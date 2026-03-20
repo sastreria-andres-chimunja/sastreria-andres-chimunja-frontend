@@ -1,0 +1,81 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #sidenav
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="!isMobile"
+    class="sidenav"
+    [class.expanded]="expanded || isMobile"
+    (mouseenter)="!isMobile && (expanded = true)"
+    (mouseleave)="!isMobile && (expanded = false)"
+  >
+    <!-- LOGO -->
+    <div class="logo-area">
+      <!-- <mat-icon class="logo-collapsed">content_cut</mat-icon> -->
+      <img src="assets/logo-sastreria-transparente.png" class="logo-icon" />
+      <img
+        src="assets/logo-sastreria-transparente.png"
+        class="logo-collapsed"
+      />
+    </div>
+
+    <mat-nav-list class="nav-section">
+      <a mat-list-item routerLink="/hoja-trabajo" routerLinkActive="active">
+        <mat-icon matListItemIcon>assignment</mat-icon>
+        <span matListItemTitle class="nav-label">Hoja de Trabajo</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="nav-title nav-label">Usuarios</div>
+    <mat-nav-list class="nav-section">
+      <a mat-list-item routerLink="/clientes" routerLinkActive="active">
+        <mat-icon matListItemIcon>person</mat-icon>
+        <span matListItemTitle class="nav-label">Clientes</span>
+      </a>
+      <a mat-list-item routerLink="/empleados" routerLinkActive="active">
+        <mat-icon matListItemIcon>badge</mat-icon>
+        <span matListItemTitle class="nav-label">Empleados</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="nav-title nav-label">Finanzas</div>
+    <mat-nav-list class="nav-section">
+      <a mat-list-item routerLink="/balance" routerLinkActive="active">
+        <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
+        <span matListItemTitle class="nav-label">Balance</span>
+      </a>
+      <a mat-list-item routerLink="/gastos" routerLinkActive="active">
+        <mat-icon matListItemIcon>money_off</mat-icon>
+        <span matListItemTitle class="nav-label">Gastos</span>
+      </a>
+      <a mat-list-item routerLink="/nomina" routerLinkActive="active">
+        <mat-icon matListItemIcon>engineering</mat-icon>
+        <span matListItemTitle class="nav-label">Nómina</span>
+      </a>
+      <a mat-list-item routerLink="/movimientos" routerLinkActive="active">
+        <mat-icon matListItemIcon>trending_up</mat-icon>
+        <span matListItemTitle class="nav-label">Movimientos</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content
+    class="main-content"
+    [style.margin-left]="isMobile ? '0' : expanded ? '210px' : '56px'"
+  >
+    <mat-toolbar class="topbar">
+      <!-- Botón hamburguesa solo en móvil -->
+      <button
+        *ngIf="isMobile"
+        mat-icon-button
+        (click)="sidenav.toggle()"
+        class="menu-btn"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      {{ pageTitle }}
+    </mat-toolbar>
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

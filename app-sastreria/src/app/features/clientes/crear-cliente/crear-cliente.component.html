@@ -1,0 +1,79 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>person_add</mat-icon>
+  {{ titulo }} cliente
+</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="form-wrapper">
+    <form [formGroup]="form" autocomplete="off">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Nombres</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <input
+          matInput
+          formControlName="nombres"
+          placeholder="Ej: Juan Carlos"
+        />
+        <mat-error *ngIf="form.get('nombres')?.hasError('required')">
+          El nombre es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Apellidos</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <input
+          matInput
+          formControlName="apellidos"
+          placeholder="Ej: Pérez García"
+        />
+        <mat-error *ngIf="form.get('apellidos')?.hasError('required')">
+          Los apellidos son requeridos
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Cédula</mat-label>
+        <mat-icon matPrefix>fingerprint</mat-icon>
+        <input matInput formControlName="cedula" placeholder="Ej: 1234567890" />
+        <mat-error *ngIf="form.get('cedula')?.hasError('required')">
+          La cédula es requerida
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Teléfono</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input
+          matInput
+          formControlName="telefono"
+          placeholder="Ej: 3001234567"
+        />
+        <mat-error *ngIf="form.get('telefono')?.hasError('required')">
+          El teléfono es requerido
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<!-- Loading overlay sobre el dialog completo -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p class="loading-text">Guardando cliente...</p>
+</div>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button [mat-dialog-close]="false" [disabled]="isLoading">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="guardar()"
+    [disabled]="isLoading || form.invalid"
+  >
+    <mat-icon>save</mat-icon>
+    Guardar
+  </button>
+</mat-dialog-actions>

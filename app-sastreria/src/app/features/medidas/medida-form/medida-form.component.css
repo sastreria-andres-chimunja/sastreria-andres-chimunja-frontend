@@ -1,0 +1,217 @@
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* ── Header ── */
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid #e8e0d4;
+  padding: 5px 30px;
+}
+
+.header-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #c8922a;
+}
+
+.form-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2a2018;
+  margin: 0;
+}
+
+.form-subtitle {
+  font-size: 13px;
+  color: #8a7d6e;
+  margin: 2px 0 0;
+}
+
+/* ── Campo full width ── */
+.field-full {
+  width: 100%;
+}
+
+/* ── Sección de campos ── */
+.fields-section {
+  margin-top: 8px;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6a5d48;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: #f5f0e8;
+  border-left: 3px solid #c8922a;
+  border-radius: 0 6px 6px 0;
+}
+
+.section-label mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #c8922a;
+}
+
+/* ── Grid de campos ── */
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.fields-grid mat-form-field {
+  width: 100%;
+}
+
+/* ── Sección imágenes ── */
+.image-section {
+  margin-top: 24px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* ── Drop zone ── */
+.drop-zone {
+  border: 2px dashed #c8b89a;
+  border-radius: 12px;
+  padding: 36px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #faf8f4;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #c8922a;
+  background: #fdf5e8;
+}
+
+.drop-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #c8b89a;
+  display: block;
+  margin: 0 auto 12px;
+  transition: color 0.2s;
+}
+
+.drop-zone:hover .drop-icon,
+.drop-zone.drag-over .drop-icon {
+  color: #c8922a;
+}
+
+.drop-text {
+  font-size: 14px;
+  color: #5a4a38;
+  margin: 0 0 4px;
+}
+
+.drop-link {
+  color: #c8922a;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.drop-hint {
+  font-size: 11px;
+  color: #a09080;
+  margin: 0;
+}
+
+/* ── Preview grid ── */
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.preview-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 2px solid #e8e0d4;
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 24px !important;
+  height: 24px !important;
+  background: rgba(0,0,0,0.55) !important;
+  color: white !important;
+  line-height: 24px !important;
+}
+
+.remove-btn mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+/* ── Acciones ── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e0d4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .fields-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .image-preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+
+@media (max-width: 400px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+}

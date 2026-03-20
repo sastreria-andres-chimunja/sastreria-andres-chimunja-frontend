@@ -1,0 +1,160 @@
+/* ── Contenedor global ── */
+.sidenav-container {
+  height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidenav {
+  width: 56px;
+  background: linear-gradient(to top, #23282B, #000000);
+  border-right: none;
+  overflow: hidden;
+  transition: width 0.25s ease;
+  border-top-right-radius: 0 !important;
+ 
+}
+
+.sidenav.expanded {
+  width: 210px;
+}
+
+/* ── Logo area ── */
+.logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid #3a3025;
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ícono visible cuando está contraído */
+.logo-collapsed {
+  width: 50px;
+  height: 80px;
+  min-width: 50px;
+  /* filter: brightness(0) invert(1);  */
+  filter: invert(1) hue-rotate(180deg) saturate(6);
+  transition: opacity 0.2s ease;
+}
+
+/* Logo completo: oculto cuando contraído */
+.logo-icon {
+  width: 130px;
+  min-width: 130px;
+  filter: invert(1) hue-rotate(180deg) saturate(6);
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s;
+  position: absolute;
+}
+
+/* Al expandir: ocultar ícono, mostrar logo */
+.sidenav.expanded .logo-collapsed {
+  opacity: 0;
+}
+
+.sidenav.expanded .logo-icon {
+  opacity: 1;
+}
+
+/* ── Labels: ocultos por defecto ── */
+.nav-label {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.sidenav.expanded .nav-label {
+  opacity: 1;
+}
+
+/* ── Título de sección ── */
+.nav-title {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: #c8922a;
+  /* color: #6a5d48; */
+  padding: 12px 16px 2px;
+  text-transform: uppercase;
+}
+
+/* ── Nav items ── */
+.nav-section {
+  padding: 4px 0;
+  margin-top: 10px;
+}
+
+.nav-section a.mat-mdc-list-item {
+  color: #b8a888;
+  height: 40px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-section a.mat-mdc-list-item:hover {
+  background: #3a2e20;
+  color: #e8d8a0;
+}
+
+.nav-section a.mat-mdc-list-item.active {
+  background: #3a2e20;
+  color: #e8d8a0;
+  border: 1px solid #c8922a;
+  border-radius: 10px;
+}
+
+.nav-section mat-icon[matlistitemicon] {
+  color: white;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+}
+
+.nav-section [matlistitemtitle] {
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: white;
+}
+
+/* ── Contenido principal ── */
+.main-content {
+  background: whitesmoke;
+  transition: margin-left 0.25s ease;
+}
+
+.content-wrapper {
+  background-color: white;
+  width: 95%;
+  margin: 20px auto;
+}
+
+.topbar {
+  /* background: #228B22; */
+  /* background: #556B2F; */
+  background: linear-gradient(to right, #23282B, #000000);
+  font-size: 40px;
+  color: white;
+}
+/* ── Responsive móvil ── */
+.menu-btn {
+  color: white;
+  margin-right: 8px;
+}
+
+@media (max-width: 600px) {
+  .mat-drawer-content {
+    margin-left: 0 !important;
+  }
+  .content-wrapper {
+    width: 100%;
+    margin: 12px auto;
+  }
+
+  .topbar {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,38 @@
+<h2>Crear Medida</h2>
+
+<select (change)="seleccionarTipo($event.target.value)">
+  <option value="">Seleccione</option>
+  <option value="camisa">Camisa</option>
+  <option value="pantalon">Pantalón</option>
+</select>
+
+<!-- CAMPOS CAMISA -->
+
+<div *ngIf="tipoPrenda == 'camisa'">
+  <input placeholder="Espalda" />
+
+  <input placeholder="Hombro" />
+
+  <input placeholder="Pecho" />
+
+  <input placeholder="Cintura" />
+
+  <input placeholder="Largo manga" />
+</div>
+
+<!-- CAMPOS PANTALON -->
+
+<div *ngIf="tipoPrenda == 'pantalon'">
+  <input placeholder="Cintura" />
+
+  <input placeholder="Base" />
+
+  <input placeholder="Tiro" />
+
+  <input placeholder="Rodilla" />
+
+  <input placeholder="Bota" />
+
+  <input placeholder="Largo" />
+  <input type="file" multiple (change)="onFileSelected($event)" />
+</div>

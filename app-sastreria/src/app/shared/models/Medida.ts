@@ -1,0 +1,23 @@
+export class Medida {
+  idMedida?: number = 0;
+  idCliente: number = 0;
+  espalda: number = 0.0;
+  hombro: number = 0.0;
+  talleDelantero: number = 0.0;
+  talleTrasero: number = 0.0;
+  distancia: number = 0.0;
+  separacion: number = 0.0;
+  pecho: number = 0.0;
+  cintura: number = 0.0;
+  base: number = 0.0;
+  largo: number = 0.0;
+  largoManga: number = 0.0;
+  anchoManga: number = 0.0;
+  escote: number = 0.0;
+  tiro: number = 0.0;
+  pierna: number = 0.0;
+  rodilla: number = 0.0;
+  bota: number = 0.0;
+  otros: string = '';
+  tipoPrenda: string = '';
+}
