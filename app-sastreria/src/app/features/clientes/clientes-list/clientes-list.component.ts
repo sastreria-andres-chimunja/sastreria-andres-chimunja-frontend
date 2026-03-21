@@ -47,17 +47,11 @@ export class ClientesListComponent implements OnInit {
     this.loadClientes();
   }
 
-  ngAfterViewInit() {
-    if (this.dataSource) {
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    }
-  }
-
   loadClientes() {
     this.clienteService.getAll().subscribe((resp: any) => {
-      console.log('clientes', resp);
       this.dataSource = new MatTableDataSource(resp.clientes);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
     });
   }
 
@@ -84,7 +78,7 @@ export class ClientesListComponent implements OnInit {
   }
   openDialogMedida(data?: Cliente) {
     const dialogRef = this.dialog.open(MedidaFormComponent, {
-      width: '400px',
+      width: '500px',
       height: '500px',
       data: data == null ? {} : data,
     });

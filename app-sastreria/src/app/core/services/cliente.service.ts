@@ -18,6 +18,9 @@ export class ClienteService {
   buscar(cedula: string) {
     return this.http.get(`${this.api}/search?cedula=${cedula}`);
   }
+  buscarPorId(idCliente: number) {
+    return this.http.get(`${this.api}/${idCliente}`);
+  }
   getAll() {
     return this.http.get(this.api);
   }

@@ -1,11 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { API } from '../../utils/constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ImagenService {
-  api = 'http://localhost:3000/imagenes';
+  api = `${API.BASE_URL}/${API.IMAGENES}`;
   files: File[] = [];
 
   constructor(private http: HttpClient) {}
@@ -25,5 +26,15 @@ export class ImagenService {
     });
 
     return this.http.post(`${this.api}/upload`, formData);
+  }
+  getImagenes(tipoReferencia: string, idReferencia: number) {
+    const params = new HttpParams()
+      .set('tipoReferencia', tipoReferencia)
+      .set('idReferencia', idReferencia.toString());
+
+    return this.http.get(`${this.api}`, { params });
+  }
+  getImagenById(id: number) {
+    return this.http.get(`${this.api}/${id}`);
   }
 }

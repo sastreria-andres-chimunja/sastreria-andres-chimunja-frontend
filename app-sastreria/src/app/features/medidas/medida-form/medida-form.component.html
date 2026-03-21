@@ -16,13 +16,13 @@
           (selectionChange)="seleccionarTipo($event.value)"
         >
           <mat-option value="">Seleccione un tipo de prenda</mat-option>
-          <mat-option value="camisa">
+          <mat-option value="Camisa/Chaqueta">
             <mat-icon>dry_cleaning</mat-icon> Camisa/Chaqueta
           </mat-option>
-          <mat-option value="pantalon">
+          <mat-option value="Pantalon">
             <mat-icon>accessibility_new</mat-icon> Pantalón
           </mat-option>
-          <mat-option value="ambas">
+          <mat-option value="Ambas">
             <mat-icon>accessibility_new</mat-icon>
             <mat-icon>dry_cleaning</mat-icon> Ambas
           </mat-option>
@@ -32,7 +32,7 @@
 
       <!-- CAMPOS CAMISA -->
       <div
-        *ngIf="tipoPrenda === 'camisa' || tipoPrenda === 'ambas'"
+        *ngIf="tipoPrenda === 'Camisa/Chaqueta' || tipoPrenda === 'Ambas'"
         class="fields-section"
       >
         <div class="section-label">
@@ -55,10 +55,10 @@
             <input matInput formControlName="pecho" type="number" />
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <!-- <mat-form-field appearance="outline">
             <mat-label>Cintura</mat-label>
             <input matInput formControlName="cintura" type="number" />
-          </mat-form-field>
+          </mat-form-field> -->
 
           <mat-form-field appearance="outline">
             <mat-label>Largo manga</mat-label>
@@ -69,7 +69,7 @@
 
       <!-- CAMPOS PANTALÓN -->
       <div
-        *ngIf="tipoPrenda === 'pantalon' || tipoPrenda === 'ambas'"
+        *ngIf="tipoPrenda === 'Pantalon' || tipoPrenda === 'Ambas'"
         class="fields-section"
       >
         <div class="section-label">
@@ -108,6 +108,24 @@
           </mat-form-field>
         </div>
       </div>
+      <!-- Imágenes existentes -->
+      <div
+        class="section-label"
+        *ngIf="existingImages.length > 0"
+        style="margin-top: 12px"
+      >
+        <mat-icon>add_photo_alternate</mat-icon>
+        <span>Fotos guardadas</span>
+      </div>
+
+      <div class="image-preview-grid" *ngIf="existingImages.length > 0">
+        <div class="preview-item" *ngFor="let img of existingImages">
+          <img [src]="img.url" alt="Imagen existente" />
+          <span class="existing-badge">Guardada</span>
+        </div>
+      </div>
+
+      <!-- Separador si hay existentes y se van a agregar nuevas -->
 
       <!-- SELECTOR DE IMÁGENES -->
       <div *ngIf="tipoPrenda" class="image-section">
@@ -115,7 +133,6 @@
           <mat-icon>photo_library</mat-icon>
           <span>Fotos de referencia</span>
         </div>
-
         <!-- Zona de drop -->
         <div
           class="drop-zone"
@@ -159,8 +176,8 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end" class="dialog-actions">
   <button mat-stroked-button [mat-dialog-close]="false">Cancelar</button>
-  <button mat-raised-button color="primary">
+  <button mat-raised-button color="primary" (click)="guardar()">
     <mat-icon>save</mat-icon>
-    Guardar
+    {{ medidaModel.idMedida ? "Actualizar" : "Guardar" }}
   </button>
 </mat-dialog-actions>

@@ -6,7 +6,7 @@
 /* ── Sidebar ── */
 .sidenav {
   width: 56px;
-  background: linear-gradient(to top, #23282B, #000000);
+  background: linear-gradient(to bottom, #23282B, #000000);
   border-right: none;
   overflow: hidden;
   transition: width 0.25s ease;

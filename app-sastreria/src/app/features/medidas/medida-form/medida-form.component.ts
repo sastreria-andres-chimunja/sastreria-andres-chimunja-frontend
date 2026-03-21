@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,11 @@ import {
   MatDialogModule,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
+import { Medida } from '../../../shared/models/Medida';
+import { MedidaService } from '../../../core/services/medida.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { ImagenService } from '../../../core/services/imagen.service';
+import { API } from '../../../utils/constants';
 
 @Component({
   selector: 'app-medida-form',
@@ -28,32 +33,42 @@ import {
     MatDialogModule,
   ],
 })
-export class MedidaFormComponent {
+export class MedidaFormComponent implements OnInit {
   form: FormGroup;
   tipoPrenda = '';
   imagePreviews: string[] = [];
   selectedFiles: File[] = [];
+  existingImages: { id: number; url: string }[] = [];
   isDragging = false;
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<MedidaFormComponent>,
+    @Inject(MAT_DIALOG_DATA) public medidaModel: Medida,
+    private medidaService: MedidaService,
+    private imagenService: ImagenService,
+    private sanitizer: DomSanitizer,
   ) {
+    console.log('medida', this.medidaModel);
+    this.tipoPrenda = this.medidaModel.tipoPrenda || '';
     this.form = this.fb.group({
-      tipoPrenda: [''],
+      tipoPrenda: [this.medidaModel.tipoPrenda || ''],
       // Camisa
-      espalda: [null],
-      hombro: [null],
-      pecho: [null],
-      cintura: [null],
-      largoManga: [null],
+      espalda: [this.medidaModel.espalda || 0.0],
+      hombro: [this.medidaModel.hombro || 0.0],
+      pecho: [this.medidaModel.pecho || 0.0],
+      cintura: [this.medidaModel.cintura || 0.0],
+      largoManga: [this.medidaModel.largoManga || 0.0],
       // Pantalón
-      base: [null],
-      tiro: [null],
-      rodilla: [null],
-      bota: [null],
-      largo: [null],
+      base: [this.medidaModel.base || 0.0],
+      tiro: [this.medidaModel.tiro || 0.0],
+      rodilla: [this.medidaModel.rodilla || 0.0],
+      bota: [this.medidaModel.bota || 0.0],
+      largo: [this.medidaModel.largo || 0.0],
     });
+  }
+  ngOnInit(): void {
+    this.cargarImagenesExistentes();
   }
 
   seleccionarTipo(tipo: string) {
@@ -100,10 +115,42 @@ export class MedidaFormComponent {
   }
 
   // ── Acciones ────────────────────────────────────────────
+  cargarImagenesExistentes() {
+    this.imagenService
+      .getImagenes('Medida', this.medidaModel.idMedida!)
+      .subscribe((resp: any) => {
+        this.existingImages = resp.map((img: any) => ({
+          id: img.idImagen,
+          url: `${API.BASE_URL}/${img.rutaImagen.replace(/\\/g, '/')}`,
+        }));
+      });
+  }
+
+  // En guardar(), subir imágenes nuevas después de crear/actualizar
   guardar() {
-    console.log('Medidas:', this.form.value);
-    console.log('Fotos:', this.selectedFiles);
-    // Aquí conectas con tu servicio
+    const payload = { ...this.medidaModel, ...this.form.value };
+
+    const afterSave = (idMedida: number) => {
+      if (this.selectedFiles.length > 0) {
+        this.imagenService
+          .subirImagenes(this.selectedFiles, 'Medida', idMedida)
+          .subscribe(() => this.dialogRef.close(true));
+      } else {
+        this.dialogRef.close(true);
+      }
+    };
+
+    if (this.medidaModel.idMedida) {
+      this.medidaService.actualizar(payload).subscribe({
+        next: () => afterSave(this.medidaModel.idMedida!),
+        error: (err) => console.error('error actualizar', err),
+      });
+    } else {
+      this.medidaService.crear(payload).subscribe({
+        next: (resp: any) => afterSave(resp.medida.idMedida), // ajusta según tu backend
+        error: (err) => console.error('error crear', err),
+      });
+    }
   }
 
   limpiar() {

@@ -24,4 +24,5 @@ export const API = {
   CLIENTES: 'clientes',
   EMPLEADOS: 'empleados',
   MEDIDAS: 'medidas',
+  IMAGENES: 'imagenes',
 } as const;

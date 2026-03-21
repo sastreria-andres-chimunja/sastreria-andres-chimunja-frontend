@@ -1,0 +1,123 @@
+.main-content {
+  padding: 20px;
+  background-color: whitesmoke;
+}
+
+.toolbar-medidas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Filtro */
+.filtro {
+  flex: 1;
+  min-width: 250px;
+}
+
+.filtro .mdc-notched-outline__leading,
+.filtro .mdc-notched-outline__notch,
+.filtro .mdc-notched-outline__trailing {
+  border-color: black !important;
+  border-width: 2px !important;
+}
+
+/* Botón crear */
+.boton-crear {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -20px;
+  border-radius: 10px;
+  font-size: 16px;
+  white-space: nowrap;
+  background-color: blue;
+}
+button{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  cursor:pointer;
+  width: 150px;
+  height: 40px;
+  border-radius: 10px;
+  text-align: center;
+  
+}
+button:hover{
+  background-color: black;
+  color: white;
+}
+
+/* Íconos de acciones */
+.icon-create {
+  color: blue;
+  cursor: pointer;
+}
+
+.icon-delete {
+  color: red;
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+/* Tabla responsive */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #c8b89a;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  color: #2a2018;
+  margin: 0;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #8a7d6e;
+  margin: 0;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .toolbar-medidas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .boton-crear {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0;
+  }
+
+  .mat-column-id,
+  .mat-column-fecha {
+    display: none;
+  }
+}
