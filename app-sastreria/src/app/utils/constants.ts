@@ -22,7 +22,12 @@ export const COLORS = {
 export const API = {
   BASE_URL: 'http://localhost:3000',
   CLIENTES: 'clientes',
-  EMPLEADOS: 'empleados',
+  EMPLEADOS: 'empleado',
   MEDIDAS: 'medidas',
   IMAGENES: 'imagenes',
+  ROL: 'roles',
+  TIPO_MOVIMIENTO: 'tipoMovimiento',
+  CATEGORIA_MOVIMIENTO: 'categoriaMovimiento',
+  METODO_PAGO: 'metodoPago',
+  MOVIMIENTOS: 'movimiento',
 } as const;

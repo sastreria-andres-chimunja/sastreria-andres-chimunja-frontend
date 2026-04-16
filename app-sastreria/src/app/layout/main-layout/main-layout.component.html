@@ -32,14 +32,14 @@
         <span matListItemTitle class="nav-label">Clientes</span>
       </a>
       <a mat-list-item routerLink="/empleados" routerLinkActive="active">
-        <mat-icon matListItemIcon>badge</mat-icon>
+        <mat-icon matListItemIcon>group</mat-icon>
         <span matListItemTitle class="nav-label">Empleados</span>
       </a>
     </mat-nav-list>
 
     <div class="nav-title nav-label">Finanzas</div>
     <mat-nav-list class="nav-section">
-      <a mat-list-item routerLink="/balance" routerLinkActive="active">
+      <!-- <a mat-list-item routerLink="/movimientos" routerLinkActive="active">
         <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
         <span matListItemTitle class="nav-label">Balance</span>
       </a>
@@ -50,10 +50,29 @@
       <a mat-list-item routerLink="/nomina" routerLinkActive="active">
         <mat-icon matListItemIcon>engineering</mat-icon>
         <span matListItemTitle class="nav-label">Nómina</span>
-      </a>
+      </a> -->
       <a mat-list-item routerLink="/movimientos" routerLinkActive="active">
         <mat-icon matListItemIcon>trending_up</mat-icon>
-        <span matListItemTitle class="nav-label">Movimientos</span>
+        <span matListItemTitle class="nav-label">Balance</span>
+      </a>
+    </mat-nav-list>
+    <div class="nav-title nav-label">Administración</div>
+    <mat-nav-list class="nav-section">
+      <a mat-list-item routerLink="/roles" routerLinkActive="active">
+        <mat-icon matListItemIcon>badge</mat-icon>
+        <span matListItemTitle class="nav-label">Roles</span>
+      </a>
+      <a mat-list-item routerLink="/metodosPago" routerLinkActive="active">
+        <mat-icon matListItemIcon>euro_symbol</mat-icon>
+        <span matListItemTitle class="nav-label">Métodos de pago</span>
+      </a>
+      <a
+        mat-list-item
+        routerLink="/categoriaMovimientos"
+        routerLinkActive="active"
+      >
+        <mat-icon matListItemIcon>assessment</mat-icon>
+        <span matListItemTitle class="nav-label">Categoría de movimiento</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>

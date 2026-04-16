@@ -1,0 +1,73 @@
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 16px 24px 0;
+}
+
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.form-wrapper form {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field {
+  width: 100%;
+}
+
+.dialog-actions {
+  padding: 8px 24px 16px;
+  gap: 8px;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;                        
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.loading-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+:host {
+  position: relative;
+  display: block;
+}
+mat-icon{
+  color: blue;
+}
+/* Responsive */
+@media (max-width: 480px) {
+  .form-wrapper form {
+    width: 95%;
+  }
+
+  .dialog-title {
+    font-size: 1rem;
+  }
+}
+.mat-mdc-dialog-content {
+  max-height: unset !important;
+  overflow: visible !important;
+}

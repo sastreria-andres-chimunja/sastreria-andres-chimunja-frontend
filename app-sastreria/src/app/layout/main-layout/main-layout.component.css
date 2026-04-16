@@ -6,6 +6,7 @@
 /* ── Sidebar ── */
 .sidenav {
   width: 56px;
+  /* background: linear-gradient(to top, grey, #000000); */
   background: linear-gradient(to bottom, #23282B, #000000);
   border-right: none;
   overflow: hidden;
@@ -133,8 +134,7 @@
 }
 
 .topbar {
-  /* background: #228B22; */
-  /* background: #556B2F; */
+  /* background: linear-gradient(to right, black, grey); */
   background: linear-gradient(to right, #23282B, #000000);
   font-size: 40px;
   color: white;

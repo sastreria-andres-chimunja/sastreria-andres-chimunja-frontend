@@ -1,19 +1,4 @@
-/* .container {
-  padding: 20px;
-}
 
-
-.form-element{
-  width: 100%;
-}
-
-
-@media (max-width: 600px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-} */
- /* Título del dialog */
 .dialog-title {
   display: flex;
   align-items: center;
@@ -23,7 +8,6 @@
   padding: 16px 24px 0;
 }
 
-/* Wrapper del formulario: centrado al 80% */
 .form-wrapper {
   display: flex;
   justify-content: center;
@@ -37,21 +21,18 @@
   gap: 4px;
 }
 
-/* Cada campo ocupa el 100% del form (que ya es 80%) */
 .form-field {
   width: 100%;
 }
 
-/* Acciones del dialog */
 .dialog-actions {
   padding: 8px 24px 16px;
   gap: 8px;
 }
 
-/* ─── Loading overlay ─────────────────────────────────────── */
 .loading-overlay {
   position: absolute;
-  inset: 0;                         /* cubre todo el dialog */
+  inset: 0;                        
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,13 +50,14 @@
   color: #555;
 }
 
-/* Asegura que el host tenga posición relativa para el overlay */
 :host {
   position: relative;
   display: block;
 }
-
-/* 📱 Responsive */
+mat-icon{
+  color: blue;
+}
+/* Responsive */
 @media (max-width: 480px) {
   .form-wrapper form {
     width: 95%;
