@@ -59,7 +59,9 @@
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Fecha de cumpleaños</mat-label>
         <mat-icon matPrefix>date_range</mat-icon>
-        <input matInput formControlName="fechaCumpleanios" />
+        <input matInput [matDatepicker]="pickerCumple" formControlName="fechaCumpleanios" placeholder="dd/mm/aaaa" readonly />
+        <mat-datepicker-toggle matIconSuffix [for]="pickerCumple"></mat-datepicker-toggle>
+        <mat-datepicker #pickerCumple></mat-datepicker>
         <mat-error *ngIf="form.get('fechaCumpleanios')?.hasError('required')">
           La fecha de cumpleaños es requerida
         </mat-error>

@@ -1,121 +1,53 @@
-.main-content{
-  padding: 20px;
-  background-color: whitesmoke;
-}
-.clientes-container{
-  width:100%;
+.main-content {
+  padding: 1.5rem 2rem;
+  background: var(--bg, #F5F2EE);
+  min-height: 100%;
 }
 
-.header{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:20px;
-}
-
-button{
-  background:#2563eb !important;
-  color:white !important;
-  border:none;
-  padding:8px 12px;
-  cursor:pointer;
-  width: 180px;
-  height: 70px;       
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: -20px;
-  border-radius: 10px;
-  font-size: 18px;
-  
-}
-button:hover{
-  background-color: black !important;
-  color: white !important;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:10px;
-  border-bottom:1px solid #ddd;
-}
-
-.acciones button{
-  margin-right:5px;
-}
-.icon-straighten{
-  color: red;
-  margin-left: 20px;
-}
-.icon-create{
-  color:blue;
-}
-/* .boton-crear{
-  margin-left: 50px;
-} */
 .toolbar-clientes {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap; /* 🔥 permite que baje en móvil */
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-/* Filtro ocupa todo el espacio disponible */
 .filtro {
   flex: 1;
-  min-width: 250px;
-}
-/* Borde negro al input */
-.filtro .mdc-notched-outline__leading,
-.filtro .mdc-notched-outline__notch,
-.filtro .mdc-notched-outline__trailing {
-  border-color: black !important;
-  border-width: 4px !important;
-}
-
-/* .boton-crear {
-  height: 70px;       
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: -20px;
-  border-radius: 10px;
-  font-size: 18px;
-  background-color: #2563eb;
-  color: white;
+  min-width: 220px;
+  max-width: 400px;
 }
 
 .boton-crear {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-size: 14px;
   white-space: nowrap;
-} */
+  padding: 0 18px !important;
+  background: var(--primary, #185FA5) !important;
+  color: #fff !important;
+}
 
-/* 📱 Responsive (móvil) */
+.boton-crear:hover {
+  background: var(--primary-hover, #145089) !important;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.icon-create    { color: var(--primary, #185FA5); cursor: pointer; }
+.icon-straighten { color: var(--danger, #C0392B); cursor: pointer; margin-left: 16px; }
+
 @media (max-width: 600px) {
-  .toolbar-clientes {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .boton-crear {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Wrapper con scroll — asegúrate de tener este div en el HTML */
-  .table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Ocultar columnas menos importantes en móvil */
-  .mat-column-id,
-  .mat-column-cc {
-    display: none;
-  }
+  .main-content { padding: 1rem; }
+  .toolbar-clientes { flex-direction: column; align-items: stretch; }
+  .filtro { max-width: 100%; }
+  .boton-crear { width: 100%; justify-content: center; }
+  .mat-column-id, .mat-column-cc { display: none; }
 }

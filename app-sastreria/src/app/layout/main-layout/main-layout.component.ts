@@ -17,6 +17,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { filter } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -36,6 +37,7 @@ import { CommonModule } from '@angular/common';
     MatSidenav,
     LayoutModule,
     MatButtonModule,
+    MatTooltipModule,
     CommonModule,
   ],
   templateUrl: './main-layout.component.html',
@@ -47,6 +49,7 @@ export class MainLayoutComponent implements OnInit {
 
   expanded = false;
   isMobile = false;
+  isDarkMode = false;
 
   // Mapa ruta → nombre legible
   private routeTitles: Record<string, string> = {
@@ -64,8 +67,11 @@ export class MainLayoutComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+    this.applyTheme();
+
     // Setear título en la carga inicial
-    this.pageTitle = this.routeTitles[this.router.url] ?? 'Sistema de Gestión';
+    this.pageTitle = this.routeTitles[this.router.url] ?? 'Bienvenido Admin';
 
     // Actualizar en cada navegación
     this.router.events
@@ -74,7 +80,7 @@ export class MainLayoutComponent implements OnInit {
         const base = '/' + e.urlAfterRedirects.split('/')[1];
 
         this.pageTitle =
-          this.routeTitles[e.urlAfterRedirects] ?? 'Sistema de Gestión';
+          this.routeTitles[e.urlAfterRedirects] ?? 'Bienvenido Admin';
       });
     this.breakpointObserver
       .observe([Breakpoints.Handset])
@@ -85,5 +91,18 @@ export class MainLayoutComponent implements OnInit {
           this.sidenav.close();
         }
       });
+  }
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('darkMode', String(this.isDarkMode));
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    document.documentElement.classList.toggle('dark-mode', this.isDarkMode);
+  }
+
+  logout() {
+    this.router.navigate(['/'], { replaceUrl: true });
   }
 }

@@ -12,6 +12,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { CrearEmpleadoComponent } from '../crear-empleado/crear-empleado.component';
+import { CrearMovimientoComponent } from '../../movimientos/crear-movimiento/crear-movimiento.component';
+import { Movimiento } from '../../../shared/models/Movimiento';
 
 @Component({
   selector: 'app-empleados-list',
@@ -73,6 +75,22 @@ export class EmpleadosListComponent implements OnInit {
       width: '400px',
       height: '600px',
       data: data == null ? {} : data,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      this.loadEmpleados();
+    });
+  }
+  openDialogMovimiento(data?: Empleado) {
+    let newMovement = new Movimiento();
+
+    newMovement.idReferencia = Number(data?.idEmpleado);
+    newMovement.tipoReferencia = 'empleado';
+    newMovement.observacion = `Abono de nómina a ${data?.nombres} ${data?.apellidos}`;
+    const dialogRef = this.dialog.open(CrearMovimientoComponent, {
+      width: '400px',
+      height: '600px',
+      data: newMovement == null ? {} : newMovement,
     });
 
     dialogRef.afterClosed().subscribe((result) => {

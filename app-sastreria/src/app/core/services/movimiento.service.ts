@@ -18,8 +18,11 @@ export class MovimientoService {
   buscarMovimientoPorId(idMovimiento: number) {
     return this.http.get(`${this.api}/${idMovimiento}`);
   }
-  listarMovimientos() {
-    return this.http.get(this.api);
+  listarMovimientos(fechaInicio?: string, fechaFin?: string) {
+    const params: Record<string, string> = {};
+    if (fechaInicio) params['fechaInicio'] = fechaInicio;
+    if (fechaFin) params['fechaFin'] = fechaFin;
+    return this.http.get(this.api, { params });
   }
 
   actualizar(movimiento: Movimiento) {

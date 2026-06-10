@@ -17,10 +17,12 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { Empleado } from '../../../shared/models/Empleado';
 import { Rol } from '../../../shared/models/Rol';
 import { RolService } from '../../../core/services/rol.service';
 import { MatSelectModule } from '@angular/material/select';
+import { dateToString, stringToDate } from '../../../utils/date.utils';
 
 @Component({
   selector: 'app-crear-empleado',
@@ -34,6 +36,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatIconModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    MatDatepickerModule,
     MatSelectModule,
   ],
   templateUrl: './crear-empleado.component.html',
@@ -67,9 +70,7 @@ export class CrearEmpleadoComponent implements OnInit {
       nombres: [this.empleadoModel.nombres, [Validators.required]],
       apellidos: [this.empleadoModel.apellidos, [Validators.required]],
       fechaCumpleanios: [
-        this.empleadoModel.fechaCumpleanios
-          ? this.empleadoModel.fechaCumpleanios.split('T')[0]
-          : '',
+        stringToDate(this.empleadoModel.fechaCumpleanios),
         [Validators.required],
       ],
       telefono: [this.empleadoModel.telefono, [Validators.required]],
@@ -84,23 +85,20 @@ export class CrearEmpleadoComponent implements OnInit {
       return;
     }
 
-    // Mapear valores del form al modelo
-    Object.assign(this.empleadoModel, this.form.value);
+    const formValue = { ...this.form.value };
+    formValue.fechaCumpleanios = dateToString(formValue.fechaCumpleanios);
+    Object.assign(this.empleadoModel, formValue);
 
     this.isLoading = true;
-    console.log('id1', this.empleadoModel.idEmpleado);
 
     if (this.empleadoModel.idEmpleado! > 0) {
-      console.log('id3', this.empleadoModel.idEmpleado);
-
       this.empleadoService.actualizar(this.empleadoModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          this.dialogRef.close(true);
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar empleado:', err);
         },
       });
@@ -108,11 +106,10 @@ export class CrearEmpleadoComponent implements OnInit {
       this.empleadoService.crear(this.empleadoModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          this.dialogRef.close(true);
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar empleado:', err);
         },
       });

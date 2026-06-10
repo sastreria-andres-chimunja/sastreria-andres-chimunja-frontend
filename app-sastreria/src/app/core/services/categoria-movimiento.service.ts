@@ -18,7 +18,7 @@ export class CategoriaMovimientoService {
   buscarCategoriaMovimientoPorId(idCategoriaMovimiento: number) {
     return this.http.get(`${this.api}/${idCategoriaMovimiento}`);
   }
-  listarCategoriaMovimientoes() {
+  listarCategoriasMovimiento() {
     return this.http.get(this.api);
   }
 
@@ -28,5 +28,9 @@ export class CategoriaMovimientoService {
       `${this.api}/${idCategoriaMovimiento}`,
       categoriaMovimiento,
     );
+  }
+  eliminar(categoriaMovimiento: CategoriaMovimiento) {
+    const { idCategoriaMovimiento } = categoriaMovimiento;
+    return this.http.delete(`${this.api}/${idCategoriaMovimiento}`);
   }
 }

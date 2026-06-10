@@ -21,6 +21,7 @@ export const COLORS = {
 
 export const API = {
   BASE_URL: 'http://localhost:3000',
+  AUTH: 'auth',
   CLIENTES: 'clientes',
   EMPLEADOS: 'empleado',
   MEDIDAS: 'medidas',
@@ -29,5 +30,6 @@ export const API = {
   TIPO_MOVIMIENTO: 'tipoMovimiento',
   CATEGORIA_MOVIMIENTO: 'categoriaMovimiento',
   METODO_PAGO: 'metodoPago',
-  MOVIMIENTOS: 'movimiento',
+  MOVIMIENTOS: 'movimientos',
+  NOMINA: 'nomina',
 } as const;

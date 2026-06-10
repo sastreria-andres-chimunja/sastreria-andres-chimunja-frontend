@@ -48,7 +48,7 @@
             Fecha de cumpleaños
           </th>
           <td mat-cell *matCellDef="let row">
-            {{ row.fechaCumpleanios.split("T")[0] }}
+            {{ row.fechaCumpleanios }}
           </td>
         </ng-container>
         <ng-container matColumnDef="acciones">
@@ -63,12 +63,12 @@
               (click)="openDialog(row)"
             ></mat-icon>
             <mat-icon
-              matTooltip="Ver movimientos"
+              matTooltip="Crear un movimiento"
               aria-hidden="false"
               aria-label="Agregar movimiento"
               fontIcon="trending_up"
               class="icon-straighten"
-              routerLink="/medidas/{{ row.idCliente }}"
+              (click)="openDialogMovimiento(row)"
             ></mat-icon>
           </td>
         </ng-container>

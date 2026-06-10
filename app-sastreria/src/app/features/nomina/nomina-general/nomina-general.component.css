@@ -1,0 +1,248 @@
+/* ── Layout ──────────────────────────────────────────────────── */
+.main-content {
+  width: 100%;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.nomina-lista {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 1rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────── */
+.toolbar-clientes {
+  padding: 0.5rem 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 6px;
+  padding: 5px 10px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  background: transparent;
+  width: 100%;
+  height: 36px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-primary, #2C2518);
+}
+
+.search-box input::placeholder { color: var(--text-muted, #A09080); }
+.search-box .search-icon       { font-size: 14px; color: var(--text-muted, #A09080); }
+
+/* ── Tarjeta empleado ────────────────────────────────────────── */
+.pay-card {
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pay-card:hover {
+  border-color: var(--primary, #185FA5);
+  box-shadow: 0 2px 8px rgba(24, 95, 165, 0.08);
+}
+
+.card-top { display: flex; align-items: center; gap: 8px; }
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #E6F1FB;
+  color: var(--primary, #185FA5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.pay-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary, #2C2518);
+}
+
+/* ── Importes ────────────────────────────────────────────────── */
+.card-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light, #EDE8E1);
+}
+
+.amount-item  { display: flex; flex-direction: column; gap: 1px; text-align: right; }
+.amount-label { font-size: 10px; color: var(--text-muted, #A09080); margin: 0; line-height: 1.2; }
+.amount-value { font-size: 13px; font-weight: 500; margin: 0; }
+
+.income  { color: var(--success, #2A7A2A); }
+.paid    { color: var(--primary, #185FA5); }
+.pending { color: var(--danger, #C0392B); }
+.zero    { color: var(--success, #2A7A2A); }
+
+/* ── Footer tarjeta ──────────────────────────────────────────── */
+.card-footer { display: flex; justify-content: flex-end; padding-top: 4px; }
+
+.btn-view {
+  background: none;
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text-secondary, #7A6E63);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: var(--bg, #F5F2EE); color: var(--text-primary, #2C2518); }
+}
+
+/* ── Sin datos ───────────────────────────────────────────────── */
+.no-data {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted, #A09080);
+  font-size: 14px;
+}
+
+/* ── Filtro de fechas ────────────────────────────────────────── */
+.fecha-filter-wrapper { position: relative; }
+
+.btn-fecha {
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 6px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted, #A09080);
+  transition: border-color 0.15s, color 0.15s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { border-color: var(--primary, #185FA5); color: var(--primary, #185FA5); }
+  &.activo { border-color: var(--primary, #185FA5); color: var(--primary, #185FA5); background: #E6F1FB; }
+}
+
+.fecha-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 20px rgba(44, 37, 24, 0.10);
+  z-index: 100;
+  min-width: 280px;
+}
+
+.fecha-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.fecha-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #7A6E63);
+  margin: 0;
+}
+
+.btn-cerrar-panel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted, #A09080);
+  border-radius: 4px;
+  &:hover { color: var(--text-primary, #2C2518); background: var(--bg, #F5F2EE); }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+.fecha-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fecha-field { width: 100%; }
+
+.fecha-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-limpiar {
+  background: none;
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-secondary, #7A6E63);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  &:hover { background: var(--bg, #F5F2EE); }
+}
+
+.btn-aplicar {
+  background: var(--primary, #185FA5);
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  &:hover { background: var(--primary-hover, #145089); }
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .nomina-lista { grid-template-columns: 1fr; }
+}

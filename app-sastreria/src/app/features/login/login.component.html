@@ -1,0 +1,118 @@
+<div class="login-wrapper">
+  <div class="left-panel">
+    <div class="brand-overlay"></div>
+    <div class="left-content">
+      <div class="logo-container">
+        <img
+          src="assets/logo-sastreria.png"
+          alt="Sastrería SAC - Andrés Chimunja"
+          class="logo-img"
+        />
+        <!-- <div class="logo-area">
+      <img src="assets/logo-sastreria-transparente.png" class="logo-icon" />
+      <img
+        src="assets/logo-sastreria-transparente.png"
+        class="logo-collapsed"
+      />
+    </div> -->
+        <div class="tagline">Alta Costura · Armenia, Quindío</div>
+      </div>
+      <div class="decorative-line"></div>
+      <p class="brand-quote">
+        "La elegancia no es ser notado,<br />es ser recordado."
+      </p>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <mat-card class="login-card" appearance="outlined">
+      <mat-card-header>
+        <div class="card-header-content">
+          <span class="card-eyebrow">Sistema de Gestión</span>
+          <mat-card-title>Iniciar Sesión</mat-card-title>
+          <mat-card-subtitle
+            >Ingresa tus credenciales para continuar</mat-card-subtitle
+          >
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          class="login-form"
+        >
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Usuario</mat-label>
+            <input
+              matInput
+              formControlName="username"
+              placeholder="Ej: admin"
+              autocomplete="username"
+            />
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+              El usuario es requerido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña</mat-label>
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePassword = !hidePassword"
+              [attr.aria-label]="'Toggle password visibility'"
+            >
+              <mat-icon>{{
+                hidePassword ? "visibility_off" : "visibility"
+              }}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+              La contraseña es requerida
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-options">
+            <mat-checkbox formControlName="rememberMe" color="primary">
+              Recordarme
+            </mat-checkbox>
+            <a mat-button class="forgot-link" routerLink="/recuperar">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="submit-btn full-width"
+            [disabled]="loginForm.invalid || isLoading"
+          >
+            <mat-spinner
+              *ngIf="isLoading"
+              diameter="20"
+              class="btn-spinner"
+            ></mat-spinner>
+            <span *ngIf="!isLoading">Ingresar</span>
+          </button>
+        </form>
+      </mat-card-content>
+
+      <mat-card-footer>
+        <div class="card-footer-content">
+          <mat-icon class="footer-icon">security</mat-icon>
+          <span>Acceso seguro · Sastrería SAC {{ currentYear }}</span>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+</div>

@@ -96,7 +96,7 @@ export class MetodosPagoListComponent implements OnInit {
   openDialog(data?: MetodoPago) {
     const dialogRef = this.dialog.open(CrearMetodoPagoComponent, {
       width: '400px',
-      height: '350px',
+      height: '250px',
       data: data == null ? {} : data,
     });
 

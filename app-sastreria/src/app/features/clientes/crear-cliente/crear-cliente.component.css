@@ -1,11 +1,20 @@
+:host {
+  position: relative;
+  display: block;
+}
 
 .dialog-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  padding: 16px 24px 0;
+  color: var(--text-primary, #2C2518);
+  padding: 20px 24px 0;
+}
+
+.dialog-title mat-icon {
+  color: var(--primary, #185FA5);
 }
 
 .form-wrapper {
@@ -15,7 +24,7 @@
 }
 
 .form-wrapper form {
-  width: 80%;
+  width: 85%;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -26,44 +35,36 @@
 }
 
 .dialog-actions {
-  padding: 8px 24px 16px;
+  padding: 8px 24px 20px;
   gap: 8px;
+}
+
+.mat-mdc-dialog-content {
+  max-height: unset !important;
+  overflow: visible !important;
 }
 
 .loading-overlay {
   position: absolute;
-  inset: 0;                        
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(2px);
+  background: rgba(253, 252, 250, 0.88);
+  backdrop-filter: blur(3px);
   z-index: 10;
   border-radius: inherit;
 }
 
 .loading-text {
   margin: 0;
-  font-size: 0.95rem;
-  color: #555;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #7A6E63);
 }
 
-:host {
-  position: relative;
-  display: block;
-}
-mat-icon{
-  color: blue;
-}
-/* Responsive */
 @media (max-width: 480px) {
-  .form-wrapper form {
-    width: 95%;
-  }
-
-  .dialog-title {
-    font-size: 1rem;
-  }
+  .form-wrapper form { width: 95%; }
+  .dialog-title { font-size: 1rem; }
 }

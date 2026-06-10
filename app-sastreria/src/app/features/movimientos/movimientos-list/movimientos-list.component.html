@@ -1,1 +1,172 @@
-<p>movimientos-list works!</p>
+<!-- movimientos-list.component.html -->
+
+<!-- TOP BAR — fijo, nunca se desplaza -->
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar movimiento, categoría..."
+      />
+    </div>
+
+    <div class="fecha-filter-wrapper">
+      <button
+        class="btn-fecha"
+        [class.activo]="filtroFechaActivo"
+        (click)="toggleFiltroFecha()"
+        matTooltip="Filtrar por fecha"
+      >
+        <mat-icon>date_range</mat-icon>
+      </button>
+
+      <div class="fecha-panel" *ngIf="filtroFechaAbierto">
+        <div class="fecha-panel-header">
+          <p class="fecha-panel-title">Rango de fechas</p>
+          <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="fecha-inputs">
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Desde</mat-label>
+            <input matInput [matDatepicker]="pickerDesde" [formControl]="fechaInicioCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDesde></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Hasta</mat-label>
+            <input matInput [matDatepicker]="pickerHasta" [formControl]="fechaFinCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+            <mat-datepicker #pickerHasta></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="fecha-actions">
+          <button class="btn-limpiar" (click)="limpiarFiltroFecha()">Limpiar</button>
+          <button class="btn-aplicar" (click)="aplicarFiltroFecha()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" (click)="openDialog()">
+      + Nuevo {{ tabActivo === "Ingreso" ? "Ingreso" : "Salida" }}
+    </button>
+  </div>
+</div>
+
+<!-- ZONA CON SCROLL — sólo esta parte se desplaza -->
+<div class="scroll-area">
+  <!-- RESUMEN RÁPIDO -->
+  <div class="resumen-row">
+    <div class="resumen-card ingreso">
+      <div class="resumen-icon">💰</div>
+      <div class="resumen-info">
+        <div class="resumen-valor">{{ formatCurrency(totalIngresos) }}</div>
+        <div class="resumen-label">Total ingresos</div>
+      </div>
+    </div>
+    <div class="resumen-card salida">
+      <div class="resumen-icon">💸</div>
+      <div class="resumen-info">
+        <div class="resumen-valor">{{ formatCurrency(totalSalidas) }}</div>
+        <div class="resumen-label">Total salidas</div>
+      </div>
+    </div>
+    <div
+      class="resumen-card balance"
+      [class.positivo]="totalIngresos - totalSalidas >= 0"
+      [class.negativo]="totalIngresos - totalSalidas < 0"
+    >
+      <div class="resumen-icon">📊</div>
+      <div class="resumen-info">
+        <div class="resumen-valor">
+          {{ formatCurrency(totalIngresos - totalSalidas) }}
+        </div>
+        <div class="resumen-label">Balance neto</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-search-row">
+    <div class="tabs">
+      <div
+        class="tab"
+        [class.active]="tabActivo === 'Ingreso'"
+        (click)="cambiarTab('Ingreso')"
+      >
+        Ingresos ({{ conteoIngresos }})
+      </div>
+      <div
+        class="tab"
+        [class.active]="tabActivo === 'Salida'"
+        (click)="cambiarTab('Salida')"
+      >
+        Salidas ({{ conteoSalidas }})
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA DE TARJETAS -->
+  <div
+    class="card-list"
+    *ngIf="movimientosFiltrados.length > 0; else sinResultados"
+  >
+    <div class="mov-card" *ngFor="let mov of movimientosFiltrados">
+      <!-- CABECERA TARJETA -->
+      <div class="mov-card-head">
+        <div class="mov-info">
+          <div class="mov-fecha">{{ mov.fecha }}</div>
+          <div class="mov-descripcion">{{ mov.observacion }}</div>
+        </div>
+        <div class="mov-right">
+          <span
+            class="categoria-badge"
+            [ngClass]="'cat-' + mov.idCategoriaMovimiento"
+          >
+            {{ mov.idCategoriaMovimiento }}
+          </span>
+        </div>
+      </div>
+
+      <!-- PIE TARJETA -->
+      <div class="mov-card-footer">
+        <div class="mov-meta">
+          <span *ngIf="mov.idReferencia" class="mov-ref">
+            {{ mov.idReferencia }}
+          </span>
+        </div>
+        <div class="mov-footer-right">
+          <div
+            class="mov-valor"
+            [class.valor-ingreso]="mov.idTipoMovimiento === 1"
+            [class.valor-salida]="mov.idTipoMovimiento === 2"
+          >
+            {{ mov.idTipoMovimiento === 1 ? "+" : "-"
+            }}{{ formatCurrency(mov.valor) }}
+          </div>
+          <button class="btn-detalle" (click)="openDialog(mov)">
+            Ver detalle
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADO VACÍO -->
+  <ng-template #sinResultados>
+    <div class="empty-state">
+      <div class="empty-icon">{{ tabActivo === "Ingreso" ? "💰" : "💸" }}</div>
+      <div class="empty-title">No se encontraron {{ tabActivo }}s</div>
+      <div class="empty-sub">
+        Intenta con otra búsqueda o
+        <span class="empty-link" (click)="openDialog()"
+          >registra uno nuevo</span
+        >
+      </div>
+    </div>
+  </ng-template>
+</div>
+<!-- /scroll-area -->
