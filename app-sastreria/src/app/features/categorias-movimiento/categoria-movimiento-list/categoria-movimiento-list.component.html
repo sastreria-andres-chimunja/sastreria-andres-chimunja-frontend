@@ -1,0 +1,82 @@
+<div class="main-content">
+  <div class="toolbar-clientes">
+    <mat-form-field appearance="outline" class="filtro">
+      <mat-label>Buscar categoría</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Ej: Nómina"
+        #input
+      />
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="boton-crear"
+      (click)="openDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      Crear categoría
+    </button>
+  </div>
+  <div class="table-responsive">
+    <div class="mat-elevation-z8">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.idCategoriaMovimiento }}
+          </td>
+        </ng-container>
+
+        <!-- Cédula Column -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Nombre de categoría
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.nombreCategoriaMovimiento }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-icon
+              matTooltip="Editar categoría"
+              aria-hidden="false"
+              aria-label="Example home icon"
+              fontIcon="create"
+              class="icon-create"
+              (click)="openDialog(row)"
+            ></mat-icon>
+            <mat-icon
+              matTooltip="Eliminar categoría"
+              aria-hidden="false"
+              aria-label="Agregar movimiento"
+              fontIcon="delete"
+              class="icon-straighten"
+              (click)="eliminar(row)"
+            ></mat-icon>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            No data matching the filter "{{ input.value }}"
+          </td>
+        </tr>
+      </table>
+
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        aria-label="Select page of users"
+      ></mat-paginator>
+    </div>
+  </div>
+</div>

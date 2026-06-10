@@ -22,19 +22,15 @@
           <mat-option value="Pantalon">
             <mat-icon>accessibility_new</mat-icon> Pantalón
           </mat-option>
-          <mat-option value="Ambas">
+        </mat-select>
+        <!-- <mat-icon matSuffix>expand_more</mat-icon> -->
+      </mat-form-field>
+      <!-- <mat-option value="Ambas">
             <mat-icon>accessibility_new</mat-icon>
             <mat-icon>dry_cleaning</mat-icon> Ambas
-          </mat-option>
-        </mat-select>
-        <mat-icon matSuffix>expand_more</mat-icon>
-      </mat-form-field>
-
+          </mat-option> -->
       <!-- CAMPOS CAMISA -->
-      <div
-        *ngIf="tipoPrenda === 'Camisa/Chaqueta' || tipoPrenda === 'Ambas'"
-        class="fields-section"
-      >
+      <div *ngIf="tipoPrenda === 'Camisa/Chaqueta'" class="fields-section">
         <div class="section-label">
           <mat-icon>dry_cleaning</mat-icon>
           <span>Medidas de Camisa</span>
@@ -49,29 +45,61 @@
             <mat-label>Hombro</mat-label>
             <input matInput formControlName="hombro" type="number" />
           </mat-form-field>
-
+          <mat-form-field appearance="outline">
+            <mat-label>Talle Delantero</mat-label>
+            <input matInput formControlName="talleDelantero" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Talle Trasero</mat-label>
+            <input matInput formControlName="talleTrasero" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Distancia</mat-label>
+            <input matInput formControlName="distancia" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Separación</mat-label>
+            <input matInput formControlName="separacion" type="number" />
+          </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Pecho</mat-label>
             <input matInput formControlName="pecho" type="number" />
           </mat-form-field>
 
-          <!-- <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline">
             <mat-label>Cintura</mat-label>
             <input matInput formControlName="cintura" type="number" />
-          </mat-form-field> -->
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Base</mat-label>
+            <input matInput formControlName="base" type="number" />
+          </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Largo manga</mat-label>
+            <mat-label>Largo</mat-label>
+            <input matInput formControlName="largo" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Largo Manga</mat-label>
             <input matInput formControlName="largoManga" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Ancho Manga</mat-label>
+            <input matInput formControlName="largoManga" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Escote</mat-label>
+            <input matInput formControlName="escote" type="number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Otros</mat-label>
+            <input matInput formControlName="otros" type="number" />
           </mat-form-field>
         </div>
       </div>
 
       <!-- CAMPOS PANTALÓN -->
-      <div
-        *ngIf="tipoPrenda === 'Pantalon' || tipoPrenda === 'Ambas'"
-        class="fields-section"
-      >
+      <div *ngIf="tipoPrenda === 'Pantalon'" class="fields-section">
         <div class="section-label">
           <mat-icon>accessibility_new</mat-icon>
           <span>Medidas de Pantalón</span>
@@ -106,7 +134,32 @@
             <mat-label>Largo</mat-label>
             <input matInput formControlName="largo" type="number" />
           </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Otros</mat-label>
+            <input matInput formControlName="otros" type="number" />
+          </mat-form-field>
         </div>
+      </div>
+      <div>
+        <mat-form-field
+          appearance="outline"
+          *ngIf="tipoPrenda !== ''"
+          class="field-observations"
+        >
+          <mat-label>Observaciones</mat-label>
+          <textarea
+            matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="3"
+            cdkAutosizeMaxRows="6"
+            formControlName="observaciones"
+            placeholder="Observaciones..."
+            maxlength="1000"
+          ></textarea>
+          <mat-hint align="end"
+            >{{ form.get("observaciones")?.value?.length || 0 }}/300</mat-hint
+          >
+        </mat-form-field>
       </div>
       <!-- Imágenes existentes -->
       <div

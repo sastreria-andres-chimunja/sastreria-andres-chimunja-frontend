@@ -11,6 +11,7 @@ import {
   MatDialogModule,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { Medida } from '../../../shared/models/Medida';
 import { MedidaService } from '../../../core/services/medida.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -31,6 +32,7 @@ import { API } from '../../../utils/constants';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
+    TextFieldModule,
   ],
 })
 export class MedidaFormComponent implements OnInit {
@@ -56,15 +58,24 @@ export class MedidaFormComponent implements OnInit {
       // Camisa
       espalda: [this.medidaModel.espalda || 0.0],
       hombro: [this.medidaModel.hombro || 0.0],
+      talleDelantero: [this.medidaModel.talleDelantero || 0.0],
+      talleTrasero: [this.medidaModel.talleTrasero || 0.0],
+      distancia: [this.medidaModel.distancia || 0.0],
+      separacion: [this.medidaModel.separacion || 0.0],
       pecho: [this.medidaModel.pecho || 0.0],
       cintura: [this.medidaModel.cintura || 0.0],
+      largo: [this.medidaModel.largo || 0.0],
       largoManga: [this.medidaModel.largoManga || 0.0],
+      anchoManga: [this.medidaModel.anchoManga || 0.0],
+      escote: [this.medidaModel.escote || 0.0],
+      otros: [this.medidaModel.otros || 0.0],
       // Pantalón
       base: [this.medidaModel.base || 0.0],
       tiro: [this.medidaModel.tiro || 0.0],
+      pierna: [this.medidaModel.pierna || 0.0],
       rodilla: [this.medidaModel.rodilla || 0.0],
       bota: [this.medidaModel.bota || 0.0],
-      largo: [this.medidaModel.largo || 0.0],
+      observaciones: [this.medidaModel.observaciones || ''],
     });
   }
   ngOnInit(): void {
@@ -72,11 +83,35 @@ export class MedidaFormComponent implements OnInit {
   }
 
   seleccionarTipo(tipo: string) {
+    const esNuevoTipo = this.tipoPrenda !== tipo;
     this.tipoPrenda = tipo;
-    // Limpiar campos y fotos al cambiar tipo
-    this.form.reset({ tipoPrenda: tipo });
-    this.imagePreviews = [];
-    this.selectedFiles = [];
+
+    // Solo limpiar si cambia de tipo y es creación
+    if (esNuevoTipo && !this.medidaModel.idMedida) {
+      // Reset sin tocar tipoPrenda ni observaciones
+      this.form.patchValue({
+        espalda: 0,
+        hombro: 0,
+        talleDelantero: 0,
+        talleTrasero: 0,
+        distancia: 0,
+        separacion: 0,
+        pecho: 0,
+        cintura: 0,
+        largo: 0,
+        largoManga: 0,
+        anchoManga: 0,
+        escote: 0,
+        otros: 0,
+        base: 0,
+        tiro: 0,
+        pierna: 0,
+        rodilla: 0,
+        bota: 0,
+      });
+      this.imagePreviews = [];
+      this.selectedFiles = [];
+    }
   }
 
   // ── Manejo de archivos ──────────────────────────────────

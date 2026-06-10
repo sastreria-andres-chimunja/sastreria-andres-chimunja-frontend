@@ -20,4 +20,5 @@ export class Medida {
   bota: number = 0.0;
   otros: string = '';
   tipoPrenda: string = '';
+  observaciones: string = '';
 }

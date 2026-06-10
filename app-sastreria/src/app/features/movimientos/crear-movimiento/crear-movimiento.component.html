@@ -1,0 +1,122 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>account_balance_wallet</mat-icon>
+  {{ titulo }} movimiento
+</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="form-wrapper">
+    <form [formGroup]="form" autocomplete="off">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-icon matPrefix>view_compact</mat-icon>
+        <mat-label>Elija un tipo de movimiento</mat-label>
+        <mat-select formControlName="idTipoMovimiento">
+          <mat-option
+            *ngFor="let item of tiposMovimiento"
+            [value]="item.idTipoMovimiento"
+          >
+            {{ item.nombreTipoMovimiento }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-icon matPrefix>view_compact</mat-icon>
+        <mat-label>Elija una categoría</mat-label>
+        <mat-select formControlName="idCategoriaMovimiento">
+          <mat-option
+            *ngFor="let item of categorias"
+            [value]="item.idCategoriaMovimiento"
+          >
+            {{ item.nombreCategoriaMovimiento }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-icon matPrefix>view_compact</mat-icon>
+        <mat-label>Elija un método de pago</mat-label>
+        <mat-select formControlName="idMetodoPago">
+          <mat-option
+            *ngFor="let item of metodosPago"
+            [value]="item.idMetodoPago"
+          >
+            {{ item.nombreMetodoPago }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Valor</mat-label>
+        <mat-icon matPrefix>attach_money</mat-icon>
+        <input
+          matInput
+          formControlName="valor"
+          placeholder="Ej: 120000"
+          type="number"
+        />
+        <mat-error *ngIf="form.get('valor')?.hasError('required')">
+          El valor es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Fecha</mat-label>
+        <mat-icon matPrefix>date_range</mat-icon>
+        <input matInput [matDatepicker]="pickerFecha" formControlName="fecha" placeholder="dd/mm/aaaa" readonly />
+        <mat-datepicker-toggle matIconSuffix [for]="pickerFecha"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFecha></mat-datepicker>
+        <mat-error *ngIf="form.get('fecha')?.hasError('required')">
+          La fecha es requerida
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-icon matPrefix>filter_none</mat-icon>
+        <mat-label>Elija un tipo de referencia</mat-label>
+        <mat-select formControlName="tipoReferencia">
+          <mat-option *ngFor="let item of tiposReferencia" [value]="item">
+            {{ item }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Número de Referencia</mat-label>
+        <mat-icon matPrefix>payment</mat-icon>
+        <input
+          matInput
+          formControlName="idReferencia"
+          placeholder="Ej: Cc empleado o id trabajo"
+        />
+        <mat-error *ngIf="form.get('idReferencia')?.hasError('required')">
+          La referencia es requerida
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Observación</mat-label>
+        <mat-icon matPrefix>edit</mat-icon>
+        <input
+          matInput
+          formControlName="observacion"
+          placeholder="Ej: Abono de arreglo xx"
+        />
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<!-- Loading overlay sobre el dialog completo -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p class="loading-text">Guardando cliente...</p>
+</div>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button [mat-dialog-close]="false" [disabled]="isLoading">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="guardar()"
+    [disabled]="isLoading || form.invalid"
+  >
+    <mat-icon>save</mat-icon>
+    Guardar
+  </button>
+</mat-dialog-actions>

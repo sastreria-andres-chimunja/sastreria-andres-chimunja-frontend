@@ -1,77 +1,49 @@
 .main-content {
-  padding: 20px;
-  background-color: whitesmoke;
+  padding: 1.5rem 2rem;
+  background: var(--bg, #F5F2EE);
+  min-height: 100%;
 }
 
 .toolbar-medidas {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
-/* Filtro */
 .filtro {
   flex: 1;
-  min-width: 250px;
+  min-width: 220px;
+  max-width: 400px;
 }
 
-.filtro .mdc-notched-outline__leading,
-.filtro .mdc-notched-outline__notch,
-.filtro .mdc-notched-outline__trailing {
-  border-color: black !important;
-  border-width: 2px !important;
-}
-
-/* Botón crear */
 .boton-crear {
-  height: 56px;
+  height: 48px;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: -20px;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 14px;
   white-space: nowrap;
-  background-color: blue;
-}
-button{
-  background:#2563eb;
-  color:white;
-  border:none;
-  padding:8px 12px;
-  cursor:pointer;
-  width: 150px;
-  height: 40px;
-  border-radius: 10px;
-  text-align: center;
-  
-}
-button:hover{
-  background-color: black;
-  color: white;
+  padding: 0 18px !important;
+  background: var(--primary, #185FA5) !important;
+  color: #fff !important;
 }
 
-/* Íconos de acciones */
-.icon-create {
-  color: blue;
-  cursor: pointer;
+.boton-crear:hover {
+  background: var(--primary-hover, #145089) !important;
 }
 
-.icon-delete {
-  color: red;
-  margin-left: 20px;
-  cursor: pointer;
-}
-
-/* Tabla responsive */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
+
+.icon-create { color: var(--primary, #185FA5); cursor: pointer; }
+.icon-delete { color: var(--danger, #C0392B); cursor: pointer; margin-left: 16px; }
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -79,45 +51,35 @@ button:hover{
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  background: white;
-  border-radius: 8px;
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--border, #E3DDD6);
+  border-radius: 12px;
   gap: 12px;
 }
 
 .empty-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  color: #c8b89a;
+  font-size: 56px;
+  width: 56px;
+  height: 56px;
+  color: var(--text-muted, #A09080);
 }
 
 .empty-state h3 {
-  font-size: 18px;
-  color: #2a2018;
+  font-size: 17px;
+  color: var(--text-primary, #2C2518);
   margin: 0;
 }
 
 .empty-state p {
-  font-size: 14px;
-  color: #8a7d6e;
+  font-size: 13px;
+  color: var(--text-secondary, #7A6E63);
   margin: 0;
 }
 
-/* 📱 Responsive */
 @media (max-width: 600px) {
-  .toolbar-medidas {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .boton-crear {
-    width: 100%;
-    justify-content: center;
-    margin-top: 0;
-  }
-
-  .mat-column-id,
-  .mat-column-fecha {
-    display: none;
-  }
+  .main-content { padding: 1rem; }
+  .toolbar-medidas { flex-direction: column; align-items: stretch; }
+  .filtro { max-width: 100%; }
+  .boton-crear { width: 100%; justify-content: center; margin-top: 0; }
+  .mat-column-id, .mat-column-fecha { display: none; }
 }

@@ -1,4 +1,197 @@
-/* You can add global styles to this file, and also import other style files */
-
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; }
+
+/* ── Design tokens — light (cenizo/ash) ──────────────────────── */
+:root {
+  --bg:             #ECEEF2;
+  --surface:        #F8F9FB;
+  --surface-alt:    #E2E5EA;
+  --border:         #CDD2DA;
+  --border-light:   #D8DCE4;
+  --primary:        #185FA5;
+  --primary-hover:  #145089;
+  --accent:         #C8922A;
+  --text-primary:   #1F2328;
+  --text-secondary: #6B7280;
+  --text-muted:     #9CA3AF;
+  --danger:         #C0392B;
+  --success:        #2A7A2A;
+}
+
+/* ── Design tokens — dark ─────────────────────────────────────── */
+.dark-mode {
+  --bg:             #111214;
+  --surface:        #1C1D21;
+  --surface-alt:    #252629;
+  --border:         #34363D;
+  --border-light:   #2C2E35;
+  --primary:        #5BA5E0;
+  --primary-hover:  #4A94CF;
+  --accent:         #D4A843;
+  --text-primary:   #E4E6EA;
+  --text-secondary: #9499A6;
+  --text-muted:     #636879;
+  --danger:         #E06060;
+  --success:        #5BBF5B;
+}
+
+/* ── Material table global skin ───────────────────────────────── */
+.mat-elevation-z8 {
+  box-shadow: none !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background: var(--surface) !important;
+}
+
+.mat-mdc-header-row {
+  background: var(--surface-alt) !important;
+}
+
+.mat-mdc-header-cell {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.mat-mdc-row { transition: background 0.12s; }
+
+.mat-mdc-row:hover { background: var(--bg) !important; }
+
+.mat-mdc-cell {
+  font-size: 13px !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-light) !important;
+}
+
+.mat-mdc-paginator {
+  background: var(--surface) !important;
+  border-top: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+.mat-mdc-no-data-row td {
+  font-size: 13px !important;
+  color: var(--text-muted) !important;
+  text-align: center;
+  padding: 2rem !important;
+}
+
+/* ── Material dark mode overrides ─────────────────────────────── */
+.dark-mode .mat-mdc-dialog-surface {
+  background: var(--surface) !important;
+}
+
+.dark-mode .mat-mdc-dialog-title,
+.dark-mode .mat-mdc-dialog-content,
+.dark-mode .mat-mdc-dialog-actions {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .mdc-text-field--outlined .mdc-notched-outline__leading,
+.dark-mode .mdc-text-field--outlined .mdc-notched-outline__notch,
+.dark-mode .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--border) !important;
+}
+
+.dark-mode .mdc-text-field .mdc-text-field__input {
+  color: var(--text-primary) !important;
+  caret-color: var(--primary) !important;
+}
+
+.dark-mode .mat-mdc-floating-label {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .mat-mdc-select-panel,
+.dark-mode .cdk-overlay-pane .mat-mdc-select-panel {
+  background: var(--surface) !important;
+}
+
+.dark-mode .mat-mdc-option {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+
+.dark-mode .mat-mdc-option .mdc-list-item__primary-text {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .mat-mdc-option:hover,
+.dark-mode .mat-mdc-option.mdc-list-item--selected {
+  background: var(--surface-alt) !important;
+}
+
+.dark-mode .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+  color: var(--primary) !important;
+}
+
+.dark-mode .mat-mdc-select-value-text,
+.dark-mode .mat-mdc-select-placeholder {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .mat-mdc-select-arrow svg {
+  fill: var(--text-secondary) !important;
+}
+
+.dark-mode .mat-mdc-menu-panel {
+  background: var(--surface) !important;
+}
+
+.dark-mode .mat-calendar {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .mat-calendar-body-cell-content {
+  color: var(--text-primary) !important;
+}
+
+/* ── Material buttons dark mode ───────────────────────────────── */
+
+/* Stroked (Cancelar) */
+.dark-mode .mat-mdc-outlined-button:not(:disabled) {
+  border-color: var(--border) !important;
+}
+.dark-mode .mat-mdc-outlined-button:not(:disabled) .mdc-button__label {
+  color: var(--text-primary) !important;
+}
+.dark-mode .mat-mdc-outlined-button:not(:disabled):hover {
+  background: var(--surface-alt) !important;
+}
+
+/* Raised primary (Guardar) — fondo y texto siempre blancos en botón coloreado */
+.mat-mdc-raised-button.mat-primary .mdc-button__label,
+.mat-mdc-unelevated-button.mat-primary .mdc-button__label {
+  color: #fff !important;
+}
+
+.dark-mode .mat-mdc-raised-button.mat-primary:not(:disabled),
+.dark-mode .mat-mdc-unelevated-button.mat-primary:not(:disabled) {
+  background: var(--primary) !important;
+}
+.dark-mode .mat-mdc-raised-button.mat-primary:not(:disabled) .mdc-button__label,
+.dark-mode .mat-mdc-unelevated-button.mat-primary:not(:disabled) .mdc-button__label {
+  color: #fff !important;
+}
+.dark-mode .mat-mdc-raised-button.mat-primary:not(:disabled):hover,
+.dark-mode .mat-mdc-unelevated-button.mat-primary:not(:disabled):hover {
+  background: var(--primary-hover) !important;
+}
+
+/* Disabled state */
+.dark-mode .mat-mdc-raised-button:disabled,
+.dark-mode .mat-mdc-outlined-button:disabled {
+  color: var(--text-muted) !important;
+  border-color: var(--border-light) !important;
+  background: transparent !important;
+  opacity: 0.5;
+}

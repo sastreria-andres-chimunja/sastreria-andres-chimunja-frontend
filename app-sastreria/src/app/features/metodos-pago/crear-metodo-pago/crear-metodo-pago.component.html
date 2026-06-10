@@ -1,0 +1,44 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>euro_symbol</mat-icon>
+  {{ titulo }} método de pago
+</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="form-wrapper">
+    <form [formGroup]="form" autocomplete="off">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Nombre de método de pago</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <input
+          matInput
+          formControlName="nombreMetodoPago"
+          placeholder="Ej: Efectivo"
+        />
+        <mat-error *ngIf="form.get('nombreMetodoPago')?.hasError('required')">
+          El nombre es requerido
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<!-- Loading overlay sobre el dialog completo -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p class="loading-text">Guardando método de pago...</p>
+</div>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button [mat-dialog-close]="false" [disabled]="isLoading">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="guardar()"
+    [disabled]="isLoading || form.invalid"
+  >
+    <mat-icon>save</mat-icon>
+    Guardar
+  </button>
+</mat-dialog-actions>
