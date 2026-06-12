@@ -1,0 +1,131 @@
+<div class="dialog-wrapper">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="dialog-header-left">
+      <div class="dialog-avatar">{{ getInitials(data.nombres) }}</div>
+      <div class="dialog-title-group">
+        <h2 class="dialog-title">{{ data.nombres }} {{ data.apellidos }}</h2>
+        <p class="dialog-subtitle">Detalle de nómina</p>
+      </div>
+    </div>
+    <button class="btn-close-dialog" (click)="cerrar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="dialog-loading" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+    <p>Cargando movimientos...</p>
+  </div>
+
+  <!-- Content -->
+  <div class="dialog-body" *ngIf="!cargando && detalle">
+
+    <!-- Resumen -->
+    <div class="resumen-strip">
+      <div class="resumen-item">
+        <span class="resumen-label">Pendiente de pago</span>
+        <span class="resumen-value income">{{ formatCOP(detalle.entradas.total) }}</span>
+      </div>
+      <div class="resumen-divider"></div>
+      <div class="resumen-item">
+        <span class="resumen-label">Abonos</span>
+        <span class="resumen-value paid">{{ formatCOP(detalle.salidas.total) }}</span>
+      </div>
+      <div class="resumen-divider"></div>
+      <div class="resumen-item">
+        <span class="resumen-label">Saldo</span>
+        <span class="resumen-value"
+          [class.pending]="detalle.saldo > 0"
+          [class.zero]="detalle.saldo === 0">
+          {{ formatCOP(detalle.saldo) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <mat-tab-group class="movimientos-tabs" animationDuration="150ms">
+
+      <!-- Tab Ingresos pendientes -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">schedule</mat-icon>
+          Por pagar
+          <span class="tab-badge income-badge">{{ detalle.entradas.items.length }}</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="empty-state" *ngIf="detalle.entradas.items.length === 0">
+            <mat-icon>check_circle</mat-icon>
+            <p>Todo al día — sin ítems pendientes</p>
+          </div>
+
+          <div class="movimiento-list" *ngIf="detalle.entradas.items.length > 0">
+            <div class="mov-header-row">
+              <span>Descripción</span>
+              <span>Fecha entrega</span>
+              <span class="text-right">Valor</span>
+              <span></span>
+            </div>
+            <div class="mov-row" *ngFor="let item of detalle.entradas.items">
+              <div class="mov-desc">
+                <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
+                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
+              </div>
+              <span class="mov-fecha">{{ item.fechaEntrega || '—' }}</span>
+              <span class="mov-valor income">{{ formatCOP(item.valor) }}</span>
+              <button class="btn-pagar"
+                (click)="pagar(item)"
+                [disabled]="pagandoId === item.idItemPedido"
+                title="Marcar como pagado">
+                <mat-icon *ngIf="pagandoId !== item.idItemPedido">payments</mat-icon>
+                <mat-spinner *ngIf="pagandoId === item.idItemPedido" diameter="14"></mat-spinner>
+                <span *ngIf="pagandoId !== item.idItemPedido">Pagar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Tab Abonos -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">arrow_upward</mat-icon>
+          Abonos
+          <span class="tab-badge paid-badge">{{ detalle.salidas.abonos.length }}</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="empty-state" *ngIf="detalle.salidas.abonos.length === 0">
+            <mat-icon>inbox</mat-icon>
+            <p>Sin abonos en el período</p>
+          </div>
+
+          <div class="movimiento-list" *ngIf="detalle.salidas.abonos.length > 0">
+            <div class="mov-header-row">
+              <span>Observación</span>
+              <span>Fecha</span>
+              <span class="text-right">Valor</span>
+            </div>
+            <div class="mov-row" *ngFor="let abono of detalle.salidas.abonos">
+              <div class="mov-desc">
+                <span class="mov-label">{{ abono.observacion || 'Abono' }}</span>
+                <span class="mov-sub">{{ abono.nombreTipoMovimiento }}</span>
+              </div>
+              <span class="mov-fecha">{{ abono.fecha || '—' }}</span>
+              <span class="mov-valor paid">{{ formatCOP(abono.valor) }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </div>
+
+  <!-- Error -->
+  <div class="dialog-loading" *ngIf="!cargando && !detalle">
+    <mat-icon style="font-size: 32px; color: var(--danger);">error_outline</mat-icon>
+    <p>No se pudo cargar la información.</p>
+  </div>
+</div>

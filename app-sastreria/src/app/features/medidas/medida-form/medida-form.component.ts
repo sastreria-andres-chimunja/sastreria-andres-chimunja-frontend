@@ -152,7 +152,7 @@ export class MedidaFormComponent implements OnInit {
   // ── Acciones ────────────────────────────────────────────
   cargarImagenesExistentes() {
     this.imagenService
-      .getImagenes('Medida', this.medidaModel.idMedida!)
+      .listarPorReferencia('Medida', this.medidaModel.idMedida!)
       .subscribe((resp: any) => {
         this.existingImages = resp.map((img: any) => ({
           id: img.idImagen,
@@ -168,7 +168,7 @@ export class MedidaFormComponent implements OnInit {
     const afterSave = (idMedida: number) => {
       if (this.selectedFiles.length > 0) {
         this.imagenService
-          .subirImagenes(this.selectedFiles, 'Medida', idMedida)
+          .subir('Medida', idMedida, this.selectedFiles)
           .subscribe(() => this.dialogRef.close(true));
       } else {
         this.dialogRef.close(true);

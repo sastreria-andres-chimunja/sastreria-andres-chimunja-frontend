@@ -3,47 +3,125 @@
   display: block;
 }
 
-.dialog-title {
+/* ── Header personalizado ────────────────────────────────────── */
+.dialog-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.1rem;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dialog-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #2478c5 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(24, 95, 165, 0.25);
+
+  mat-icon { font-size: 22px; width: 22px; height: 22px; }
+}
+
+.dialog-title-group { display: flex; flex-direction: column; gap: 1px; }
+
+.dialog-title {
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #2C2518);
-  padding: 20px 24px 0;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.3;
 }
 
-.dialog-title mat-icon {
-  color: var(--primary, #185FA5);
+.dialog-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
 }
 
+.btn-close-dialog {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: background 0.12s, color 0.12s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { background: var(--bg); color: var(--text-primary); }
+}
+
+/* ── Formulario ──────────────────────────────────────────────── */
 .form-wrapper {
   display: flex;
   justify-content: center;
-  padding: 8px 0 4px;
+  padding: 10px 0 4px;
 }
 
 .form-wrapper form {
-  width: 85%;
+  width: 88%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.form-field {
-  width: 100%;
-}
+.form-field { width: 100%; }
 
+/* ── Acciones ────────────────────────────────────────────────── */
 .dialog-actions {
-  padding: 8px 24px 20px;
+  padding: 8px 20px 18px;
   gap: 8px;
+  border-top: 1px solid var(--border);
 }
 
-.mat-mdc-dialog-content {
-  max-height: unset !important;
-  overflow: visible !important;
+.btn-cancelar {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.13s;
+  &:hover:not(:disabled) { background: var(--bg); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
+.btn-guardar {
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.13s;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover:not(:disabled) { background: var(--primary-hover); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* ── Overlay de carga ────────────────────────────────────────── */
 .loading-overlay {
   position: absolute;
   inset: 0;
@@ -51,20 +129,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  background: rgba(253, 252, 250, 0.88);
-  backdrop-filter: blur(3px);
+  gap: 14px;
+  background: rgba(var(--surface), 0.88);
+  backdrop-filter: blur(4px);
   z-index: 10;
   border-radius: inherit;
 }
 
 .loading-text {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary, #7A6E63);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 480px) {
   .form-wrapper form { width: 95%; }
-  .dialog-title { font-size: 1rem; }
 }

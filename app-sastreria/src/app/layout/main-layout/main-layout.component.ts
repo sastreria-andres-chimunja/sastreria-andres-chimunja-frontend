@@ -53,13 +53,15 @@ export class MainLayoutComponent implements OnInit {
 
   // Mapa ruta → nombre legible
   private routeTitles: Record<string, string> = {
-    '/hoja-trabajo': 'Hoja de Trabajo',
-    '/clientes': 'Clientes',
-    '/empleados': 'Empleados',
-    '/balance': 'Balance',
-    '/gastos': 'Gastos',
-    '/nomina': 'Nómina',
-    '/movimientos': 'Movimientos',
+    '/app/pedidos': 'Pedidos',
+    '/app/pedidos/crear': 'Nuevo pedido',
+    '/app/clientes': 'Clientes',
+    '/app/empleados': 'Empleados',
+    '/app/nomina': 'Nómina',
+    '/app/movimientos': 'Movimientos',
+    '/app/metodosPago': 'Métodos de pago',
+    '/app/categoriaMovimientos': 'Categorías de movimiento',
+    '/app/roles': 'Roles',
   };
   constructor(
     private router: Router,
@@ -77,10 +79,16 @@ export class MainLayoutComponent implements OnInit {
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
-        const base = '/' + e.urlAfterRedirects.split('/')[1];
-
-        this.pageTitle =
-          this.routeTitles[e.urlAfterRedirects] ?? 'Bienvenido Admin';
+        const url = e.urlAfterRedirects;
+        if (this.routeTitles[url]) {
+          this.pageTitle = this.routeTitles[url];
+        } else if (url.startsWith('/app/pedidos/editar/')) {
+          this.pageTitle = 'Editar pedido';
+        } else if (url.startsWith('/app/medidas/')) {
+          this.pageTitle = 'Medidas';
+        } else {
+          this.pageTitle = 'Sistema de Gestión';
+        }
       });
     this.breakpointObserver
       .observe([Breakpoints.Handset])

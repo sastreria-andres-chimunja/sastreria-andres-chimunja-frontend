@@ -1,40 +1,31 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { API } from '../../utils/constants';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ImagenService {
-  api = `${API.BASE_URL}/${API.IMAGENES}`;
-  files: File[] = [];
-
+  private api = `${API.BASE_URL}/${API.IMAGENES}`;
   constructor(private http: HttpClient) {}
 
-  onFileSelected(event: any) {
-    this.files = Array.from(event.target.files);
-  }
-
-  subirImagenes(files: File[], tipoReferencia: string, idReferencia: number) {
-    const formData = new FormData();
-
-    formData.append('tipoReferencia', tipoReferencia);
-    formData.append('idReferencia', idReferencia.toString());
-
-    files.forEach((file) => {
-      formData.append('imagenes', file);
+  listarPorReferencia(tipoReferencia: string, idReferencia: number) {
+    return this.http.get<any[]>(this.api, {
+      params: { tipoReferencia, idReferencia: String(idReferencia) },
     });
-
-    return this.http.post(`${this.api}/upload`, formData);
   }
-  getImagenes(tipoReferencia: string, idReferencia: number) {
-    const params = new HttpParams()
-      .set('tipoReferencia', tipoReferencia)
-      .set('idReferencia', idReferencia.toString());
 
-    return this.http.get(`${this.api}`, { params });
+  subir(tipoReferencia: string, idReferencia: number, files: File[]) {
+    const form = new FormData();
+    form.append('tipoReferencia', tipoReferencia);
+    form.append('idReferencia', String(idReferencia));
+    files.forEach((f) => form.append('imagenes', f));
+    return this.http.post<any[]>(`${this.api}/upload`, form);
   }
-  getImagenById(id: number) {
-    return this.http.get(`${this.api}/${id}`);
+
+  eliminar(idImagen: number) {
+    return this.http.delete<any>(`${this.api}/${idImagen}`);
+  }
+
+  getUrl(rutaImagen: string): string {
+    return `${API.BASE_URL}/${rutaImagen}`;
   }
 }

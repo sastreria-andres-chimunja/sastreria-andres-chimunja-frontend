@@ -32,4 +32,7 @@ export const API = {
   METODO_PAGO: 'metodoPago',
   MOVIMIENTOS: 'movimientos',
   NOMINA: 'nomina',
+  PEDIDOS: 'pedidos',
+  ITEM_PEDIDO: 'itemPedido',
+  ESTADO: 'estado',
 } as const;

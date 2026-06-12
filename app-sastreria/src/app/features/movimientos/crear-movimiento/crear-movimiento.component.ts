@@ -26,6 +26,8 @@ import { TipoMovimientoService } from '../../../core/services/tipo-movimiento.se
 import { TipoMovimiento } from '../../../shared/models/TipoMovimiento';
 import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
 import { MetodoPago } from '../../../shared/models/MetodoPago';
+import { EmpleadoService } from '../../../core/services/empleado.service';
+import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString, stringToDate } from '../../../utils/date.utils';
 
 @Component({
@@ -51,11 +53,15 @@ export class CrearMovimientoComponent implements OnInit {
   movimiento = new Movimiento();
   isLoading = false;
   titulo = '';
-  icono = '';
   categorias: CategoriaMovimiento[] = [];
   metodosPago: MetodoPago[] = [];
   tiposMovimiento: TipoMovimiento[] = [];
-  tiposReferencia: string[] = [];
+  empleados: Empleado[] = [];
+
+  readonly tiposReferencia = [
+    { label: 'Empleado',  value: 'Nómina' },
+    { label: 'Ventas',    value: 'Ventas' },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -63,6 +69,7 @@ export class CrearMovimientoComponent implements OnInit {
     private categoriaService: CategoriaMovimientoService,
     private tipoMovimientoService: TipoMovimientoService,
     private metodoPagoservice: MetodoPagoService,
+    private empleadoService: EmpleadoService,
     private dialogRef: MatDialogRef<CrearMovimientoComponent>,
     @Inject(MAT_DIALOG_DATA) public movimientoModel: Movimiento,
   ) {}
@@ -70,36 +77,27 @@ export class CrearMovimientoComponent implements OnInit {
   ngOnInit(): void {
     this.listarCategorias();
     this.listarTiposMovimiento();
-    this.listarTiposReferencia();
     this.listarMetodosPago();
+    this.listarEmpleados();
     this.createForm();
     this.titulo = this.movimientoModel.idMovimiento! > 0 ? 'Editar' : 'Agregar';
-    this.icono = this.movimientoModel.idMovimiento! > 0 ? 'create' : 'add';
   }
 
   createForm() {
     this.form = this.fb.group({
       valor: [this.movimientoModel.valor, [Validators.required]],
-      fecha: [
-        stringToDate(this.movimientoModel.fecha),
-        [Validators.required],
-      ],
-      idTipoMovimiento: [
-        this.movimientoModel.idTipoMovimiento,
-        [Validators.required],
-      ],
-      idCategoriaMovimiento: [
-        this.movimientoModel.idCategoriaMovimiento,
-        [Validators.required],
-      ],
+      fecha: [stringToDate(this.movimientoModel.fecha), [Validators.required]],
+      idTipoMovimiento: [this.movimientoModel.idTipoMovimiento, [Validators.required]],
+      idCategoriaMovimiento: [this.movimientoModel.idCategoriaMovimiento, [Validators.required]],
       idMetodoPago: [this.movimientoModel.idMetodoPago, [Validators.required]],
-      tipoReferencia: [
-        this.movimientoModel.tipoReferencia,
-        [Validators.required],
-      ],
-      idReferencia: [this.movimientoModel.idReferencia, [Validators.required]],
+      tipoReferencia: [this.movimientoModel.tipoReferencia, [Validators.required]],
+      idReferencia: [this.movimientoModel.idReferencia || null, [Validators.required]],
       observacion: [this.movimientoModel.observacion, null],
     });
+  }
+
+  get esNomina(): boolean {
+    return this.form.get('tipoReferencia')?.value === 'Nómina';
   }
 
   guardar() {
@@ -114,51 +112,42 @@ export class CrearMovimientoComponent implements OnInit {
 
     this.isLoading = true;
 
-    if (this.movimientoModel.idMovimiento! > 0) {
-      this.movimientoService.actualizar(this.movimientoModel).subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          this.isLoading = false;
-          console.error('Error al guardar movimiento:', err);
-        },
-      });
-    } else {
-      this.movimientoService.crear(this.movimientoModel).subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          this.isLoading = false;
-          console.error('Error al guardar movimiento:', err);
-        },
-      });
-    }
+    const obs = this.movimientoModel.idMovimiento! > 0
+      ? this.movimientoService.actualizar(this.movimientoModel)
+      : this.movimientoService.crear(this.movimientoModel);
+
+    obs.subscribe({
+      next: () => { this.isLoading = false; this.dialogRef.close(true); },
+      error: (err) => { this.isLoading = false; console.error(err); },
+    });
   }
 
   listarCategorias() {
-    this.categoriaService
-      .listarCategoriasMovimiento()
-      .subscribe((resp: any) => {
-        this.categorias = resp.categoriasMovimiento;
-      });
+    this.categoriaService.listarCategoriasMovimiento().subscribe((resp: any) => {
+      this.categorias = resp.categoriasMovimiento;
+    });
   }
+
   listarMetodosPago() {
     this.metodoPagoservice.listarMetodosPago().subscribe((resp: any) => {
       this.metodosPago = resp.metodosPago;
     });
   }
+
   listarTiposMovimiento() {
-    this.tipoMovimientoService
-      .listarTiposMovimiento()
-      .subscribe((resp: any) => {
-        this.tiposMovimiento = resp.tiposMovimiento;
-      });
+    this.tipoMovimientoService.listarTiposMovimiento().subscribe((resp: any) => {
+      this.tiposMovimiento = resp.tiposMovimiento;
+    });
   }
-  listarTiposReferencia() {
-    this.tiposReferencia = ['empleado', 'ventas'];
+
+  listarEmpleados() {
+    this.empleadoService.getAll().subscribe((resp: any) => {
+      this.empleados = resp.empleados ?? [];
+    });
+  }
+
+  nombreEmpleado(idEmpleado: number): string {
+    const emp = this.empleados.find((e) => e.idEmpleado === idEmpleado);
+    return emp ? `${emp.nombres} ${emp.apellidos}` : '';
   }
 }

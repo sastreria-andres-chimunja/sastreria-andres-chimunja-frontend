@@ -1,0 +1,200 @@
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Buscar cliente o # pedido..." (keyup)="onBusqueda($event)" />
+    </div>
+
+    <div class="fecha-filter-wrapper">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo"
+        (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha entrega">
+        <mat-icon>date_range</mat-icon>
+      </button>
+      <div class="fecha-panel" *ngIf="filtroFechaAbierto">
+        <div class="fecha-panel-header">
+          <p class="fecha-panel-title">Rango de fechas</p>
+          <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="fecha-inputs">
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Desde</mat-label>
+            <input matInput [matDatepicker]="pickerDesde" [formControl]="fechaInicioCtrl" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDesde></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Hasta</mat-label>
+            <input matInput [matDatepicker]="pickerHasta" [formControl]="fechaFinCtrl" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+            <mat-datepicker #pickerHasta></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="fecha-actions">
+          <button class="btn-limpiar" (click)="limpiarFiltroFecha()">Limpiar</button>
+          <button class="btn-aplicar" (click)="aplicarFiltroFecha()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" (click)="irACrear()">
+      <mat-icon>add</mat-icon> Nuevo pedido
+    </button>
+  </div>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area">
+
+  <!-- RESUMEN -->
+  <div class="resumen-row">
+
+    <div class="resumen-card" [class.activa]="filtroEstado === null"
+      (click)="setFiltro(null)" matTooltip="Mostrar todos">
+      <div class="resumen-icon-circle total-icon"><mat-icon>receipt_long</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Total</div>
+        <div class="resumen-valor">{{ total }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'pendiente'"
+      (click)="setFiltro('pendiente')" matTooltip="Filtrar pendientes">
+      <div class="resumen-icon-circle pendiente-icon"><mat-icon>pending</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Pendientes</div>
+        <div class="resumen-valor pendiente-valor">{{ pendientes }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'asignado'"
+      (click)="setFiltro('asignado')" matTooltip="Filtrar asignados">
+      <div class="resumen-icon-circle asignado-icon"><mat-icon>person_pin</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Asignados</div>
+        <div class="resumen-valor asignado-valor">{{ asignados }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'terminado'"
+      (click)="setFiltro('terminado')" matTooltip="Filtrar terminados">
+      <div class="resumen-icon-circle terminado-icon"><mat-icon>task_alt</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Terminados</div>
+        <div class="resumen-valor terminado-valor">{{ terminados }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'por-vencer'"
+      (click)="setFiltro('por-vencer')" matTooltip="Filtrar por vencer (7 días)">
+      <div class="resumen-icon-circle pv-icon"><mat-icon>schedule</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Por vencer (7d)</div>
+        <div class="resumen-valor pv-valor">{{ porVencer }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'vencido'"
+      (click)="setFiltro('vencido')" matTooltip="Filtrar vencidos">
+      <div class="resumen-icon-circle vencido-icon"><mat-icon>warning</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Vencidos</div>
+        <div class="resumen-valor vencido-valor">{{ vencidos }}</div>
+      </div>
+    </div>
+
+    <div class="resumen-card" [class.activa]="filtroEstado === 'entregado'"
+      (click)="setFiltro('entregado')" matTooltip="Filtrar entregados">
+      <div class="resumen-icon-circle entregado-icon"><mat-icon>check_circle</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Entregados</div>
+        <div class="resumen-valor entregado-valor">{{ entregados }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LISTA DE TARJETAS -->
+  <div class="card-list" *ngIf="pedidosFiltrados.length > 0; else sinResultados">
+    <div class="ped-card" *ngFor="let p of pedidosFiltrados">
+
+      <div class="card-stripe" [ngClass]="'stripe-' + estadoClase(p)"></div>
+
+      <!-- Cabecera -->
+      <div class="card-top">
+        <div class="avatar" [ngClass]="'avatar-' + estadoClase(p)">
+          {{ getInitials(p.nombreCliente ?? '') }}
+        </div>
+        <div class="card-info">
+          <p class="cliente-nombre">{{ p.nombreCliente }}</p>
+          <p class="pedido-id"># {{ p.idPedido }}</p>
+        </div>
+        <span class="estado-badge" [ngClass]="'badge-' + estadoClase(p)">
+          {{ p.nombreEstado || 'Sin estado' }}
+        </span>
+      </div>
+
+      <!-- Fechas y valor -->
+      <div class="card-amounts">
+        <div class="amount-item">
+          <span class="amount-label">Recibido</span>
+          <span class="amount-value">{{ p.fechaRecibido || '—' }}</span>
+        </div>
+        <div class="amount-item">
+          <span class="amount-label">Entrega</span>
+          <span class="amount-value" [ngClass]="{
+            'fecha-vencida': estadoClase(p) === 'vencido',
+            'fecha-proxima': estadoClase(p) === 'por-vencer'
+          }">{{ p.fechaEntrega || '—' }}</span>
+        </div>
+        <div class="amount-item">
+          <span class="amount-label">Total</span>
+          <span class="amount-value valor-total">{{ formatCOP(p.valorTotal) }}</span>
+        </div>
+      </div>
+
+      <!-- Días restantes -->
+      <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado'">
+        <ng-container [ngSwitch]="true">
+          <ng-container *ngSwitchCase="diasRestantes(p.fechaEntrega) < 0">
+            <mat-icon class="dias-icon vencido-icon-sm">warning</mat-icon>
+            <span class="dias-vencido">Vencido hace {{ diasRestantes(p.fechaEntrega) * -1 }} día(s)</span>
+          </ng-container>
+          <ng-container *ngSwitchCase="diasRestantes(p.fechaEntrega) === 0">
+            <mat-icon class="dias-icon pv-icon-sm">schedule</mat-icon>
+            <span class="dias-hoy">¡Entrega hoy!</span>
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            <mat-icon class="dias-icon ok-icon-sm">event</mat-icon>
+            <span>{{ diasRestantes(p.fechaEntrega) }} día(s)</span>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <span class="tel-chip" *ngIf="p.telefonoCliente">
+          <mat-icon>phone</mat-icon> {{ p.telefonoCliente }}
+        </span>
+        <button class="btn-view" (click)="irAEditar(p)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ESTADO VACÍO -->
+  <ng-template #sinResultados>
+    <div class="empty-state">
+      <div class="empty-icon-circle"><mat-icon>receipt_long</mat-icon></div>
+      <div class="empty-title">No hay pedidos</div>
+      <div class="empty-sub">
+        <span class="empty-link" (click)="irACrear()">Crea el primer pedido</span>
+      </div>
+    </div>
+  </ng-template>
+
+</div>

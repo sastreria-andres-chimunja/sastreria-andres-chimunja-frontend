@@ -86,8 +86,10 @@ export class MovimientosListComponent implements OnInit {
   openDialog(data?: Movimiento) {
     const dialogRef = this.dialog.open(CrearMovimientoComponent, {
       width: '500px',
-      height: '700px',
+      maxHeight: '90vh',
       data: data == null ? {} : data,
+      panelClass: 'nomina-dialog-panel',
+      autoFocus: false,
     });
     dialogRef.afterClosed().subscribe(() => {
       this.loadMovimientos();

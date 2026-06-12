@@ -15,8 +15,8 @@ export class ClienteService {
     return this.http.post(this.api, cliente);
   }
 
-  buscar(cedula: string) {
-    return this.http.get(`${this.api}/search?cedula=${cedula}`);
+  buscar(q: string) {
+    return this.http.get(`${this.api}/search?q=${encodeURIComponent(q)}`);
   }
   buscarPorId(idCliente: number) {
     return this.http.get(`${this.api}/${idCliente}`);

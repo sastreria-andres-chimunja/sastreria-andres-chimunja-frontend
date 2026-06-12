@@ -11,67 +11,12 @@ import { CategoriaMovimientoListComponent } from './features/categorias-movimien
 import { RolesListComponent } from './features/roles/roles-list/roles-list.component';
 import { NominaGeneralComponent } from './features/nomina/nomina-general/nomina-general.component';
 import { LoginComponent } from './features/login/login.component';
-
-// export const routes: Routes = [
-//   {
-//     path: '',
-//     component: MainLayoutComponent,
-//     children: [
-//       {
-//         path: 'clientes',
-//         component: ClientesListComponent,
-//       },
-
-//       {
-//         path: 'crear-cliente',
-//         component: CrearClienteComponent,
-//       },
-//       {
-//         path: 'medidas/:id',
-//         component: MedidasListComponent,
-//       },
-//       {
-//         path: 'empleados',
-//         component: EmpleadosListComponent,
-//       },
-//       {
-//         path: 'movimientos',
-//         component: MovimientosListComponent,
-//       },
-//       {
-//         path: 'metodosPago',
-//         component: MetodosPagoListComponent,
-//       },
-//       {
-//         path: 'tipoMovimientos',
-//         component: TipoMovimientoListComponent,
-//       },
-//       {
-//         path: 'categoriaMovimientos',
-//         component: CategoriaMovimientoListComponent,
-//       },
-//       {
-//         path: 'roles',
-//         component: RolesListComponent,
-//       },
-//       {
-//         path: 'nomina',
-//         component: NominaGeneralComponent,
-//       },
-//     ],
-//   },
-// ];
+import { PedidosListComponent } from './features/pedidos/pedidos-list/pedidos-list.component';
+import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedido.component';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: LoginComponent,
-  },
-
-  {
-    path: 'login',
-    component: LoginComponent,
-  },
+  { path: '', component: LoginComponent },
+  { path: 'login', component: LoginComponent },
 
   {
     path: 'app',
@@ -84,19 +29,17 @@ export const routes: Routes = [
       { path: 'movimientos', component: MovimientosListComponent },
       { path: 'metodosPago', component: MetodosPagoListComponent },
       { path: 'tipoMovimientos', component: TipoMovimientoListComponent },
-      {
-        path: 'categoriaMovimientos',
-        component: CategoriaMovimientoListComponent,
-      },
+      { path: 'categoriaMovimientos', component: CategoriaMovimientoListComponent },
       { path: 'roles', component: RolesListComponent },
       { path: 'nomina', component: NominaGeneralComponent },
+      // Pedidos
+      { path: 'pedidos', component: PedidosListComponent },
+      { path: 'pedidos/crear', component: CrearPedidoComponent },
+      { path: 'pedidos/editar/:id', component: CrearPedidoComponent },
 
-      { path: '', redirectTo: 'clientes', pathMatch: 'full' },
+      { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
     ],
   },
 
-  {
-    path: '**',
-    redirectTo: '',
-  },
+  { path: '**', redirectTo: '' },
 ];

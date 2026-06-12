@@ -1,0 +1,208 @@
+<!-- TOP BAR -->
+<div class="page-topbar">
+  <button class="btn-back" (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <div class="page-title-group">
+    <h1 class="page-title">{{ isEdit ? 'Editar pedido' : 'Nuevo pedido' }}</h1>
+    <p class="page-subtitle" *ngIf="idPedido"># {{ idPedido }}</p>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn-save" (click)="guardar()" [disabled]="guardando">
+    <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar pedido' }}
+  </button>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="page-body">
+  <div class="layout-grid">
+
+    <!-- ══ COLUMNA IZQUIERDA: datos del pedido ══ -->
+    <div class="col-left">
+
+      <!-- Cliente -->
+      <div class="card-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">person</mat-icon>
+          <span>Cliente</span>
+        </div>
+        <div class="autocomplete-wrapper">
+          <div class="search-box" [class.has-value]="!!clienteSeleccionado">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              type="text"
+              placeholder="Buscar cliente por nombre o cédula..."
+              [value]="clienteQuery"
+              (input)="onClienteInput($event)"
+              (blur)="mostrarSugerencias = false"
+              (focus)="mostrarSugerencias = clientesSugeridos.length > 0"
+            />
+            <mat-icon class="check-icon" *ngIf="clienteSeleccionado">check_circle</mat-icon>
+          </div>
+          <div class="sugerencias-panel" *ngIf="mostrarSugerencias && clientesSugeridos.length > 0">
+            <div class="sugerencia-item" *ngFor="let c of clientesSugeridos"
+              (mousedown)="seleccionarCliente(c)">
+              <div class="sug-avatar">{{ getInitials(c.nombres) }}</div>
+              <div class="sug-info">
+                <span class="sug-nombre">{{ c.nombres }} {{ c.apellidos }}</span>
+                <span class="sug-cc">CC {{ c.cedula }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info cliente seleccionado -->
+        <div class="cliente-card" *ngIf="clienteSeleccionado">
+          <div class="cli-avatar">{{ getInitials(clienteSeleccionado.nombres) }}</div>
+          <div class="cli-data">
+            <p class="cli-nombre">{{ clienteSeleccionado.nombres }} {{ clienteSeleccionado.apellidos }}</p>
+            <p class="cli-meta">
+              <mat-icon>credit_card</mat-icon> {{ clienteSeleccionado.cedula }}
+              <mat-icon>phone</mat-icon> {{ clienteSeleccionado.telefono }}
+            </p>
+          </div>
+          <div class="cli-medidas-chip">
+            <mat-icon>straighten</mat-icon>
+            {{ clienteMedidas.length }} medida(s)
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos del pedido -->
+      <div class="card-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">assignment</mat-icon>
+          <span>Datos del pedido</span>
+        </div>
+        <form [formGroup]="form" class="pedido-form">
+          <!-- Estado: Pendiente/Asignado son auto; solo Terminado/Entregado son manuales -->
+          <div class="estado-field-group">
+            <div class="estado-auto-badge" *ngIf="!estadoActualEsManual">
+              <mat-icon class="estado-icon">auto_awesome</mat-icon>
+              <span class="estado-badge-label">{{ nombreEstadoAuto }}</span>
+              <span class="estado-auto-hint">Calculado automáticamente</span>
+            </div>
+            <mat-form-field appearance="outline" class="form-field" style="width:100%">
+              <mat-label>Estado del pedido</mat-label>
+              <mat-icon matPrefix>flag</mat-icon>
+              <mat-select formControlName="idEstado">
+                <mat-option *ngFor="let e of estados" [value]="e.idEstado"
+                  [disabled]="e.nombre === 'Pendiente' || e.nombre === 'Asignado'">
+                  {{ e.nombre }}
+                  <span *ngIf="e.nombre === 'Pendiente' || e.nombre === 'Asignado'"
+                    style="font-size:10px; color: var(--text-muted)"> — automático</span>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Fecha recibido</mat-label>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <input matInput [matDatepicker]="pickerR" formControlName="fechaRecibido" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerR"></mat-datepicker-toggle>
+            <mat-datepicker #pickerR></mat-datepicker>
+            <mat-error>Requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Fecha entrega</mat-label>
+            <mat-icon matPrefix>event</mat-icon>
+            <input matInput [matDatepicker]="pickerE" formControlName="fechaEntrega" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerE"></mat-datepicker-toggle>
+            <mat-datepicker #pickerE></mat-datepicker>
+            <mat-error>Requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Valor total</mat-label>
+            <mat-icon matPrefix>attach_money</mat-icon>
+            <input matInput formControlName="valorTotal" type="number" readonly />
+          </mat-form-field>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- ══ COLUMNA DERECHA: ítems del pedido ══ -->
+    <div class="col-right">
+      <div class="card-section items-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">list_alt</mat-icon>
+          <span>Ítems del pedido</span>
+          <span class="spacer"></span>
+          <button class="btn-add-item" (click)="abrirDialogoItem()"
+            [disabled]="!clienteSeleccionado && !isEdit"
+            matTooltip="{{ !clienteSeleccionado && !isEdit ? 'Seleccione un cliente primero' : 'Agregar ítem' }}">
+            <mat-icon>add</mat-icon> Agregar ítem
+          </button>
+        </div>
+
+        <!-- Lista de ítems -->
+        <div class="items-list" *ngIf="items.length > 0">
+          <div class="item-card" *ngFor="let it of items; let i = index">
+            <div class="item-stripe"></div>
+
+            <div class="item-top">
+              <div class="item-icon">
+                <mat-icon>checkroom</mat-icon>
+              </div>
+              <div class="item-info">
+                <p class="item-desc">{{ it.descripcion }}</p>
+                <p class="item-meta">
+                  <span *ngIf="it.nombreEmpleado || it.idEmpleado">
+                    <mat-icon>person</mat-icon> {{ it.nombreEmpleado || 'Empleado #' + it.idEmpleado }}
+                  </span>
+                  <span *ngIf="it.tipoPrendaMedida || it.idMedida">
+                    <mat-icon>straighten</mat-icon>
+                    {{ it.tipoPrendaMedida || (it._nuevaMedida ? it._nuevaMedida.tipoPrenda : 'Medida asignada') }}
+                  </span>
+                  <span *ngIf="it.fechaEntrega">
+                    <mat-icon>event</mat-icon> {{ it.fechaEntrega }}
+                  </span>
+                </p>
+              </div>
+              <div class="item-valor">{{ formatCOP(it.valor) }}</div>
+            </div>
+
+            <!-- Fotos preview -->
+            <div class="item-fotos" *ngIf="(it._fotos?.length > 0) || (it._fotosNuevas?.length > 0)">
+              <img *ngFor="let f of (it._fotos ?? [])"
+                [src]="getImageUrl(f.rutaImagen)" class="foto-thumb" [alt]="f.nombreArchivo" />
+              <div class="foto-count-chip" *ngIf="(it._fotosNuevas?.length ?? 0) > 0">
+                <mat-icon>photo</mat-icon> +{{ it._fotosNuevas.length }}
+              </div>
+            </div>
+
+            <div class="item-footer">
+              <span class="estado-chip">{{ it.nombreEstado || 'Sin estado' }}</span>
+              <div class="item-actions">
+                <button class="btn-item-action" (click)="abrirDialogoItem(it)" matTooltip="Editar ítem">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button class="btn-item-action danger" (click)="eliminarItem(it, i)" matTooltip="Eliminar ítem">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty ítems -->
+        <div class="items-empty" *ngIf="items.length === 0">
+          <mat-icon>add_shopping_cart</mat-icon>
+          <p>Sin ítems. Agregue prendas al pedido.</p>
+        </div>
+
+        <!-- Total -->
+        <div class="items-total" *ngIf="items.length > 0">
+          <span>Total estimado:</span>
+          <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

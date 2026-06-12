@@ -1,6 +1,4 @@
-<!-- movimientos-list.component.html -->
-
-<!-- TOP BAR — fijo, nunca se desplaza -->
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="top-actions">
     <div class="search-box">
@@ -51,122 +49,128 @@
     </div>
 
     <button class="btn-primary" (click)="openDialog()">
-      + Nuevo {{ tabActivo === "Ingreso" ? "Ingreso" : "Salida" }}
+      <mat-icon>add</mat-icon>
+      {{ tabActivo === "Ingreso" ? "Ingreso" : "Salida" }}
     </button>
   </div>
 </div>
 
-<!-- ZONA CON SCROLL — sólo esta parte se desplaza -->
+<!-- ZONA CON SCROLL -->
 <div class="scroll-area">
-  <!-- RESUMEN RÁPIDO -->
+
+  <!-- RESUMEN -->
   <div class="resumen-row">
     <div class="resumen-card ingreso">
-      <div class="resumen-icon">💰</div>
+      <div class="resumen-icon-circle ingreso-icon">
+        <mat-icon>arrow_downward</mat-icon>
+      </div>
       <div class="resumen-info">
-        <div class="resumen-valor">{{ formatCurrency(totalIngresos) }}</div>
         <div class="resumen-label">Total ingresos</div>
+        <div class="resumen-valor ingreso-valor">{{ formatCurrency(totalIngresos) }}</div>
       </div>
     </div>
     <div class="resumen-card salida">
-      <div class="resumen-icon">💸</div>
+      <div class="resumen-icon-circle salida-icon">
+        <mat-icon>arrow_upward</mat-icon>
+      </div>
       <div class="resumen-info">
-        <div class="resumen-valor">{{ formatCurrency(totalSalidas) }}</div>
         <div class="resumen-label">Total salidas</div>
+        <div class="resumen-valor salida-valor">{{ formatCurrency(totalSalidas) }}</div>
       </div>
     </div>
-    <div
-      class="resumen-card balance"
+    <div class="resumen-card balance"
       [class.positivo]="totalIngresos - totalSalidas >= 0"
-      [class.negativo]="totalIngresos - totalSalidas < 0"
-    >
-      <div class="resumen-icon">📊</div>
+      [class.negativo]="totalIngresos - totalSalidas < 0">
+      <div class="resumen-icon-circle"
+        [class.balance-pos-icon]="totalIngresos - totalSalidas >= 0"
+        [class.balance-neg-icon]="totalIngresos - totalSalidas < 0">
+        <mat-icon>account_balance</mat-icon>
+      </div>
       <div class="resumen-info">
-        <div class="resumen-valor">
-          {{ formatCurrency(totalIngresos - totalSalidas) }}
-        </div>
         <div class="resumen-label">Balance neto</div>
+        <div class="resumen-valor">{{ formatCurrency(totalIngresos - totalSalidas) }}</div>
       </div>
     </div>
   </div>
 
   <!-- TABS -->
-  <div class="tabs-search-row">
+  <div class="tabs-row">
     <div class="tabs">
-      <div
-        class="tab"
-        [class.active]="tabActivo === 'Ingreso'"
-        (click)="cambiarTab('Ingreso')"
-      >
-        Ingresos ({{ conteoIngresos }})
+      <div class="tab" [class.active]="tabActivo === 'Ingreso'" (click)="cambiarTab('Ingreso')">
+        <mat-icon class="tab-icon">arrow_downward</mat-icon>
+        Ingresos
+        <span class="tab-count">{{ conteoIngresos }}</span>
       </div>
-      <div
-        class="tab"
-        [class.active]="tabActivo === 'Salida'"
-        (click)="cambiarTab('Salida')"
-      >
-        Salidas ({{ conteoSalidas }})
+      <div class="tab" [class.active]="tabActivo === 'Salida'" (click)="cambiarTab('Salida')">
+        <mat-icon class="tab-icon">arrow_upward</mat-icon>
+        Salidas
+        <span class="tab-count">{{ conteoSalidas }}</span>
       </div>
     </div>
   </div>
 
   <!-- LISTA DE TARJETAS -->
-  <div
-    class="card-list"
-    *ngIf="movimientosFiltrados.length > 0; else sinResultados"
-  >
+  <div class="card-list" *ngIf="movimientosFiltrados.length > 0; else sinResultados">
     <div class="mov-card" *ngFor="let mov of movimientosFiltrados">
-      <!-- CABECERA TARJETA -->
-      <div class="mov-card-head">
-        <div class="mov-info">
-          <div class="mov-fecha">{{ mov.fecha }}</div>
-          <div class="mov-descripcion">{{ mov.observacion }}</div>
+
+      <!-- Franja de color superior -->
+      <div class="card-stripe"
+        [class.ingreso-stripe]="mov.idTipoMovimiento === 1"
+        [class.salida-stripe]="mov.idTipoMovimiento === 2">
+      </div>
+
+      <!-- Encabezado: ícono + descripción -->
+      <div class="card-top">
+        <div class="mov-icon"
+          [class.ingreso-icon]="mov.idTipoMovimiento === 1"
+          [class.salida-icon]="mov.idTipoMovimiento === 2">
+          <mat-icon>{{ mov.idTipoMovimiento === 1 ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
         </div>
-        <div class="mov-right">
-          <span
-            class="categoria-badge"
-            [ngClass]="'cat-' + mov.idCategoriaMovimiento"
-          >
-            {{ mov.idCategoriaMovimiento }}
-          </span>
+        <div class="mov-info">
+          <p class="mov-descripcion">{{ mov.observacion || 'Sin descripción' }}</p>
+          <span class="mov-fecha">{{ mov.fecha }}</span>
         </div>
       </div>
 
-      <!-- PIE TARJETA -->
-      <div class="mov-card-footer">
-        <div class="mov-meta">
-          <span *ngIf="mov.idReferencia" class="mov-ref">
-            {{ mov.idReferencia }}
-          </span>
-        </div>
-        <div class="mov-footer-right">
-          <div
-            class="mov-valor"
-            [class.valor-ingreso]="mov.idTipoMovimiento === 1"
-            [class.valor-salida]="mov.idTipoMovimiento === 2"
-          >
-            {{ mov.idTipoMovimiento === 1 ? "+" : "-"
-            }}{{ formatCurrency(mov.valor) }}
-          </div>
-          <button class="btn-detalle" (click)="openDialog(mov)">
-            Ver detalle
-          </button>
-        </div>
+      <!-- Separador con meta info -->
+      <div class="card-meta">
+        <span class="categoria-badge" [ngClass]="'cat-' + mov.idCategoriaMovimiento">
+          Cat. {{ mov.idCategoriaMovimiento }}
+        </span>
+        <span class="mov-ref" *ngIf="mov.idReferencia">
+          Ref. {{ mov.idReferencia }}
+        </span>
       </div>
+
+      <!-- Pie: valor + botón -->
+      <div class="card-footer">
+        <span class="mov-valor"
+          [class.valor-ingreso]="mov.idTipoMovimiento === 1"
+          [class.valor-salida]="mov.idTipoMovimiento === 2">
+          {{ mov.idTipoMovimiento === 1 ? '+' : '−' }}{{ formatCurrency(mov.valor) }}
+        </span>
+        <button class="btn-view" (click)="openDialog(mov)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+      </div>
+
     </div>
   </div>
 
   <!-- ESTADO VACÍO -->
   <ng-template #sinResultados>
     <div class="empty-state">
-      <div class="empty-icon">{{ tabActivo === "Ingreso" ? "💰" : "💸" }}</div>
-      <div class="empty-title">No se encontraron {{ tabActivo }}s</div>
+      <div class="empty-icon-circle"
+        [class.ingreso-icon]="tabActivo === 'Ingreso'"
+        [class.salida-icon]="tabActivo === 'Salida'">
+        <mat-icon>{{ tabActivo === 'Ingreso' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+      </div>
+      <div class="empty-title">No hay {{ tabActivo === 'Ingreso' ? 'ingresos' : 'salidas' }}</div>
       <div class="empty-sub">
-        Intenta con otra búsqueda o
-        <span class="empty-link" (click)="openDialog()"
-          >registra uno nuevo</span
-        >
+        Intenta otra búsqueda o
+        <span class="empty-link" (click)="openDialog()">registra uno nuevo</span>
       </div>
     </div>
   </ng-template>
+
 </div>
-<!-- /scroll-area -->

@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { dateToString } from '../../../utils/date.utils';
+import { NominaDetalleDialogComponent } from '../nomina-detalle-dialog/nomina-detalle-dialog.component';
 
 @Component({
   selector: 'app-nomina-general',
@@ -46,6 +47,7 @@ export class NominaGeneralComponent implements OnInit {
   constructor(
     private router: Router,
     private nominaService: NominaService,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -90,6 +92,29 @@ export class NominaGeneralComponent implements OnInit {
     });
   }
 
+  verDetalle(emp: any): void {
+    const inicio = this.fechaInicioCtrl.value
+      ? dateToString(this.fechaInicioCtrl.value)
+      : undefined;
+    const fin = this.fechaFinCtrl.value
+      ? dateToString(this.fechaFinCtrl.value)
+      : undefined;
+
+    this.dialog.open(NominaDetalleDialogComponent, {
+      data: {
+        idEmpleado: emp.idEmpleado,
+        nombres: emp.nombres,
+        apellidos: emp.apellidos,
+        fechaInicio: inicio,
+        fechaFin: fin,
+      },
+      panelClass: 'nomina-dialog-panel',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: false,
+    });
+  }
+
   getInitials(nombre: string): string {
     return nombre
       .split(' ')
@@ -105,6 +130,6 @@ export class NominaGeneralComponent implements OnInit {
       currency: 'COP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(valor);
+    }).format(valor ?? 0);
   }
 }

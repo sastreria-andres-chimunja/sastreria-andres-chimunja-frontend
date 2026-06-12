@@ -1,0 +1,300 @@
+/* ── Wrapper ────────────────────────────────────────────────── */
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 680px;
+  max-width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: 14px;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.dialog-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #2478c5 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.dialog-title-group { display: flex; flex-direction: column; gap: 1px; }
+
+.dialog-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.dialog-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.btn-close-dialog {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: background 0.12s, color 0.12s;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { background: var(--bg); color: var(--text-primary); }
+}
+
+/* ── Loading / Error ─────────────────────────────────────────── */
+.dialog-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Body ───────────────────────────────────────────────────── */
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Resumen strip ──────────────────────────────────────────── */
+.resumen-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 14px 20px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.resumen-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.resumen-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.resumen-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.resumen-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+}
+
+/* ── Tabs ───────────────────────────────────────────────────── */
+.movimientos-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::ng-deep .movimientos-tabs .mat-mdc-tab-body-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+
+::ng-deep .movimientos-tabs .mat-mdc-tab-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+::ng-deep .movimientos-tabs .mdc-tab__text-label {
+  color: var(--text-secondary) !important;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 4px;
+}
+
+::ng-deep .movimientos-tabs .mdc-tab--active .mdc-tab__text-label {
+  color: var(--primary) !important;
+}
+
+::ng-deep .movimientos-tabs .mdc-tab-indicator__content--underline {
+  border-color: var(--primary) !important;
+}
+
+.tab-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  margin-right: 3px;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+  margin-left: 5px;
+}
+
+.income-badge { background: #e8f5e9; color: var(--success); }
+.paid-badge   { background: #e3f0fb; color: var(--primary); }
+
+/* ── Tab content ────────────────────────────────────────────── */
+.tab-content {
+  padding: 0;
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 2.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 13px;
+  mat-icon { font-size: 36px; width: 36px; height: 36px; opacity: 0.4; }
+}
+
+/* ── Listado de movimientos ─────────────────────────────────── */
+.movimiento-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.mov-header-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 90px 90px;
+  padding: 8px 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.text-right { text-align: right; }
+
+.mov-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 90px 90px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.1s;
+  &:hover { background: var(--bg); }
+  &:last-child { border-bottom: none; }
+}
+
+.mov-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.mov-label {
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.mov-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.mov-fecha {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mov-valor {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ── Botón pagar ─────────────────────────────────────────────── */
+.btn-pagar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, var(--success) 0%, #3ea03e 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.13s;
+  white-space: nowrap;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover:not(:disabled) { opacity: 0.85; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* ── Amount colors ──────────────────────────────────────────── */
+.income  { color: var(--success); }
+.paid    { color: var(--primary); }
+.pending { color: var(--danger); }
+.zero    { color: var(--success); }
