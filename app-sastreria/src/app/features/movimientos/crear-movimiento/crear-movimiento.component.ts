@@ -29,6 +29,7 @@ import { MetodoPago } from '../../../shared/models/MetodoPago';
 import { EmpleadoService } from '../../../core/services/empleado.service';
 import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString, stringToDate } from '../../../utils/date.utils';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-crear-movimiento',
@@ -57,10 +58,11 @@ export class CrearMovimientoComponent implements OnInit {
   metodosPago: MetodoPago[] = [];
   tiposMovimiento: TipoMovimiento[] = [];
   empleados: Empleado[] = [];
+  esInsumo = false;
 
   readonly tiposReferencia = [
-    { label: 'Empleado',  value: 'Nómina' },
-    { label: 'Ventas',    value: 'Ventas' },
+    { label: 'Empleado', value: 'Nómina' },
+    { label: 'Pedidos',  value: 'Pedidos' },
   ];
 
   constructor(
@@ -81,23 +83,51 @@ export class CrearMovimientoComponent implements OnInit {
     this.listarEmpleados();
     this.createForm();
     this.titulo = this.movimientoModel.idMovimiento! > 0 ? 'Editar' : 'Agregar';
+
+    this.form.get('idCategoriaMovimiento')!.valueChanges.subscribe((idCat) => {
+      this.recalcularEsInsumo(idCat);
+      this.actualizarValidadoresReferencia();
+    });
   }
 
   createForm() {
     this.form = this.fb.group({
       valor: [this.movimientoModel.valor, [Validators.required]],
-      fecha: [stringToDate(this.movimientoModel.fecha), [Validators.required]],
+      fecha: [stringToDate(this.movimientoModel.fecha) ?? new Date(), [Validators.required]],
       idTipoMovimiento: [this.movimientoModel.idTipoMovimiento, [Validators.required]],
       idCategoriaMovimiento: [this.movimientoModel.idCategoriaMovimiento, [Validators.required]],
       idMetodoPago: [this.movimientoModel.idMetodoPago, [Validators.required]],
-      tipoReferencia: [this.movimientoModel.tipoReferencia, [Validators.required]],
-      idReferencia: [this.movimientoModel.idReferencia || null, [Validators.required]],
+      tipoReferencia: [this.movimientoModel.tipoReferencia, this.isEdit ? [] : [Validators.required]],
+      idReferencia: [this.movimientoModel.idReferencia || null, this.isEdit ? [] : [Validators.required]],
       observacion: [this.movimientoModel.observacion, null],
     });
   }
 
+  get isEdit(): boolean {
+    return (this.movimientoModel.idMovimiento ?? 0) > 0;
+  }
+
+  recalcularEsInsumo(idCat: any): void {
+    const cat = this.categorias.find((c) => Number(c.idCategoriaMovimiento) === Number(idCat));
+    this.esInsumo = cat?.nombreCategoriaMovimiento?.toLowerCase().includes('insumo') ?? false;
+  }
+
   get esNomina(): boolean {
     return this.form.get('tipoReferencia')?.value === 'Nómina';
+  }
+
+  actualizarValidadoresReferencia(): void {
+    const tipoRef = this.form.get('tipoReferencia')!;
+    const idRef   = this.form.get('idReferencia')!;
+    if (this.isEdit || this.esInsumo) {
+      tipoRef.clearValidators();
+      idRef.clearValidators();
+    } else {
+      tipoRef.setValidators([Validators.required]);
+      idRef.setValidators([Validators.required]);
+    }
+    tipoRef.updateValueAndValidity({ emitEvent: false });
+    idRef.updateValueAndValidity({ emitEvent: false });
   }
 
   guardar() {
@@ -116,8 +146,13 @@ export class CrearMovimientoComponent implements OnInit {
       ? this.movimientoService.actualizar(this.movimientoModel)
       : this.movimientoService.crear(this.movimientoModel);
 
+    const isEdit = this.movimientoModel.idMovimiento! > 0;
     obs.subscribe({
-      next: () => { this.isLoading = false; this.dialogRef.close(true); },
+      next: () => {
+        this.isLoading = false;
+        Swal.fire({ title: isEdit ? '¡Movimiento editado!' : '¡Movimiento registrado!', icon: 'success', timer: 1800, showConfirmButton: false })
+          .then(() => this.dialogRef.close(true));
+      },
       error: (err) => { this.isLoading = false; console.error(err); },
     });
   }
@@ -125,6 +160,8 @@ export class CrearMovimientoComponent implements OnInit {
   listarCategorias() {
     this.categoriaService.listarCategoriasMovimiento().subscribe((resp: any) => {
       this.categorias = resp.categoriasMovimiento;
+      const idCat = this.form?.get('idCategoriaMovimiento')?.value;
+      if (idCat) this.recalcularEsInsumo(idCat);
     });
   }
 

@@ -1,163 +1,51 @@
-<!-- <div class="main-content">
-  <div class="toolbar-rol" *ngIf="!isEmpty">
-    <mat-form-field appearance="outline" class="filtro">
-      <mat-label>Buscar rol</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Ej: Admin"
-        #input
-      />
-    </mat-form-field>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="boton-crear"
-      (click)="openDialogRol()"
-    >
-      <mat-icon>add</mat-icon>
-      Crear rol
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar rol..." />
+    </div>
+    <button class="btn-primary" (click)="openDialogRol()">
+      <mat-icon>add</mat-icon> Crear rol
     </button>
   </div>
-  <div class="empty-state" *ngIf="isEmpty">
-    <mat-icon class="empty-icon">straighten</mat-icon>
-    <h3>No hay roles registrados</h3>
-    <p>Crea el primero para comenzar</p>
-    <button mat-raised-button color="primary">
-      <mat-icon>add</mat-icon>
-      Crear
-    </button>
-  </div>
-  <div class="table-responsive" *ngIf="!isEmpty">
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource" matSort>
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-          <td mat-cell *matCellDef="let row">{{ row.idRol }}</td>
-        </ng-container>
+</div>
 
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre rol</th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.nombre }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-icon
-              matTooltip="Editar rol"
-              aria-hidden="false"
-              aria-label="Example home icon"
-              fontIcon="create"
-              class="icon-create"
-            ></mat-icon>
-            <mat-icon
-              matTooltip="Eliminar rol"
-              aria-hidden="false"
-              aria-label="Example home icon"
-              fontIcon="delete_sweep"
-              class="icon-delete"
-            ></mat-icon>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4">
-            No se encontraron resultados para tu búsqueda
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator
-        [pageSizeOptions]="[2, 5, 10, 25, 100]"
-        aria-label="Select page of users"
-      ></mat-paginator>
+<div class="scroll-area">
+  <div class="card-list" *ngIf="rolesFiltrados.length > 0; else sinResultados">
+    <div class="item-card" *ngFor="let r of rolesFiltrados">
+      <div class="card-stripe stripe-purple"></div>
+      <div class="card-top">
+        <div class="item-avatar avatar-purple">
+          <mat-icon>admin_panel_settings</mat-icon>
+        </div>
+        <div class="item-info">
+          <p class="item-nombre">{{ r.nombre }}</p>
+          <div class="item-meta">
+            <span class="meta-chip"><mat-icon>tag</mat-icon>ID {{ r.idRol }}</span>
+            <span class="meta-chip" *ngIf="r.descripcion">
+              <mat-icon>info</mat-icon>{{ r.descripcion }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-action" (click)="openDialogRol(r)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+        <button class="btn-action btn-danger" (click)="eliminarRol(r)">
+          <mat-icon>delete</mat-icon> Eliminar
+        </button>
+      </div>
     </div>
   </div>
-</div> -->
-<div class="main-content">
-  <div class="toolbar-clientes">
-    <mat-form-field appearance="outline" class="filtro">
-      <mat-label>Buscar rol</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Ej: Admin"
-        #input
-      />
-    </mat-form-field>
 
-    <button
-      mat-raised-button
-      color="primary"
-      class="boton-crear"
-      (click)="openDialogRol()"
-    >
-      <mat-icon>add</mat-icon>
-      Crear rol
-    </button>
-  </div>
-  <div class="table-responsive">
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource" matSort>
-        <!-- ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-          <td mat-cell *matCellDef="let row">{{ row.idRol }}</td>
-        </ng-container>
-
-        <!-- Cédula Column -->
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Nombre de rol
-          </th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.nombre }}
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-icon
-              matTooltip="Editar rol"
-              aria-hidden="false"
-              aria-label="Example home icon"
-              fontIcon="create"
-              class="icon-create"
-              (click)="openDialogRol(row)"
-            ></mat-icon>
-            <mat-icon
-              matTooltip="Eliminar rol"
-              aria-hidden="false"
-              aria-label="Agregar movimiento"
-              fontIcon="delete"
-              class="icon-straighten"
-              (click)="eliminarRol(row)"
-            ></mat-icon>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-        <!-- Row shown when there is no matching data. -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4">
-            No data matching the filter "{{ input.value }}"
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 25, 100]"
-        aria-label="Select page of users"
-      ></mat-paginator>
+  <ng-template #sinResultados>
+    <div class="empty-state">
+      <mat-icon class="empty-icon">admin_panel_settings</mat-icon>
+      <div class="empty-title">Sin roles</div>
+      <div class="empty-sub">
+        <span class="empty-link" (click)="openDialogRol()">Crear el primero</span>
+      </div>
     </div>
-  </div>
+  </ng-template>
 </div>

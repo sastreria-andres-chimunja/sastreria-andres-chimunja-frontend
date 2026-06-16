@@ -1,100 +1,140 @@
-<h2 mat-dialog-title class="dialog-title">
-  <mat-icon>person_add</mat-icon>
-  {{ titulo }} empleado
-</h2>
+<!-- ── Estado: Empleado creado ───────────────────────────── -->
+<ng-container *ngIf="empleadoCreado; else formulario">
 
-<mat-dialog-content class="mat-typography">
-  <div class="form-wrapper">
-    <form [formGroup]="form" autocomplete="off">
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Nombres</mat-label>
-        <mat-icon matPrefix>badge</mat-icon>
-        <input
-          matInput
-          formControlName="nombres"
-          placeholder="Ej: Juan Carlos"
-        />
-        <mat-error *ngIf="form.get('nombres')?.hasError('required')">
-          El nombre es requerido
-        </mat-error>
-      </mat-form-field>
+  <h2 mat-dialog-title class="dialog-title success-title">
+    <span class="success-icon-wrap">
+      <mat-icon>check_circle</mat-icon>
+    </span>
+    Empleado registrado
+  </h2>
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Apellidos</mat-label>
-        <mat-icon matPrefix>badge</mat-icon>
-        <input
-          matInput
-          formControlName="apellidos"
-          placeholder="Ej: Pérez García"
-        />
-        <mat-error *ngIf="form.get('apellidos')?.hasError('required')">
-          Los apellidos son requeridos
-        </mat-error>
-      </mat-form-field>
+  <mat-dialog-content class="mat-typography">
+    <div class="credentials-panel">
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Teléfono</mat-label>
-        <mat-icon matPrefix>phone</mat-icon>
-        <input
-          matInput
-          formControlName="telefono"
-          placeholder="Ej: 3001234567"
-        />
-        <mat-error *ngIf="form.get('telefono')?.hasError('required')">
-          El teléfono es requerido
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Dirección</mat-label>
-        <mat-icon matPrefix>room</mat-icon>
-        <input
-          matInput
-          formControlName="direccion"
-          placeholder="Ej: Calle 15 #14-56 centro"
-        />
-        <mat-error *ngIf="form.get('direccion')?.hasError('required')">
-          La dirección es requerida
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Fecha de cumpleaños</mat-label>
-        <mat-icon matPrefix>date_range</mat-icon>
-        <input matInput [matDatepicker]="pickerCumple" formControlName="fechaCumpleanios" placeholder="dd/mm/aaaa" readonly />
-        <mat-datepicker-toggle matIconSuffix [for]="pickerCumple"></mat-datepicker-toggle>
-        <mat-datepicker #pickerCumple></mat-datepicker>
-        <mat-error *ngIf="form.get('fechaCumpleanios')?.hasError('required')">
-          La fecha de cumpleaños es requerida
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Rol</mat-label>
-        <mat-select formControlName="idRol">
-          @for (rol of roles; track rol) {
-            <mat-option [value]="rol.idRol">{{ rol.nombre }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </form>
+      <p class="cred-intro">
+        Se generó una contraseña temporal para <strong>{{ nombreCompleto }}</strong>.
+        Envíala por WhatsApp antes de cerrar esta ventana.
+      </p>
+
+      <div class="cred-box">
+        <div class="cred-row">
+          <span class="cred-label">
+            <mat-icon>person</mat-icon> Usuario
+          </span>
+          <span class="cred-value">{{ usernameEmpleado }}</span>
+        </div>
+        <div class="cred-divider"></div>
+        <div class="cred-row">
+          <span class="cred-label">
+            <mat-icon>lock</mat-icon> Contraseña temporal
+          </span>
+          <span class="cred-value cred-pass">{{ claveGenerada }}</span>
+        </div>
+      </div>
+
+      <p class="cred-warning">
+        <mat-icon>info</mat-icon>
+        Al ingresar por primera vez, el sistema solicitará cambiar la contraseña.
+      </p>
+
+      <div class="wa-buttons">
+        <button class="btn-wa btn-wa-emp" (click)="enviarWhatsAppEmpleado()">
+          <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Enviar al empleado
+        </button>
+        <button class="btn-wa btn-wa-admin" (click)="enviarWhatsAppAdmin()" [disabled]="!telefonoAdmin">
+          <svg class="wa-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Enviar al administrador
+        </button>
+      </div>
+
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-raised-button color="primary" (click)="cerrar()">
+      <mat-icon>done</mat-icon>
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+
+</ng-container>
+
+<!-- ── Estado: Formulario ────────────────────────────────── -->
+<ng-template #formulario>
+
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon>person_add</mat-icon>
+    {{ titulo }} empleado
+  </h2>
+
+  <mat-dialog-content class="mat-typography">
+    <div class="form-wrapper">
+      <form [formGroup]="form" autocomplete="off">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Nombres</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput formControlName="nombres" placeholder="Ej: Juan Carlos" />
+          <mat-error *ngIf="form.get('nombres')?.hasError('required')">El nombre es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Apellidos</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput formControlName="apellidos" placeholder="Ej: Pérez García" />
+          <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Los apellidos son requeridos</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Teléfono</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="telefono" placeholder="Ej: 3001234567" />
+          <mat-error *ngIf="form.get('telefono')?.hasError('required')">El teléfono es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Dirección</mat-label>
+          <mat-icon matPrefix>room</mat-icon>
+          <input matInput formControlName="direccion" placeholder="Ej: Calle 15 #14-56 centro" />
+          <mat-error *ngIf="form.get('direccion')?.hasError('required')">La dirección es requerida</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Fecha de cumpleaños</mat-label>
+          <mat-icon matPrefix>date_range</mat-icon>
+          <input matInput [matDatepicker]="pickerCumple" formControlName="fechaCumpleanios" placeholder="dd/mm/aaaa" readonly />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerCumple"></mat-datepicker-toggle>
+          <mat-datepicker #pickerCumple></mat-datepicker>
+          <mat-error *ngIf="form.get('fechaCumpleanios')?.hasError('required')">La fecha de cumpleaños es requerida</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="idRol">
+            @for (rol of roles; track rol) {
+              <mat-option [value]="rol.idRol">{{ rol.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </div>
+  </mat-dialog-content>
+
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p class="loading-text">Guardando empleado...</p>
   </div>
-</mat-dialog-content>
 
-<!-- Loading overlay sobre el dialog completo -->
-<div class="loading-overlay" *ngIf="isLoading">
-  <mat-spinner diameter="48"></mat-spinner>
-  <p class="loading-text">Guardando cliente...</p>
-</div>
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-stroked-button [mat-dialog-close]="false" [disabled]="isLoading">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="guardar()" [disabled]="isLoading || form.invalid">
+      <mat-icon>save</mat-icon>
+      Guardar
+    </button>
+  </mat-dialog-actions>
 
-<mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-stroked-button [mat-dialog-close]="false" [disabled]="isLoading">
-    Cancelar
-  </button>
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="guardar()"
-    [disabled]="isLoading || form.invalid"
-  >
-    <mat-icon>save</mat-icon>
-    Guardar
-  </button>
-</mat-dialog-actions>
+</ng-template>

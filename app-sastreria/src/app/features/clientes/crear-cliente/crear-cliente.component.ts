@@ -18,6 +18,7 @@ import {
 } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Cliente } from '../../../shared/models/Cliente';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-crear-cliente',
@@ -83,11 +84,11 @@ export class CrearClienteComponent implements OnInit {
       this.clienteService.actualizar(this.clienteModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Cliente editado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar cliente:', err);
         },
       });
@@ -95,11 +96,11 @@ export class CrearClienteComponent implements OnInit {
       this.clienteService.crear(this.clienteModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Cliente creado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar cliente:', err);
         },
       });

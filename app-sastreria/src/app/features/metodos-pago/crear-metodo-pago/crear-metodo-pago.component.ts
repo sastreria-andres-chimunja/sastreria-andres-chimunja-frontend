@@ -19,6 +19,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
 import { MatSelectModule } from '@angular/material/select';
 import { MetodoPago } from '../../../shared/models/MetodoPago';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-crear-metodo-pago',
@@ -85,11 +86,11 @@ export class CrearMetodoPagoComponent implements OnInit {
       this.metodoPagoService.actualizar(this.metodoPagoModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Método editado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar método de pago:', err);
         },
       });
@@ -97,11 +98,11 @@ export class CrearMetodoPagoComponent implements OnInit {
       this.metodoPagoService.crear(this.metodoPagoModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Método de pago creado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
           console.error('Error al guardar método de pago:', err);
         },
       });

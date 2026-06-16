@@ -1,90 +1,51 @@
-<div class="main-content">
-  <div class="toolbar-clientes">
-    <mat-form-field appearance="outline" class="filtro">
-      <mat-label>Buscar cliente</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Ej: Juan"
-        #input
-      />
-    </mat-form-field>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="boton-crear"
-      (click)="openDialog()"
-    >
-      <mat-icon>add</mat-icon>
-      Crear cliente
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar cliente..." />
+    </div>
+    <button class="btn-primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon> Crear cliente
     </button>
   </div>
-  <div class="table-responsive">
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource" matSort>
-        <!-- ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-          <td mat-cell *matCellDef="let row">{{ row.idCliente }}</td>
-        </ng-container>
+</div>
 
-        <!-- Cédula Column -->
-        <ng-container matColumnDef="nombres">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombres</th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.nombres }} {{ row.apellidos }}
-          </td>
-        </ng-container>
-
-        <!-- Name Column -->
-        <ng-container matColumnDef="cc">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cédula</th>
-          <td mat-cell *matCellDef="let row">{{ row.cedula }}</td>
-        </ng-container>
-
-        <!-- Fruit Column -->
-        <ng-container matColumnDef="telefono">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
-          <td mat-cell *matCellDef="let row">{{ row.telefono }}</td>
-        </ng-container>
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-icon
-              matTooltip="Editar cliente"
-              aria-hidden="false"
-              aria-label="Example home icon"
-              fontIcon="create"
-              class="icon-create"
-              (click)="openDialog(row)"
-            ></mat-icon>
-            <mat-icon
-              matTooltip="Ver medidas del cliente"
-              aria-hidden="false"
-              aria-label="Agregar medida"
-              fontIcon="straighten"
-              class="icon-straighten"
-              routerLink="/app/medidas/{{ row.idCliente }}"
-            ></mat-icon>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-        <!-- Row shown when there is no matching data. -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4">
-            No data matching the filter "{{ input.value }}"
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 25, 100]"
-        aria-label="Select page of users"
-      ></mat-paginator>
+<div class="scroll-area">
+  <div class="card-list" *ngIf="clientesFiltrados.length > 0; else sinResultados">
+    <div class="item-card" *ngFor="let c of clientesFiltrados">
+      <div class="card-stripe stripe-primary"></div>
+      <div class="card-top">
+        <div class="item-avatar avatar-primary">{{ initials(c) }}</div>
+        <div class="item-info">
+          <p class="item-nombre">{{ c.nombres }} {{ c.apellidos }}</p>
+          <div class="item-meta">
+            <span class="meta-chip" *ngIf="c.cedula">
+              <mat-icon>badge</mat-icon>{{ c.cedula }}
+            </span>
+            <span class="meta-chip" *ngIf="c.telefono">
+              <mat-icon>phone</mat-icon>{{ c.telefono }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-action" (click)="openDialog(c)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+        <button class="btn-action" [routerLink]="['/app/medidas', c.idCliente]">
+          <mat-icon>straighten</mat-icon> Medidas
+        </button>
+      </div>
     </div>
   </div>
+
+  <ng-template #sinResultados>
+    <div class="empty-state">
+      <mat-icon class="empty-icon">people</mat-icon>
+      <div class="empty-title">Sin clientes</div>
+      <div class="empty-sub">
+        <span class="empty-link" (click)="openDialog()">Crear el primero</span>
+      </div>
+    </div>
+  </ng-template>
 </div>

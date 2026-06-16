@@ -7,10 +7,11 @@ export class PedidoService {
   private api = `${API.BASE_URL}/${API.PEDIDOS}`;
   constructor(private http: HttpClient) {}
 
-  listar(fechaInicio?: string, fechaFin?: string) {
+  listar(fechaInicio?: string, fechaFin?: string, idEmpleado?: number) {
     const params: Record<string, string> = {};
     if (fechaInicio) params['fechaInicio'] = fechaInicio;
     if (fechaFin) params['fechaFin'] = fechaFin;
+    if (idEmpleado) params['idEmpleado'] = String(idEmpleado);
     return this.http.get<any>(this.api, { params });
   }
 
@@ -28,5 +29,13 @@ export class PedidoService {
 
   eliminar(id: number) {
     return this.http.delete<any>(`${this.api}/${id}`);
+  }
+
+  getAbonosPedido(id: number) {
+    return this.http.get<any>(`${this.api}/${id}/abonos`);
+  }
+
+  registrarAbono(id: number, abono: { idMetodoPago: number | null; valor: number; observacion?: string }) {
+    return this.http.post<any>(`${this.api}/${id}/registrar-abono`, abono);
   }
 }

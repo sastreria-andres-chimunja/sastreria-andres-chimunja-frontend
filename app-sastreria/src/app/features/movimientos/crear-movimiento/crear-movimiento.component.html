@@ -65,36 +65,46 @@
         <mat-error *ngIf="form.get('fecha')?.hasError('required')">La fecha es requerida</mat-error>
       </mat-form-field>
 
-      <!-- Tipo de referencia -->
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Tipo de referencia</mat-label>
-        <mat-icon matPrefix>filter_none</mat-icon>
-        <mat-select formControlName="tipoReferencia">
-          <mat-option *ngFor="let item of tiposReferencia" [value]="item.value">
-            {{ item.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <!-- Tipo de referencia: solo en creación y cuando NO es insumo -->
+      <ng-container *ngIf="!isEdit && !esInsumo">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Tipo de referencia</mat-label>
+          <mat-icon matPrefix>filter_none</mat-icon>
+          <mat-select formControlName="tipoReferencia">
+            <mat-option *ngFor="let item of tiposReferencia" [value]="item.value">
+              {{ item.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <!-- Selector de empleado cuando tipoReferencia = Nómina -->
-      <mat-form-field appearance="outline" class="form-field" *ngIf="esNomina">
-        <mat-label>Empleado</mat-label>
-        <mat-icon matPrefix>person</mat-icon>
-        <mat-select formControlName="idReferencia">
-          <mat-option *ngFor="let emp of empleados" [value]="emp.idEmpleado">
-            {{ emp.nombres }} {{ emp.apellidos }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('idReferencia')?.hasError('required')">Seleccione un empleado</mat-error>
-      </mat-form-field>
+        <!-- Selector de empleado cuando tipoReferencia = Nómina -->
+        <mat-form-field appearance="outline" class="form-field" *ngIf="esNomina">
+          <mat-label>Empleado</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-select formControlName="idReferencia">
+            <mat-option *ngFor="let emp of empleados" [value]="emp.idEmpleado">
+              {{ emp.nombres }} {{ emp.apellidos }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('idReferencia')?.hasError('required')">Seleccione un empleado</mat-error>
+        </mat-form-field>
 
-      <!-- Campo texto cuando tipoReferencia != Nómina -->
-      <mat-form-field appearance="outline" class="form-field" *ngIf="!esNomina">
-        <mat-label>Número de referencia</mat-label>
-        <mat-icon matPrefix>tag</mat-icon>
-        <input matInput formControlName="idReferencia" type="number" placeholder="Ej: ID del ítem" />
-        <mat-error *ngIf="form.get('idReferencia')?.hasError('required')">La referencia es requerida</mat-error>
-      </mat-form-field>
+        <!-- Campo texto cuando tipoReferencia != Nómina -->
+        <mat-form-field appearance="outline" class="form-field" *ngIf="!esNomina">
+          <mat-label>Número de referencia</mat-label>
+          <mat-icon matPrefix>tag</mat-icon>
+          <input matInput formControlName="idReferencia" type="number" placeholder="Ej: ID del ítem" />
+          <mat-error *ngIf="form.get('idReferencia')?.hasError('required')">La referencia es requerida</mat-error>
+        </mat-form-field>
+      </ng-container>
+
+      <!-- En modo edición: referencia como solo lectura (solo si tiene referencia) -->
+      <div *ngIf="isEdit && movimientoModel.tipoReferencia" class="referencia-readonly">
+        <mat-icon>filter_none</mat-icon>
+        <span>Referencia: <strong>{{ movimientoModel.tipoReferencia || '—' }}</strong>
+          <ng-container *ngIf="movimientoModel.idReferencia"> · #{{ movimientoModel.idReferencia }}</ng-container>
+        </span>
+      </div>
 
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Observación</mat-label>

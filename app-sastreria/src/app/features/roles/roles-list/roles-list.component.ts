@@ -1,16 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { RolService } from '../../../core/services/rol.service';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
+import { RolService } from '../../../core/services/rol.service';
 import { Rol } from '../../../shared/models/Rol';
 import { CrearRolComponent } from '../crear-rol/crear-rol.component';
 import Swal from 'sweetalert2';
@@ -18,47 +11,28 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-roles-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatButtonModule,
-  ],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './roles-list.component.html',
   styleUrl: './roles-list.component.css',
 })
 export class RolesListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'nombre', 'acciones'];
-  dataSource!: MatTableDataSource<Rol>;
-  isEmpty = false;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  roles: Rol[] = [];
+  busqueda = '';
 
-  constructor(
-    private rolService: RolService,
-    public dialog: MatDialog,
-    private route: ActivatedRoute,
-  ) {}
+  constructor(private rolService: RolService, public dialog: MatDialog) {}
 
-  ngOnInit() {
-    this.loadRoles();
-  }
+  ngOnInit() { this.loadRoles(); }
 
   loadRoles() {
     this.rolService.listarRoles().subscribe((resp: any) => {
-      this.dataSource = new MatTableDataSource(resp.roles);
-      this.isEmpty = resp.roles.length === 0;
-      if (this.dataSource) {
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      }
+      this.roles = resp.roles ?? [];
     });
+  }
+
+  get rolesFiltrados(): Rol[] {
+    if (!this.busqueda.trim()) return this.roles;
+    const q = this.busqueda.toLowerCase();
+    return this.roles.filter(r => (r.nombre ?? '').toLowerCase().includes(q));
   }
 
   eliminarRol(rol: Rol) {
@@ -71,40 +45,38 @@ export class RolesListComponent implements OnInit {
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
-        this.rolService.eliminar(rol).subscribe((resp: any) => {
+        this.rolService.eliminar(rol).subscribe(() => {
           this.loadRoles();
-          Swal.fire({
-            title: '¡Eliminado!',
-            text: `El rol "${rol.nombre}" fue eliminado correctamente.`,
-            icon: 'success',
-            confirmButtonColor: '#2563eb',
-          });
+          Swal.fire({ title: '¡Eliminado!', text: `El rol "${rol.nombre}" fue eliminado.`, icon: 'success', confirmButtonColor: '#2563eb' });
         });
       }
     });
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    console.log('filtro', filterValue);
-
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-  }
   openDialogRol(data?: Rol) {
-    const dialogRef = this.dialog.open(CrearRolComponent, {
-      width: '400px',
-      height: '350px',
-      data: data == null ? {} : data,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      this.loadRoles();
-    });
+    if (data?.idRol) {
+      Swal.fire({
+        title: '¿Editar rol?',
+        text: `Se editará el rol "${data.nombre}"`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#185FA5',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Sí, editar',
+        cancelButtonText: 'Cancelar',
+      }).then(result => {
+        if (result.isConfirmed) {
+          this.dialog.open(CrearRolComponent, {
+            width: '400px', height: '350px', data,
+          }).afterClosed().subscribe(() => this.loadRoles());
+        }
+      });
+    } else {
+      this.dialog.open(CrearRolComponent, {
+        width: '400px', height: '350px', data: {},
+      }).afterClosed().subscribe(() => this.loadRoles());
+    }
   }
 }

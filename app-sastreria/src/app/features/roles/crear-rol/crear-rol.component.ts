@@ -20,6 +20,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Rol } from '../../../shared/models/Rol';
 import { RolService } from '../../../core/services/rol.service';
 import { MatSelectModule } from '@angular/material/select';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-crear-rol',
@@ -83,24 +84,24 @@ export class CrearRolComponent implements OnInit {
       this.rolService.actualizar(this.rolModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Rol editado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
-          console.error('Error al guardar empleado:', err);
+          console.error('Error al guardar rol:', err);
         },
       });
     } else {
       this.rolService.crear(this.rolModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true); // cierra y notifica éxito al padre
+          Swal.fire({ title: '¡Rol creado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
-          // Aquí puedes mostrar un snackbar o alerta con err.error.message
-          console.error('Error al guardar empleado:', err);
+          console.error('Error al guardar rol:', err);
         },
       });
     }

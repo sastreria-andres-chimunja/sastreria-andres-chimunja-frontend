@@ -19,6 +19,8 @@ import { ImagenService } from '../../../core/services/imagen.service';
 import { MedidaService } from '../../../core/services/medida.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
 import { ClienteService } from '../../../core/services/cliente.service';
+import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 import { Cliente } from '../../../shared/models/Cliente';
 import { Empleado } from '../../../shared/models/Empleado';
@@ -32,6 +34,10 @@ import {
   ItemDialogData,
   ItemDialogResult,
 } from '../item-pedido-dialog/item-pedido-dialog.component';
+import {
+  PagarItemDialogComponent,
+  PagarItemDialogData,
+} from '../pagar-item-dialog/pagar-item-dialog.component';
 
 @Component({
   selector: 'app-crear-pedido',
@@ -61,6 +67,7 @@ export class CrearPedidoComponent implements OnInit {
   estados: Estado[] = [];
   empleados: Empleado[] = [];
   clienteMedidas: Medida[] = [];
+  metodosPago: any[] = [];
 
   // Cliente autocomplete
   clienteQuery = '';
@@ -69,9 +76,10 @@ export class CrearPedidoComponent implements OnInit {
   mostrarSugerencias = false;
   private busquedaCliente$ = new Subject<string>();
 
-  // Ítems del pedido (con estado local)
+  // Ítems del pedido
   items: any[] = [];
   totalCalculado = 0;
+  totalAbonado = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -85,6 +93,8 @@ export class CrearPedidoComponent implements OnInit {
     private medidaService: MedidaService,
     private empleadoService: EmpleadoService,
     private clienteService: ClienteService,
+    private metodoPagoService: MetodoPagoService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -101,8 +111,8 @@ export class CrearPedidoComponent implements OnInit {
   private buildForm(): void {
     this.form = this.fb.group({
       idEstado: [null, Validators.required],
-      fechaRecibido: [null, Validators.required],
-      fechaEntrega: [null, Validators.required],
+      fechaRecibido: [new Date(), Validators.required],
+      fechaEntrega: [new Date(), Validators.required],
       valorTotal: [{ value: 0, disabled: true }],
     });
   }
@@ -116,6 +126,9 @@ export class CrearPedidoComponent implements OnInit {
       }
     });
     this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados; });
+    this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
+      this.metodosPago = r.metodosPago ?? r ?? [];
+    });
   }
 
   private configurarBusquedaCliente(): void {
@@ -159,7 +172,6 @@ export class CrearPedidoComponent implements OnInit {
         fechaEntrega: stringToDate(p.fechaEntrega),
         valorTotal: p.valorTotal,
       });
-      // Reconstruir cliente
       this.clienteQuery = p.nombreCliente ?? '';
       this.clienteSeleccionado = {
         idCliente: p.idCliente,
@@ -169,7 +181,22 @@ export class CrearPedidoComponent implements OnInit {
       };
       this.cargarMedidasCliente(p.idCliente);
       this.cargarItems();
+      this.cargarAbonos();
     });
+  }
+
+  cargarAbonos(): void {
+    if (!this.idPedido) return;
+    this.pedidoService.getAbonosPedido(this.idPedido).subscribe({
+      next: (resp: any) => {
+        const abonos: any[] = resp.abonos ?? [];
+        this.totalAbonado = abonos.reduce((s, a) => s + Number(a.valor), 0);
+      },
+    });
+  }
+
+  get saldoPedido(): number {
+    return this.totalCalculado - this.totalAbonado;
   }
 
   private cargarItems(): void {
@@ -189,7 +216,6 @@ export class CrearPedidoComponent implements OnInit {
     const idTerminado = this.estados.find(e => e.nombre === 'Terminado')?.idEstado;
     const idEntregado = this.estados.find(e => e.nombre === 'Entregado')?.idEstado;
 
-    // No tocar si el usuario ya lo marcó como Terminado o Entregado
     if (idEstadoActual === idTerminado || idEstadoActual === idEntregado) return;
 
     const tieneEmpleado = this.items.some(it => !!it.idEmpleado);
@@ -219,14 +245,18 @@ export class CrearPedidoComponent implements OnInit {
     return this.estados.find(e => e.idEstado === id)?.nombre ?? '';
   }
 
-  // ── Ítem dialog ────────────────────────────────────────────
+  // ── Solo visible para admin y asistente ─────────────────────
+  get puedeEditarPedido(): boolean {
+    return !this.authService.esOperario();
+  }
+
+  // ── Ítem dialog ───────────────────────────────────────────────
   abrirDialogoItem(item?: any): void {
     const dialogData: ItemDialogData = {
       item: item ?? null,
       idPedido: this.idPedido ?? 0,
       idCliente: this.clienteSeleccionado?.idCliente ?? 0,
       empleados: this.empleados,
-      estados: this.estados,
       medidas: this.clienteMedidas,
       imagenes: item?._fotos ?? [],
     };
@@ -245,15 +275,43 @@ export class CrearPedidoComponent implements OnInit {
       if (this.isEdit) {
         this.guardarItemDirecto(result, item);
       } else {
-        // Modo creación: acumular en lista local
         const idx = this.items.indexOf(item);
         if (idx >= 0) {
           this.items[idx] = { ...result.item, _fotosNuevas: result.fotosNuevas };
         } else {
-          this.items.push({ ...result.item, _fotosNuevas: result.fotosNuevas, _nuevaMedida: result.nuevaMedida });
+          this.items.push({ ...result.item, _fotosNuevas: result.fotosNuevas, _nuevaMedida: result.nuevaMedida, _fotosNuevaMedida: result.fotosNuevaMedida });
         }
         this.recalcularTotal();
         this.actualizarEstadoAutomatico();
+      }
+    });
+  }
+
+  // ── Abono del cliente al pedido ───────────────────────────────
+  abrirDialogoPago(): void {
+    if (!this.idPedido) return;
+
+    const dialogData: PagarItemDialogData = {
+      idPedido: this.idPedido,
+      valorTotalPedido: this.totalCalculado,
+      nombreCliente: this.clienteSeleccionado
+        ? `${this.clienteSeleccionado.nombres} ${this.clienteSeleccionado.apellidos}`
+        : this.clienteQuery,
+      telefonoCliente: this.clienteSeleccionado?.telefono,
+      metodosPago: this.metodosPago,
+    };
+
+    const ref = this.dialog.open(PagarItemDialogComponent, {
+      data: dialogData,
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'nomina-dialog-panel',
+      autoFocus: false,
+    });
+
+    ref.afterClosed().subscribe((result: any) => {
+      if (result?.totalAbonado !== undefined) {
+        this.totalAbonado = result.totalAbonado;
       }
     });
   }
@@ -274,7 +332,6 @@ export class CrearPedidoComponent implements OnInit {
         if (result.fotosNuevas.length > 0) {
           this.imagenService.subir('itemPedido', savedItem.idItemPedido, result.fotosNuevas).subscribe();
         }
-        // eliminar fotos marcadas
         result.fotosEliminar.forEach((id) => this.imagenService.eliminar(id).subscribe());
         this.cargarItems();
       });
@@ -282,7 +339,11 @@ export class CrearPedidoComponent implements OnInit {
 
     if (result.nuevaMedida) {
       this.medidaService.crear(result.nuevaMedida).subscribe((r: any) => {
-        guardarFn(r.medida?.idMedida ?? null);
+        const idMedida = r.medida?.idMedida ?? null;
+        if (idMedida && result.fotosNuevaMedida?.length > 0) {
+          this.imagenService.subir('Medida', idMedida, result.fotosNuevaMedida).subscribe();
+        }
+        guardarFn(idMedida);
       });
     } else {
       guardarFn(result.item.idMedida ?? null);
@@ -304,7 +365,7 @@ export class CrearPedidoComponent implements OnInit {
     this.form.patchValue({ valorTotal: this.totalCalculado });
   }
 
-  // ── Guardar pedido completo ────────────────────────────────
+  // ── Guardar pedido completo ───────────────────────────────────
   async guardar(): Promise<void> {
     if (!this.clienteSeleccionado) { alert('Seleccione un cliente'); return; }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
@@ -328,13 +389,15 @@ export class CrearPedidoComponent implements OnInit {
         const resp: any = await this.pedidoService.crear(pedidoData).toPromise();
         idPed = resp.pedido.idPedido;
 
-        // Crear ítems
         for (const it of this.items) {
           let idMedida: number | null = null;
 
           if (it._nuevaMedida) {
             const mr: any = await this.medidaService.crear({ ...it._nuevaMedida, idCliente: this.clienteSeleccionado!.idCliente }).toPromise();
             idMedida = mr.medida?.idMedida ?? null;
+            if (idMedida && it._fotosNuevaMedida?.length > 0) {
+              await this.imagenService.subir('Medida', idMedida, it._fotosNuevaMedida).toPromise();
+            }
           } else if (it.idMedida) {
             idMedida = it.idMedida;
           }
@@ -362,7 +425,6 @@ export class CrearPedidoComponent implements OnInit {
 
   volver(): void { this.router.navigate(['/app/pedidos']); }
 
-  // ── Helpers ────────────────────────────────────────────────
   formatCOP(v: number): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency', currency: 'COP',

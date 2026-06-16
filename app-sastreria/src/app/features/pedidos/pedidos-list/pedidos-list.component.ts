@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { Pedido } from '../../../shared/models/Pedido';
 import { dateToString } from '../../../utils/date.utils';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-pedidos-list',
@@ -40,16 +41,28 @@ export class PedidosListComponent implements OnInit {
   constructor(
     private pedidoService: PedidoService,
     private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.cargarPedidos();
   }
 
+  // Operario solo ve los pedidos donde tiene ítems asignados
+  get idEmpleadoFiltro(): number | undefined {
+    return this.authService.esOperario()
+      ? (this.authService.getIdEmpleado() ?? undefined)
+      : undefined;
+  }
+
+  get puedeCrearPedido(): boolean {
+    return !this.authService.esOperario();
+  }
+
   cargarPedidos(): void {
     const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
-    this.pedidoService.listar(inicio, fin).subscribe((resp: any) => {
+    this.pedidoService.listar(inicio, fin, this.idEmpleadoFiltro).subscribe((resp: any) => {
       this.pedidos = resp.pedidos;
       this.aplicarBusqueda();
     });

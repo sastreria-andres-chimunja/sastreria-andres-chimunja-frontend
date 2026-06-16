@@ -17,6 +17,7 @@ import { MedidaService } from '../../../core/services/medida.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImagenService } from '../../../core/services/imagen.service';
 import { API } from '../../../utils/constants';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-medida-form',
@@ -151,8 +152,9 @@ export class MedidaFormComponent implements OnInit {
 
   // ── Acciones ────────────────────────────────────────────
   cargarImagenesExistentes() {
+    if (!this.medidaModel.idMedida) return;
     this.imagenService
-      .listarPorReferencia('Medida', this.medidaModel.idMedida!)
+      .listarPorReferencia('Medida', this.medidaModel.idMedida)
       .subscribe((resp: any) => {
         this.existingImages = resp.map((img: any) => ({
           id: img.idImagen,
@@ -165,24 +167,31 @@ export class MedidaFormComponent implements OnInit {
   guardar() {
     const payload = { ...this.medidaModel, ...this.form.value };
 
+    const isEdit = !!this.medidaModel.idMedida;
+
     const afterSave = (idMedida: number) => {
-      if (this.selectedFiles.length > 0) {
-        this.imagenService
-          .subir('Medida', idMedida, this.selectedFiles)
-          .subscribe(() => this.dialogRef.close(true));
+      const upload$ = this.selectedFiles.length > 0
+        ? this.imagenService.subir('Medida', idMedida, this.selectedFiles)
+        : null;
+      const finish = () => {
+        Swal.fire({ title: isEdit ? '¡Medida editada!' : '¡Medida guardada!', icon: 'success', timer: 1800, showConfirmButton: false })
+          .then(() => this.dialogRef.close(true));
+      };
+      if (upload$) {
+        upload$.subscribe(() => finish());
       } else {
-        this.dialogRef.close(true);
+        finish();
       }
     };
 
-    if (this.medidaModel.idMedida) {
+    if (isEdit) {
       this.medidaService.actualizar(payload).subscribe({
         next: () => afterSave(this.medidaModel.idMedida!),
         error: (err) => console.error('error actualizar', err),
       });
     } else {
       this.medidaService.crear(payload).subscribe({
-        next: (resp: any) => afterSave(resp.medida.idMedida), // ajusta según tu backend
+        next: (resp: any) => afterSave(resp.medida.idMedida),
         error: (err) => console.error('error crear', err),
       });
     }

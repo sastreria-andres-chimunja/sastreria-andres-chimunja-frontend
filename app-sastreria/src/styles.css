@@ -20,11 +20,11 @@ body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; 
 
 /* ── Design tokens — dark ─────────────────────────────────────── */
 .dark-mode {
-  --bg:             #111214;
-  --surface:        #1C1D21;
-  --surface-alt:    #252629;
-  --border:         #34363D;
-  --border-light:   #2C2E35;
+  --bg:             #1E2028;
+  --surface:        #262830;
+  --surface-alt:    #2E3140;
+  --border:         #3C4052;
+  --border-light:   #343848;
   --primary:        #5BA5E0;
   --primary-hover:  #4A94CF;
   --accent:         #D4A843;

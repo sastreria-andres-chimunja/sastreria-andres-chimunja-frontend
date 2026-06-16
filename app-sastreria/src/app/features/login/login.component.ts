@@ -9,7 +9,6 @@ import {
 import { RouterModule, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
-// Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +18,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/services/auth.service';
+
+const REMEMBER_KEY = 'recordar_usuario';
 
 @Component({
   selector: 'app-login',
@@ -51,10 +52,12 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const usuarioRecordado = localStorage.getItem(REMEMBER_KEY) ?? '';
+
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
+      username: [usuarioRecordado, [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false],
+      rememberMe: [!!usuarioRecordado],
     });
   }
 
@@ -62,13 +65,24 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) return;
 
     this.isLoading = true;
-    const username = this.loginForm.get('username')!.value as string;
-    const clave = this.loginForm.get('password')!.value as string;
+    const username  = this.loginForm.get('username')!.value as string;
+    const clave     = this.loginForm.get('password')!.value as string;
+    const recordar  = this.loginForm.get('rememberMe')!.value as boolean;
+
+    if (recordar) {
+      localStorage.setItem(REMEMBER_KEY, username);
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
 
     this.authService.login(username, clave).subscribe({
-      next: () => {
+      next: (sesion) => {
         this.isLoading = false;
-        this.router.navigate(['/app'], { replaceUrl: true });
+        if (sesion.debeCambiarClave) {
+          this.router.navigate(['/cambiar-clave'], { replaceUrl: true });
+        } else {
+          this.router.navigate(['/app'], { replaceUrl: true });
+        }
       },
       error: (err) => {
         this.isLoading = false;

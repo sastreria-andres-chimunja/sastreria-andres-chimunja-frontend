@@ -13,14 +13,20 @@ import { NominaGeneralComponent } from './features/nomina/nomina-general/nomina-
 import { LoginComponent } from './features/login/login.component';
 import { PedidosListComponent } from './features/pedidos/pedidos-list/pedidos-list.component';
 import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedido.component';
+import { CambiarClaveComponent } from './features/cambiar-clave/cambiar-clave.component';
+import { RecuperarClaveComponent } from './features/recuperar-clave/recuperar-clave.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'recuperar', component: RecuperarClaveComponent },
+  { path: 'cambiar-clave', component: CambiarClaveComponent, canActivate: [authGuard] },
 
   {
     path: 'app',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: 'clientes', component: ClientesListComponent },
       { path: 'crear-cliente', component: CrearClienteComponent },

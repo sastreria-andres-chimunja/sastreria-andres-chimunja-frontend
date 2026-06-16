@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { NominaService } from '../../../core/services/nomina.service';
 import { Nomina } from '../../../shared/models/nomina';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { dateToString } from '../../../utils/date.utils';
 import { NominaDetalleDialogComponent } from '../nomina-detalle-dialog/nomina-detalle-dialog.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-nomina-general',
@@ -45,14 +45,19 @@ export class NominaGeneralComponent implements OnInit {
   fechaFinCtrl = new FormControl<Date | null>(null);
 
   constructor(
-    private router: Router,
     private nominaService: NominaService,
     private dialog: MatDialog,
+    public authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.traerBalance();
   }
+
+  // Operario solo ve su propia nómina, Admin/Asistente ven todos
+  get soloPropia(): boolean { return this.authService.esOperario(); }
+  get puedeVerDetalle(): boolean { return true; }
+  get puedePagar(): boolean { return this.authService.esAdmin(); }
 
   applyFilter(event: Event): void {
     const valor = (event.target as HTMLInputElement).value.toLowerCase().trim();
@@ -80,33 +85,46 @@ export class NominaGeneralComponent implements OnInit {
   }
 
   traerBalance() {
-    const inicio = this.fechaInicioCtrl.value
-      ? dateToString(this.fechaInicioCtrl.value)
-      : undefined;
-    const fin = this.fechaFinCtrl.value
-      ? dateToString(this.fechaFinCtrl.value)
-      : undefined;
-    this.nominaService.nominaGeneral(inicio, fin).subscribe((resp: any) => {
-      this.balance = resp.nominaGeneral;
-      this.balanceFiltrado = [...this.balance];
-    });
+    const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
+    const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
+
+    if (this.soloPropia) {
+      // Operario: solo su propia nómina
+      const idEmpleado = this.authService.getIdEmpleado();
+      if (!idEmpleado) return;
+      this.nominaService.nominaEmpleado(idEmpleado, inicio, fin).subscribe((resp: any) => {
+        const detalle = resp.nominaEmpleado;
+        if (detalle) {
+          this.balance = [{
+            ...detalle.empleado,
+            totalEntradas: detalle.entradas.total,
+            totalSalidas: detalle.salidas.total,
+            saldo: detalle.saldo,
+          }];
+          this.balanceFiltrado = [...this.balance];
+        }
+      });
+    } else {
+      this.nominaService.nominaGeneral(inicio, fin).subscribe((resp: any) => {
+        this.balance = resp.nominaGeneral;
+        this.balanceFiltrado = [...this.balance];
+      });
+    }
   }
 
   verDetalle(emp: any): void {
-    const inicio = this.fechaInicioCtrl.value
-      ? dateToString(this.fechaInicioCtrl.value)
-      : undefined;
-    const fin = this.fechaFinCtrl.value
-      ? dateToString(this.fechaFinCtrl.value)
-      : undefined;
+    const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
+    const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
 
     this.dialog.open(NominaDetalleDialogComponent, {
       data: {
         idEmpleado: emp.idEmpleado,
         nombres: emp.nombres,
         apellidos: emp.apellidos,
+        telefono: emp.telefono,
         fechaInicio: inicio,
         fechaFin: fin,
+        soloLectura: !this.puedePagar,
       },
       panelClass: 'nomina-dialog-panel',
       maxWidth: '95vw',
@@ -116,20 +134,13 @@ export class NominaGeneralComponent implements OnInit {
   }
 
   getInitials(nombre: string): string {
-    return nombre
-      .split(' ')
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
+    return nombre.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
   }
 
   formatCOP(valor: number): string {
     return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      style: 'currency', currency: 'COP',
+      minimumFractionDigits: 0, maximumFractionDigits: 0,
     }).format(valor ?? 0);
   }
 }

@@ -1,0 +1,108 @@
+<div class="dialog-wrapper">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon"><mat-icon>payments</mat-icon></div>
+      <div>
+        <h2 class="dialog-title">Registrar abono</h2>
+        <p class="dialog-subtitle">{{ data.nombreCliente }} — Pedido #{{ data.idPedido }}</p>
+      </div>
+    </div>
+    <button class="btn-close" (click)="cerrar()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <!-- Resumen del pedido -->
+  <div class="item-resumen">
+    <div class="resumen-fila">
+      <span class="resumen-label">Total del pedido</span>
+      <span class="resumen-valor bold">{{ formatCOP(data.valorTotalPedido) }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="resumen-label">Total abonado</span>
+      <span class="resumen-valor pagado">{{ formatCOP(totalAbonado) }}</span>
+    </div>
+    <div class="resumen-fila">
+      <span class="resumen-label">Saldo pendiente</span>
+      <span class="resumen-valor" [class.saldo-ok]="saldo <= 0" [class.saldo-pen]="saldo > 0">
+        {{ saldo <= 0 ? '¡Pagado!' : formatCOP(saldo) }}
+      </span>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progreso-bar">
+      <div class="progreso-fill" [style.width.%]="porcentajePagado"></div>
+    </div>
+    <p class="progreso-label">{{ porcentajePagado }}% abonado</p>
+  </div>
+
+  <!-- Historial de abonos -->
+  <div class="pagos-historial" *ngIf="!cargando && abonos.length > 0">
+    <p class="section-label">Abonos anteriores</p>
+    <div class="pago-fila" *ngFor="let a of abonos">
+      <span class="pago-fecha">{{ a.fecha }}</span>
+      <span class="pago-metodo">{{ a.nombreMetodoPago ?? 'Sin método' }}</span>
+      <span class="pago-valor">+{{ formatCOP(a.valor) }}</span>
+    </div>
+  </div>
+
+  <!-- Cargando -->
+  <div class="loading-state" *ngIf="cargando">
+    <mat-spinner diameter="28"></mat-spinner>
+  </div>
+
+  <!-- Formulario nuevo abono -->
+  <div class="form-section" *ngIf="saldo > 0">
+    <p class="section-label">Nuevo abono</p>
+    <form [formGroup]="form" class="pago-form">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Método de pago</mat-label>
+        <mat-icon matPrefix>credit_card</mat-icon>
+        <mat-select formControlName="idMetodoPago">
+          <mat-option *ngFor="let m of data.metodosPago" [value]="m.idMetodoPago">
+            {{ m.nombreMetodoPago }}
+          </mat-option>
+        </mat-select>
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Valor a abonar</mat-label>
+        <mat-icon matPrefix>attach_money</mat-icon>
+        <input matInput type="number" formControlName="valor" [max]="saldo" />
+        <mat-hint>Saldo: {{ formatCOP(saldo) }}</mat-hint>
+        <mat-error>Debe ser mayor a 0</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field full-width">
+        <mat-label>Observación (opcional)</mat-label>
+        <textarea matInput formControlName="observacion" rows="2"></textarea>
+      </mat-form-field>
+    </form>
+
+    <div class="form-actions">
+      <button class="btn-pagar" (click)="guardar()" [disabled]="guardando">
+        <mat-spinner *ngIf="guardando" diameter="16"></mat-spinner>
+        <mat-icon *ngIf="!guardando">check_circle</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Registrar abono' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Pedido totalmente pagado -->
+  <div class="pagado-total" *ngIf="saldo <= 0">
+    <mat-icon>check_circle</mat-icon>
+    <p>Este pedido está totalmente pagado</p>
+  </div>
+
+  <!-- Acciones de recibo (si hubo último abono) -->
+  <div class="recibo-actions" *ngIf="ultimoAbono">
+    <button class="btn-recibo" (click)="imprimirRecibo()">
+      <mat-icon>print</mat-icon> Imprimir recibo
+    </button>
+    <button class="btn-whatsapp" (click)="enviarWhatsApp()">
+      <mat-icon>send</mat-icon> WhatsApp
+    </button>
+  </div>
+
+</div>

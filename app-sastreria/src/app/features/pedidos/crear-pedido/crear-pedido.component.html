@@ -196,10 +196,29 @@
           <p>Sin ítems. Agregue prendas al pedido.</p>
         </div>
 
-        <!-- Total -->
+        <!-- Total y abonos -->
         <div class="items-total" *ngIf="items.length > 0">
-          <span>Total estimado:</span>
-          <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
+          <div class="total-summary">
+            <div class="total-row">
+              <span class="total-label">Total del pedido:</span>
+              <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
+            </div>
+            <ng-container *ngIf="isEdit">
+              <div class="total-row abonado-row">
+                <span class="total-label">Abonado:</span>
+                <span class="abonado-valor">{{ formatCOP(totalAbonado) }}</span>
+              </div>
+              <div class="total-row restante-row">
+                <span class="total-label">Restante:</span>
+                <span class="restante-valor" [class.saldo-ok]="saldoPedido <= 0" [class.saldo-pen]="saldoPedido > 0">
+                  {{ saldoPedido <= 0 ? '¡Pagado!' : formatCOP(saldoPedido) }}
+                </span>
+              </div>
+            </ng-container>
+          </div>
+          <button class="btn-registrar-abono" *ngIf="isEdit" (click)="abrirDialogoPago()">
+            <mat-icon>payments</mat-icon> Registrar abono
+          </button>
         </div>
       </div>
     </div>

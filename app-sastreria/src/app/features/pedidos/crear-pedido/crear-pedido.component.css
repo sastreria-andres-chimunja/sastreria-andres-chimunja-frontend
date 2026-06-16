@@ -287,6 +287,9 @@
   mat-icon { font-size: 15px; width: 15px; height: 15px; }
   &:hover { background: var(--bg); border-color: var(--primary); color: var(--primary); }
   &.danger:hover { border-color: var(--danger); color: var(--danger); background: #fdecea; }
+  &.pay:hover    { border-color: #059669; color: #059669; background: #dcfce7; }
+  &.receipt:hover { border-color: #555; color: #555; background: #f0ece6; }
+  &.whatsapp:hover { border-color: #15803d; color: #15803d; background: #dcfce7; }
 }
 
 /* Vacío e ítems */
@@ -298,13 +301,55 @@
 }
 
 .items-total {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 16px;
   border-top: 1px solid var(--border);
-  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  flex-wrap: wrap;
 }
 
+.total-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.total-label { color: var(--text-secondary); font-weight: 500; }
 .total-valor { font-size: 17px; font-weight: 700; color: var(--primary); }
+.abonado-valor { font-size: 14px; font-weight: 600; color: #059669; }
+.restante-valor { font-size: 14px; font-weight: 700; }
+.saldo-ok { color: #059669; }
+.saldo-pen { color: #b45309; }
+
+.btn-registrar-abono {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary, #c8922a);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { background: #b07820; }
+}
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 900px) {

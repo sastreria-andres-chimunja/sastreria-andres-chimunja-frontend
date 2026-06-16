@@ -30,4 +30,12 @@ export class ItemPedidoService {
   pagar(id: number) {
     return this.http.put<any>(`${this.api}/${id}/pagar`, {});
   }
+
+  getPagosItem(id: number) {
+    return this.http.get<any>(`${this.api}/${id}/pagos`);
+  }
+
+  registrarPago(id: number, pago: { idMetodoPago: number | null; valor: number; observacion?: string }) {
+    return this.http.post<any>(`${this.api}/${id}/registrar-pago`, pago);
+  }
 }

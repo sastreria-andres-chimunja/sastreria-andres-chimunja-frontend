@@ -1,80 +1,48 @@
-<div class="main-content">
-  <div class="toolbar-clientes">
-    <mat-form-field appearance="outline" class="filtro">
-      <mat-label>Buscar método de pago</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Ej: Efectivo"
-        #input
-      />
-    </mat-form-field>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="boton-crear"
-      (click)="openDialog()"
-    >
-      <mat-icon>add</mat-icon>
-      Crear método de pago
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" [(ngModel)]="busqueda" placeholder="Buscar método de pago..." />
+    </div>
+    <button class="btn-primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon> Crear método de pago
     </button>
   </div>
-  <div class="table-responsive">
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource" matSort>
-        <!-- ID Column -->
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-          <td mat-cell *matCellDef="let row">{{ row.idMetodoPago }}</td>
-        </ng-container>
+</div>
 
-        <!-- Cédula Column -->
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Nombre de método de pago
-          </th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.nombreMetodoPago }}
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-icon
-              matTooltip="Editar método de pago"
-              aria-hidden="false"
-              aria-label="Example home icon"
-              fontIcon="create"
-              class="icon-create"
-              (click)="openDialog(row)"
-            ></mat-icon>
-            <mat-icon
-              matTooltip="Eliminar método de pago"
-              aria-hidden="false"
-              aria-label="Agregar movimiento"
-              fontIcon="delete"
-              class="icon-straighten"
-              (click)="eliminarMetodoPago(row)"
-            ></mat-icon>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-        <!-- Row shown when there is no matching data. -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4">
-            No data matching the filter "{{ input.value }}"
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 25, 100]"
-        aria-label="Select page of users"
-      ></mat-paginator>
+<div class="scroll-area">
+  <div class="card-list" *ngIf="metodosFiltrados.length > 0; else sinResultados">
+    <div class="item-card" *ngFor="let m of metodosFiltrados">
+      <div class="card-stripe stripe-teal"></div>
+      <div class="card-top">
+        <div class="item-avatar avatar-teal">
+          <mat-icon>credit_card</mat-icon>
+        </div>
+        <div class="item-info">
+          <p class="item-nombre">{{ m.nombreMetodoPago }}</p>
+          <div class="item-meta">
+            <span class="meta-chip"><mat-icon>tag</mat-icon>ID {{ m.idMetodoPago }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-action" (click)="openDialog(m)">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+        <button class="btn-action btn-danger" (click)="eliminarMetodoPago(m)">
+          <mat-icon>delete</mat-icon> Eliminar
+        </button>
+      </div>
     </div>
   </div>
+
+  <ng-template #sinResultados>
+    <div class="empty-state">
+      <mat-icon class="empty-icon">credit_card</mat-icon>
+      <div class="empty-title">Sin métodos de pago</div>
+      <div class="empty-sub">
+        <span class="empty-link" (click)="openDialog()">Crear el primero</span>
+      </div>
+    </div>
+  </ng-template>
 </div>

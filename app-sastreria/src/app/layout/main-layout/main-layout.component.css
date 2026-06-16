@@ -167,24 +167,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 8px;
+  padding: 8px;
   border-bottom: 1px solid #3a3025;
-  height: 180px;
+  height: 96px;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0;
 }
 
 .logo-collapsed {
-  width: 50px;
-  height: 80px;
-  min-width: 50px;
+  width: 36px;
+  height: 52px;
+  min-width: 36px;
+  object-fit: contain;
   filter: invert(1) hue-rotate(180deg) saturate(6);
   transition: opacity 0.2s ease;
 }
 
 .logo-icon {
-  width: 130px;
-  min-width: 130px;
+  width: 120px;
+  height: 80px;
+  min-width: 120px;
+  object-fit: contain;
   filter: invert(1) hue-rotate(180deg) saturate(6);
   opacity: 0;
   transition: opacity 0.2s ease 0.1s;
@@ -209,19 +213,19 @@
   font-weight: 600;
   letter-spacing: 2px;
   color: #c8922a;
-  padding: 12px 16px 2px;
+  padding: 6px 16px 1px;
   text-transform: uppercase;
 }
 
 /* ── Nav items ── */
 .nav-section {
-  padding: 4px 0;
-  margin-top: 10px;
+  padding: 2px 0;
+  margin-top: 2px;
 }
 
 .nav-section a.mat-mdc-list-item {
   color: #b8a888;
-  height: 40px;
+  height: 36px;
   border-left: 3px solid transparent;
   transition: background 0.15s, color 0.15s;
 }
@@ -321,7 +325,55 @@
 .spacer {
   flex: 1;
 }
-.icon-logout{
+.icon-logout {
   color: white;
-  
+}
+
+/* ── Usuario chip ── */
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  margin: 4px 6px 0;
+  background: rgba(200,146,42,0.1);
+  border: 1px solid rgba(200,146,42,0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background: #c8922a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-nombre {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e8d8a0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-rol {
+  font-size: 10px;
+  color: #c8922a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }

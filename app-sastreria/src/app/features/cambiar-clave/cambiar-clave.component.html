@@ -1,0 +1,121 @@
+<div class="cc-wrapper">
+
+  <!-- Panel izquierdo (marca) -->
+  <div class="cc-left">
+    <div class="cc-left-content">
+      <div class="cc-brand">
+        <img src="assets/logo.png" alt="Sastrería Andrés Chimunja" class="cc-logo" />
+        <span class="cc-tagline">Sistema de gestión</span>
+      </div>
+      <div class="cc-deco-line"></div>
+      <p class="cc-quote">
+        "La excelencia no es un acto,<br/>es un hábito que se renueva<br/>cada día."
+      </p>
+    </div>
+  </div>
+
+  <!-- Panel derecho (formulario) -->
+  <div class="cc-right">
+    <div class="cc-card">
+
+      <div class="cc-card-stripe"></div>
+
+      <div class="cc-card-body">
+        <span class="cc-eyebrow">Seguridad de cuenta</span>
+        <h1 class="cc-title">Configura tu contraseña</h1>
+        <p class="cc-subtitle">Hola, <strong>{{ nombreUsuario }}</strong>. Establece una contraseña segura para continuar.</p>
+
+        <!-- Evaluador de reglas -->
+        <div class="cc-rules">
+          <div
+            class="cc-rule"
+            *ngFor="let r of reglas"
+            [class.met]="r.met"
+          >
+            <span class="cc-rule-icon">
+              <svg *ngIf="r.met" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <svg *ngIf="!r.met" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9"/>
+              </svg>
+            </span>
+            <span class="cc-rule-label">{{ r.label }}</span>
+          </div>
+          <div class="cc-rule" [class.met]="confirmaOk">
+            <span class="cc-rule-icon">
+              <svg *ngIf="confirmaOk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <svg *ngIf="!confirmaOk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9"/>
+              </svg>
+            </span>
+            <span class="cc-rule-label">Las contraseñas coinciden</span>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cc-form">
+
+          <mat-form-field appearance="outline" class="cc-field">
+            <mat-label>Nueva contraseña</mat-label>
+            <input
+              matInput
+              formControlName="claveNueva"
+              [type]="hideNueva ? 'password' : 'text'"
+              autocomplete="new-password"
+              placeholder="Ej: Ab4K8m2Q"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideNueva = !hideNueva"
+              [attr.aria-label]="hideNueva ? 'Mostrar' : 'Ocultar'"
+            >
+              <mat-icon>{{ hideNueva ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="cc-field">
+            <mat-label>Confirmar contraseña</mat-label>
+            <input
+              matInput
+              formControlName="confirmar"
+              [type]="hideConfirmar ? 'password' : 'text'"
+              autocomplete="new-password"
+              placeholder="Repite la contraseña"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideConfirmar = !hideConfirmar"
+            >
+              <mat-icon>{{ hideConfirmar ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="form.hasError('noCoincide')">Las contraseñas no coinciden</mat-error>
+          </mat-form-field>
+
+          <div class="cc-error" *ngIf="error">
+            <mat-icon>error_outline</mat-icon>
+            {{ error }}
+          </div>
+
+          <button
+            type="submit"
+            class="cc-submit-btn"
+            [disabled]="isLoading || !todasLasReglasOk"
+          >
+            <mat-spinner *ngIf="isLoading" diameter="18" class="cc-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">lock_reset</mat-icon>
+            {{ isLoading ? 'Guardando...' : 'Establecer contraseña' }}
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>

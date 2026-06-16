@@ -2,11 +2,11 @@
 <div class="topbar">
   <div class="top-actions">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <mat-icon class="search-icon">search</mat-icon>
       <input
         type="text"
         [(ngModel)]="busqueda"
-        placeholder="Buscar movimiento, categoría..."
+        placeholder="Buscar por descripción, categoría..."
       />
     </div>
 
@@ -30,13 +30,13 @@
         <div class="fecha-inputs">
           <mat-form-field appearance="outline" class="fecha-field">
             <mat-label>Desde</mat-label>
-            <input matInput [matDatepicker]="pickerDesde" [formControl]="fechaInicioCtrl" placeholder="dd/mm/aaaa" readonly />
+            <input matInput [matDatepicker]="pickerDesde" [formControl]="fechaInicioCtrl" readonly />
             <mat-datepicker-toggle matIconSuffix [for]="pickerDesde"></mat-datepicker-toggle>
             <mat-datepicker #pickerDesde></mat-datepicker>
           </mat-form-field>
           <mat-form-field appearance="outline" class="fecha-field">
             <mat-label>Hasta</mat-label>
-            <input matInput [matDatepicker]="pickerHasta" [formControl]="fechaFinCtrl" placeholder="dd/mm/aaaa" readonly />
+            <input matInput [matDatepicker]="pickerHasta" [formControl]="fechaFinCtrl" readonly />
             <mat-datepicker-toggle matIconSuffix [for]="pickerHasta"></mat-datepicker-toggle>
             <mat-datepicker #pickerHasta></mat-datepicker>
           </mat-form-field>
@@ -49,8 +49,7 @@
     </div>
 
     <button class="btn-primary" (click)="openDialog()">
-      <mat-icon>add</mat-icon>
-      {{ tabActivo === "Ingreso" ? "Ingreso" : "Salida" }}
+      <mat-icon>add</mat-icon> Registrar
     </button>
   </div>
 </div>
@@ -58,7 +57,7 @@
 <!-- ZONA CON SCROLL -->
 <div class="scroll-area">
 
-  <!-- RESUMEN -->
+  <!-- RESUMEN CARDS -->
   <div class="resumen-row">
     <div class="resumen-card ingreso">
       <div class="resumen-icon-circle ingreso-icon">
@@ -66,7 +65,7 @@
       </div>
       <div class="resumen-info">
         <div class="resumen-label">Total ingresos</div>
-        <div class="resumen-valor ingreso-valor">{{ formatCurrency(totalIngresos) }}</div>
+        <div class="resumen-valor ingreso-valor">{{ formatCurrency(totalEntradas) }}</div>
       </div>
     </div>
     <div class="resumen-card salida">
@@ -79,32 +78,34 @@
       </div>
     </div>
     <div class="resumen-card balance"
-      [class.positivo]="totalIngresos - totalSalidas >= 0"
-      [class.negativo]="totalIngresos - totalSalidas < 0">
+      [class.positivo]="totalEntradas - totalSalidas >= 0"
+      [class.negativo]="totalEntradas - totalSalidas < 0">
       <div class="resumen-icon-circle"
-        [class.balance-pos-icon]="totalIngresos - totalSalidas >= 0"
-        [class.balance-neg-icon]="totalIngresos - totalSalidas < 0">
+        [class.balance-pos-icon]="totalEntradas - totalSalidas >= 0"
+        [class.balance-neg-icon]="totalEntradas - totalSalidas < 0">
         <mat-icon>account_balance</mat-icon>
       </div>
       <div class="resumen-info">
-        <div class="resumen-label">Balance neto</div>
-        <div class="resumen-valor">{{ formatCurrency(totalIngresos - totalSalidas) }}</div>
+        <div class="resumen-label">Balance</div>
+        <div class="resumen-valor">{{ formatCurrency(totalEntradas - totalSalidas) }}</div>
       </div>
     </div>
   </div>
 
-  <!-- TABS -->
+  <!-- 3 TABS -->
   <div class="tabs-row">
     <div class="tabs">
-      <div class="tab" [class.active]="tabActivo === 'Ingreso'" (click)="cambiarTab('Ingreso')">
-        <mat-icon class="tab-icon">arrow_downward</mat-icon>
-        Ingresos
-        <span class="tab-count">{{ conteoIngresos }}</span>
+      <div class="tab" [class.active]="tabActivo === 'pedidos'" (click)="cambiarTab('pedidos')">
+        <mat-icon class="tab-icon">receipt_long</mat-icon>
+        <span>Pagos de pedidos</span>
       </div>
-      <div class="tab" [class.active]="tabActivo === 'Salida'" (click)="cambiarTab('Salida')">
-        <mat-icon class="tab-icon">arrow_upward</mat-icon>
-        Salidas
-        <span class="tab-count">{{ conteoSalidas }}</span>
+      <div class="tab" [class.active]="tabActivo === 'nomina'" (click)="cambiarTab('nomina')">
+        <mat-icon class="tab-icon">engineering</mat-icon>
+        <span>Nómina</span>
+      </div>
+      <div class="tab" [class.active]="tabActivo === 'gastos'" (click)="cambiarTab('gastos')">
+        <mat-icon class="tab-icon">shopping_cart</mat-icon>
+        <span>Gastos</span>
       </div>
     </div>
   </div>
@@ -113,18 +114,16 @@
   <div class="card-list" *ngIf="movimientosFiltrados.length > 0; else sinResultados">
     <div class="mov-card" *ngFor="let mov of movimientosFiltrados">
 
-      <!-- Franja de color superior -->
       <div class="card-stripe"
-        [class.ingreso-stripe]="mov.idTipoMovimiento === 1"
-        [class.salida-stripe]="mov.idTipoMovimiento === 2">
+        [class.ingreso-stripe]="esEntrada(mov)"
+        [class.salida-stripe]="!esEntrada(mov)">
       </div>
 
-      <!-- Encabezado: ícono + descripción -->
       <div class="card-top">
         <div class="mov-icon"
-          [class.ingreso-icon]="mov.idTipoMovimiento === 1"
-          [class.salida-icon]="mov.idTipoMovimiento === 2">
-          <mat-icon>{{ mov.idTipoMovimiento === 1 ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+          [class.ingreso-icon]="esEntrada(mov)"
+          [class.salida-icon]="!esEntrada(mov)">
+          <mat-icon>{{ esEntrada(mov) ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
         </div>
         <div class="mov-info">
           <p class="mov-descripcion">{{ mov.observacion || 'Sin descripción' }}</p>
@@ -132,22 +131,24 @@
         </div>
       </div>
 
-      <!-- Separador con meta info -->
       <div class="card-meta">
-        <span class="categoria-badge" [ngClass]="'cat-' + mov.idCategoriaMovimiento">
-          Cat. {{ mov.idCategoriaMovimiento }}
+        <span class="categoria-badge">
+          {{ mov['nombreCategoriaMovimiento'] || 'Sin categoría' }}
+        </span>
+        <span class="metodo-badge" *ngIf="mov['nombreMetodoPago']">
+          <mat-icon style="font-size:12px;width:12px;height:12px;">credit_card</mat-icon>
+          {{ mov['nombreMetodoPago'] }}
         </span>
         <span class="mov-ref" *ngIf="mov.idReferencia">
-          Ref. {{ mov.idReferencia }}
+          Ref #{{ mov.idReferencia }}
         </span>
       </div>
 
-      <!-- Pie: valor + botón -->
       <div class="card-footer">
         <span class="mov-valor"
-          [class.valor-ingreso]="mov.idTipoMovimiento === 1"
-          [class.valor-salida]="mov.idTipoMovimiento === 2">
-          {{ mov.idTipoMovimiento === 1 ? '+' : '−' }}{{ formatCurrency(mov.valor) }}
+          [class.valor-ingreso]="esEntrada(mov)"
+          [class.valor-salida]="!esEntrada(mov)">
+          {{ esEntrada(mov) ? '+' : '−' }}{{ formatCurrency(mov.valor) }}
         </span>
         <button class="btn-view" (click)="openDialog(mov)">
           <mat-icon>edit</mat-icon> Editar
@@ -157,18 +158,15 @@
     </div>
   </div>
 
-  <!-- ESTADO VACÍO -->
+  <!-- VACÍO -->
   <ng-template #sinResultados>
     <div class="empty-state">
-      <div class="empty-icon-circle"
-        [class.ingreso-icon]="tabActivo === 'Ingreso'"
-        [class.salida-icon]="tabActivo === 'Salida'">
-        <mat-icon>{{ tabActivo === 'Ingreso' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+      <div class="empty-icon-circle">
+        <mat-icon>{{ tabIcon(tabActivo) }}</mat-icon>
       </div>
-      <div class="empty-title">No hay {{ tabActivo === 'Ingreso' ? 'ingresos' : 'salidas' }}</div>
+      <div class="empty-title">Sin {{ tabLabel(tabActivo).toLowerCase() }}</div>
       <div class="empty-sub">
-        Intenta otra búsqueda o
-        <span class="empty-link" (click)="openDialog()">registra uno nuevo</span>
+        <span class="empty-link" (click)="openDialog()">Registrar uno nuevo</span>
       </div>
     </div>
   </ng-template>

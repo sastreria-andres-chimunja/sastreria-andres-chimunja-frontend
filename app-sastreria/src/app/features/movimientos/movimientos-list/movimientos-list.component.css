@@ -296,6 +296,18 @@
 .categoria-badge.cat-4 { background: #fff3e0; color: #7a4a00; }
 .categoria-badge.cat-5 { background: #f3e8fd; color: #4a107a; }
 
+.metodo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #e8f4fd;
+  color: #1565c0;
+}
+
 .mov-ref {
   font-size: 10px;
   font-weight: 600;

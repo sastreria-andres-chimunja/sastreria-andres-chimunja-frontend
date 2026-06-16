@@ -1,0 +1,213 @@
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ── Header ── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border, #e8e2d9);
+  background: linear-gradient(135deg, #23282B, #1a1f22);
+  border-radius: 12px 12px 0 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(200,146,42,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon mat-icon { color: #c8922a; }
+
+.dialog-title { font-size: 16px; font-weight: 700; color: #fff; margin: 0; }
+.dialog-subtitle { font-size: 12px; color: #b8a888; margin: 0; }
+
+.btn-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #b8a888;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* ── Resumen ── */
+.item-resumen {
+  padding: 16px 20px;
+  background: var(--surface, #fdfcfa);
+  border-bottom: 1px solid var(--border, #e8e2d9);
+}
+
+.resumen-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.resumen-label { color: var(--text-muted, #888); }
+.resumen-valor { font-weight: 500; }
+.resumen-valor.bold { font-weight: 700; }
+.resumen-valor.pagado { color: #059669; font-weight: 600; }
+.saldo-ok { color: #059669; font-weight: 700; }
+.saldo-pen { color: #b45309; font-weight: 700; }
+
+.progreso-bar {
+  height: 6px;
+  background: #e8e2d9;
+  border-radius: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progreso-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #10b981);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.progreso-label { font-size: 11px; color: var(--text-muted, #888); margin-top: 4px; }
+
+/* ── Historial ── */
+.pagos-historial {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border, #e8e2d9);
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #c8922a;
+  margin-bottom: 8px;
+}
+
+.pago-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f0ece6;
+  align-items: center;
+}
+
+.pago-fecha { color: var(--text-muted, #888); }
+.pago-metodo { color: #555; }
+.pago-valor { color: #059669; font-weight: 600; text-align: right; }
+
+/* ── Form ── */
+.form-section {
+  padding: 16px 20px;
+}
+
+.pago-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.form-field { width: 100%; }
+.form-field.full-width { grid-column: 1 / -1; }
+
+.form-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-pagar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary, #c8922a);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-pagar:hover:not(:disabled) { background: #b07820; }
+.btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Pagado total ── */
+.pagado-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 20px;
+  color: #059669;
+}
+
+.pagado-total mat-icon { font-size: 40px; width: 40px; height: 40px; }
+.pagado-total p { font-weight: 600; }
+
+/* ── Recibo actions ── */
+.recibo-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--border, #e8e2d9);
+}
+
+.btn-recibo, .btn-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-recibo {
+  background: #f0ece6;
+  color: #555;
+}
+
+.btn-recibo:hover { background: #e0d8ce; }
+
+.btn-whatsapp {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.btn-whatsapp:hover { background: #bbf7d0; }
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}

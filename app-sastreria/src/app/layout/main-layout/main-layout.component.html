@@ -10,14 +10,20 @@
   >
     <!-- LOGO -->
     <div class="logo-area">
-      <!-- <mat-icon class="logo-collapsed">content_cut</mat-icon> -->
       <img src="assets/logo-sastreria-transparente.png" class="logo-icon" />
-      <img
-        src="assets/logo-sastreria-transparente.png"
-        class="logo-collapsed"
-      />
+      <img src="assets/logo-sastreria-transparente.png" class="logo-collapsed" />
     </div>
 
+    <!-- Usuario actual -->
+    <div class="user-chip nav-label">
+      <div class="user-avatar">{{ getIniciales() }}</div>
+      <div class="user-info">
+        <span class="user-nombre">{{ nombreUsuario }}</span>
+        <span class="user-rol">{{ nombreRol }}</span>
+      </div>
+    </div>
+
+    <!-- Hoja de trabajo (todos) -->
     <mat-nav-list class="nav-section">
       <a mat-list-item routerLink="/app/pedidos" routerLinkActive="active">
         <mat-icon matListItemIcon>content_cut</mat-icon>
@@ -25,73 +31,59 @@
       </a>
     </mat-nav-list>
 
-    <div class="nav-title nav-label">Usuarios</div>
-    <mat-nav-list class="nav-section">
-      <a mat-list-item routerLink="/app/clientes" routerLinkActive="active">
-        <mat-icon matListItemIcon>person</mat-icon>
-        <span matListItemTitle class="nav-label">Clientes</span>
-      </a>
-      <a mat-list-item routerLink="/app/empleados" routerLinkActive="active">
-        <mat-icon matListItemIcon>group</mat-icon>
-        <span matListItemTitle class="nav-label">Empleados</span>
-      </a>
-    </mat-nav-list>
+    <!-- Usuarios (solo admin y asistente) -->
+    <ng-container *ngIf="!authService.esOperario()">
+      <div class="nav-title nav-label">Usuarios</div>
+      <mat-nav-list class="nav-section">
+        <a mat-list-item routerLink="/app/clientes" routerLinkActive="active">
+          <mat-icon matListItemIcon>person</mat-icon>
+          <span matListItemTitle class="nav-label">Clientes</span>
+        </a>
+        <a mat-list-item routerLink="/app/empleados" routerLinkActive="active">
+          <mat-icon matListItemIcon>group</mat-icon>
+          <span matListItemTitle class="nav-label">Empleados</span>
+        </a>
+      </mat-nav-list>
+    </ng-container>
 
+    <!-- Balance (admin y asistente ven nómina; solo admin ve movimientos) -->
     <div class="nav-title nav-label">Balance</div>
     <mat-nav-list class="nav-section">
-      <!-- <a mat-list-item routerLink="/movimientos" routerLinkActive="active">
-        <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
-        <span matListItemTitle class="nav-label">Balance</span>
-      </a>
-      <a mat-list-item routerLink="/gastos" routerLinkActive="active">
-        <mat-icon matListItemIcon>money_off</mat-icon>
-        <span matListItemTitle class="nav-label">Gastos</span>
-      </a>-->
       <a mat-list-item routerLink="/app/nomina" routerLinkActive="active">
         <mat-icon matListItemIcon>engineering</mat-icon>
         <span matListItemTitle class="nav-label">Nómina</span>
       </a>
-      <a mat-list-item routerLink="/app/movimientos" routerLinkActive="active">
+      <a mat-list-item routerLink="/app/movimientos" routerLinkActive="active"
+        *ngIf="authService.esAdmin()">
         <mat-icon matListItemIcon>trending_up</mat-icon>
         <span matListItemTitle class="nav-label">Movimientos</span>
       </a>
     </mat-nav-list>
-    <div class="nav-title nav-label">Administración</div>
-    <mat-nav-list class="nav-section">
-      <a mat-list-item routerLink="/app/roles" routerLinkActive="active">
-        <mat-icon matListItemIcon>badge</mat-icon>
-        <span matListItemTitle class="nav-label">Roles</span>
-      </a>
-      <a mat-list-item routerLink="/app/metodosPago" routerLinkActive="active">
-        <mat-icon matListItemIcon>euro_symbol</mat-icon>
-        <span matListItemTitle class="nav-label">Métodos de pago</span>
-      </a>
-      <a
-        mat-list-item
-        routerLink="/app/categoriaMovimientos"
-        routerLinkActive="active"
-      >
-        <mat-icon matListItemIcon>assessment</mat-icon>
-        <span matListItemTitle class="nav-label">Categoría de movimiento</span>
-      </a>
-    </mat-nav-list>
+
+    <!-- Administración (solo admin) -->
+    <ng-container *ngIf="authService.esAdmin()">
+      <div class="nav-title nav-label">Administración</div>
+      <mat-nav-list class="nav-section">
+        <a mat-list-item routerLink="/app/roles" routerLinkActive="active">
+          <mat-icon matListItemIcon>badge</mat-icon>
+          <span matListItemTitle class="nav-label">Roles</span>
+        </a>
+        <a mat-list-item routerLink="/app/metodosPago" routerLinkActive="active">
+          <mat-icon matListItemIcon>euro_symbol</mat-icon>
+          <span matListItemTitle class="nav-label">Métodos de pago</span>
+        </a>
+        <a mat-list-item routerLink="/app/categoriaMovimientos" routerLinkActive="active">
+          <mat-icon matListItemIcon>assessment</mat-icon>
+          <span matListItemTitle class="nav-label">Categorías</span>
+        </a>
+      </mat-nav-list>
+    </ng-container>
   </mat-sidenav>
 
   <mat-sidenav-content
     class="main-content"
     [style.margin-left]="isMobile ? '0' : expanded ? '210px' : '56px'"
   >
-    <!-- <mat-toolbar class="topbar">
-      <button
-        *ngIf="isMobile"
-        mat-icon-button
-        (click)="sidenav.toggle()"
-        class="menu-btn"
-      >
-        <mat-icon>menu</mat-icon>
-      </button>
-      {{ pageTitle }}
-    </mat-toolbar> -->
     <mat-toolbar class="topbar">
       <div class="left-section">
         <button
@@ -102,7 +94,6 @@
         >
           <mat-icon>menu</mat-icon>
         </button>
-
         <span>{{ pageTitle }}</span>
       </div>
       <span class="spacer"></span>

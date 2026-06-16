@@ -19,6 +19,7 @@ import { filter } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -28,9 +29,6 @@ import { CommonModule } from '@angular/common';
     RouterLink,
     MatSidenavModule,
     MatToolbarModule,
-    MatListModule,
-    MatIconModule,
-    MatSidenavModule,
     MatListModule,
     MatIconModule,
     RouterModule,
@@ -51,9 +49,8 @@ export class MainLayoutComponent implements OnInit {
   isMobile = false;
   isDarkMode = false;
 
-  // Mapa ruta → nombre legible
   private routeTitles: Record<string, string> = {
-    '/app/pedidos': 'Pedidos',
+    '/app/pedidos': 'Hoja de trabajo',
     '/app/pedidos/crear': 'Nuevo pedido',
     '/app/clientes': 'Clientes',
     '/app/empleados': 'Empleados',
@@ -63,19 +60,19 @@ export class MainLayoutComponent implements OnInit {
     '/app/categoriaMovimientos': 'Categorías de movimiento',
     '/app/roles': 'Roles',
   };
+
   constructor(
     private router: Router,
     private breakpointObserver: BreakpointObserver,
+    public authService: AuthService,
   ) {}
 
   ngOnInit() {
     this.isDarkMode = localStorage.getItem('darkMode') === 'true';
     this.applyTheme();
 
-    // Setear título en la carga inicial
-    this.pageTitle = this.routeTitles[this.router.url] ?? 'Bienvenido Admin';
+    this.pageTitle = this.routeTitles[this.router.url] ?? 'Bienvenido';
 
-    // Actualizar en cada navegación
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e: NavigationEnd) => {
@@ -90,16 +87,26 @@ export class MainLayoutComponent implements OnInit {
           this.pageTitle = 'Sistema de Gestión';
         }
       });
+
     this.breakpointObserver
       .observe([Breakpoints.Handset])
       .subscribe((result) => {
         this.isMobile = result.matches;
-        // En móvil cerramos el sidenav por defecto
         if (this.isMobile && this.sidenav) {
           this.sidenav.close();
         }
       });
   }
+
+  get nombreUsuario(): string {
+    const s = this.authService.getSesion();
+    return s ? `${s.nombres} ${s.apellidos}` : '';
+  }
+
+  get nombreRol(): string {
+    return this.authService.getNombreRol();
+  }
+
   toggleDarkMode(): void {
     this.isDarkMode = !this.isDarkMode;
     localStorage.setItem('darkMode', String(this.isDarkMode));
@@ -110,7 +117,14 @@ export class MainLayoutComponent implements OnInit {
     document.documentElement.classList.toggle('dark-mode', this.isDarkMode);
   }
 
+  getIniciales(): string {
+    const s = this.authService.getSesion();
+    if (!s) return '?';
+    return `${s.nombres[0] ?? ''}${s.apellidos[0] ?? ''}`.toUpperCase();
+  }
+
   logout() {
+    this.authService.logout();
     this.router.navigate(['/'], { replaceUrl: true });
   }
 }

@@ -21,4 +21,5 @@ export class Medida {
   otros: string = '';
   tipoPrenda: string = '';
   observaciones: string = '';
+  created_at?: string;
 }

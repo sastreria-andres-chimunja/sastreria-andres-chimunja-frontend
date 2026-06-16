@@ -44,7 +44,18 @@
       </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Acciones de ticket tras un pago -->
+    <div class="ticket-actions" *ngIf="ultimoItemPagado">
+      <span class="ticket-label">Pago registrado — {{ ultimoItemPagado.descripcion }}</span>
+      <button class="btn-ticket" (click)="imprimirTicketNomina()">
+        <mat-icon>print</mat-icon> Imprimir
+      </button>
+      <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()">
+        <mat-icon>send</mat-icon> WhatsApp
+      </button>
+    </div>
+
+  <!-- Tabs -->
     <mat-tab-group class="movimientos-tabs" animationDuration="150ms">
 
       <!-- Tab Ingresos pendientes -->
@@ -65,17 +76,18 @@
             <div class="mov-header-row">
               <span>Descripción</span>
               <span>Fecha entrega</span>
-              <span class="text-right">Valor</span>
+              <span class="text-right">A pagar</span>
               <span></span>
             </div>
             <div class="mov-row" *ngFor="let item of detalle.entradas.items">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub">Pedido #{{ item.idPedido }} · {{ item.comisionEmpleado }}% de {{ formatCOP(item.valor) }}</span>
               </div>
               <span class="mov-fecha">{{ item.fechaEntrega || '—' }}</span>
-              <span class="mov-valor income">{{ formatCOP(item.valor) }}</span>
+              <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>
               <button class="btn-pagar"
+                *ngIf="!data.soloLectura"
                 (click)="pagar(item)"
                 [disabled]="pagandoId === item.idItemPedido"
                 title="Marcar como pagado">

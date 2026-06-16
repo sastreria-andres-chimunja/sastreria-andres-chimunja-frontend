@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { EmpleadoService } from '../../../core/services/empleado.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +24,12 @@ import { Rol } from '../../../shared/models/Rol';
 import { RolService } from '../../../core/services/rol.service';
 import { MatSelectModule } from '@angular/material/select';
 import { dateToString, stringToDate } from '../../../utils/date.utils';
+import Swal from 'sweetalert2';
+
+interface CrearEmpleadoResponse {
+  empleado: Empleado;
+  clave: string;
+}
 
 @Component({
   selector: 'app-crear-empleado',
@@ -50,9 +57,15 @@ export class CrearEmpleadoComponent implements OnInit {
   icono = '';
   roles: Rol[] = [];
 
+  // Estado post-creación
+  empleadoCreado: Empleado | null = null;
+  claveGenerada = '';
+  telefonoAdmin = '';
+
   constructor(
     private fb: FormBuilder,
     private empleadoService: EmpleadoService,
+    private authService: AuthService,
     private rolService: RolService,
     private dialogRef: MatDialogRef<CrearEmpleadoComponent>,
     @Inject(MAT_DIALOG_DATA) public empleadoModel: Empleado,
@@ -63,6 +76,16 @@ export class CrearEmpleadoComponent implements OnInit {
     this.createForm();
     this.titulo = this.empleadoModel.idEmpleado! > 0 ? 'Editar' : 'Agregar';
     this.icono = this.empleadoModel.idEmpleado! > 0 ? 'create' : 'person_add';
+
+    // Obtener teléfono del admin actual para el botón WhatsApp
+    const idAdmin = this.authService.getIdEmpleado();
+    if (idAdmin) {
+      this.empleadoService.buscarPorId(idAdmin).subscribe({
+        next: (resp: any) => {
+          this.telefonoAdmin = resp?.empleado?.telefono ?? resp?.telefono ?? '';
+        },
+      });
+    }
   }
 
   createForm() {
@@ -70,7 +93,7 @@ export class CrearEmpleadoComponent implements OnInit {
       nombres: [this.empleadoModel.nombres, [Validators.required]],
       apellidos: [this.empleadoModel.apellidos, [Validators.required]],
       fechaCumpleanios: [
-        stringToDate(this.empleadoModel.fechaCumpleanios),
+        stringToDate(this.empleadoModel.fechaCumpleanios) ?? new Date(),
         [Validators.required],
       ],
       telefono: [this.empleadoModel.telefono, [Validators.required]],
@@ -95,7 +118,8 @@ export class CrearEmpleadoComponent implements OnInit {
       this.empleadoService.actualizar(this.empleadoModel).subscribe({
         next: () => {
           this.isLoading = false;
-          this.dialogRef.close(true);
+          Swal.fire({ title: '¡Empleado editado!', icon: 'success', timer: 1800, showConfirmButton: false })
+            .then(() => this.dialogRef.close(true));
         },
         error: (err) => {
           this.isLoading = false;
@@ -104,9 +128,11 @@ export class CrearEmpleadoComponent implements OnInit {
       });
     } else {
       this.empleadoService.crear(this.empleadoModel).subscribe({
-        next: () => {
+        next: (resp: any) => {
           this.isLoading = false;
-          this.dialogRef.close(true);
+          const r = resp as CrearEmpleadoResponse;
+          this.empleadoCreado = r.empleado;
+          this.claveGenerada = r.clave;
         },
         error: (err) => {
           this.isLoading = false;
@@ -114,6 +140,56 @@ export class CrearEmpleadoComponent implements OnInit {
         },
       });
     }
+  }
+
+  get nombreCompleto(): string {
+    return `${this.empleadoCreado?.nombres ?? ''} ${this.empleadoCreado?.apellidos ?? ''}`.trim();
+  }
+
+  get telefonoEmpleado(): string {
+    return this.form.get('telefono')?.value ?? '';
+  }
+
+  get usernameEmpleado(): string {
+    const normalizar = (s: string) =>
+      s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+    const nombres = this.form.get('nombres')?.value ?? '';
+    const apellidos = this.form.get('apellidos')?.value ?? '';
+    const pn = normalizar(nombres.trim().split(/\s+/)[0]);
+    const pa = normalizar(apellidos.trim().split(/\s+/)[0]);
+    return `${pn}${pa}`;
+  }
+
+  private mensajeWhatsApp(destino: 'empleado' | 'admin'): string {
+    const nombre = this.nombreCompleto;
+    const msg = destino === 'empleado'
+      ? `Hola ${nombre}! 👋 Aquí están tus credenciales de acceso al sistema de Sastrería Andrés Chimunja:\n\n` +
+        `🔑 *Usuario:* ${this.usernameEmpleado}\n` +
+        `🔐 *Contraseña temporal:* ${this.claveGenerada}\n\n` +
+        `⚠️ Al ingresar por primera vez, el sistema te pedirá que cambies tu contraseña.\n\n` +
+        `Ingresa en: ${window.location.origin}`
+      : `📋 *Nuevo empleado registrado*\n\n` +
+        `👤 Nombre: ${nombre}\n` +
+        `📱 Teléfono: ${this.telefonoEmpleado}\n` +
+        `🔑 Usuario: ${this.usernameEmpleado}\n` +
+        `🔐 Contraseña temp: ${this.claveGenerada}`;
+    return encodeURIComponent(msg);
+  }
+
+  enviarWhatsAppEmpleado(): void {
+    const tel = this.telefonoEmpleado.replace(/\D/g, '');
+    if (!tel) return;
+    window.open(`https://wa.me/57${tel}?text=${this.mensajeWhatsApp('empleado')}`, '_blank');
+  }
+
+  enviarWhatsAppAdmin(): void {
+    const tel = this.telefonoAdmin.replace(/\D/g, '');
+    if (!tel) return;
+    window.open(`https://wa.me/57${tel}?text=${this.mensajeWhatsApp('admin')}`, '_blank');
+  }
+
+  cerrar(): void {
+    this.dialogRef.close(this.empleadoCreado != null);
   }
 
   listarRoles() {

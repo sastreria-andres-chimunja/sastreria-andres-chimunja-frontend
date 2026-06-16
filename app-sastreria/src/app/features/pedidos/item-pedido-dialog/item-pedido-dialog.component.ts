@@ -7,23 +7,23 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { Empleado } from '../../../shared/models/Empleado';
-import { Estado } from '../../../shared/models/Estado';
 import { Medida } from '../../../shared/models/Medida';
 import { stringToDate } from '../../../utils/date.utils';
+import { ImagenService } from '../../../core/services/imagen.service';
 
 export interface ItemDialogData {
-  item?: any;          // item existente (edit) o null (create)
+  item?: any;
   idPedido: number;
   idCliente: number;
   empleados: Empleado[];
-  estados: Estado[];
-  medidas: Medida[];   // medidas del cliente
-  imagenes?: any[];    // fotos existentes (edit mode)
+  medidas: Medida[];
+  imagenes?: any[];
 }
 
 export interface ItemDialogResult {
@@ -31,6 +31,7 @@ export interface ItemDialogResult {
   nuevaMedida: any | null;
   fotosNuevas: File[];
   fotosEliminar: number[];
+  fotosNuevaMedida: File[];
 }
 
 @Component({
@@ -46,10 +47,11 @@ export interface ItemDialogResult {
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatTabsModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatRadioModule,
+    MatTooltipModule,
+    TextFieldModule,
   ],
   templateUrl: './item-pedido-dialog.component.html',
   styleUrl: './item-pedido-dialog.component.css',
@@ -59,44 +61,55 @@ export class ItemPedidoDialogComponent implements OnInit {
   medidaForm!: FormGroup;
 
   modoMedida: 'ninguna' | 'guardada' | 'nueva' = 'ninguna';
+  tipoPrendaNueva = '';
   isEdit = false;
 
-  // fotos
+  // fotos del ítem
   fotosNuevas: File[] = [];
   fotosPreview: string[] = [];
   fotosEliminar: number[] = [];
   fotosExistentes: any[] = [];
 
+  // fotos de la medida seleccionada (solo visualización)
+  fotosMedidaSeleccionada: any[] = [];
+  cargandoFotosMedida = false;
+
+  // fotos de la nueva medida
+  fotosNuevaMedida: File[] = [];
+  fotosPreviewNuevaMedida: string[] = [];
+  isDraggingMedida = false;
+
+  // medida seleccionada completa (para mostrar campos)
+  medidaSeleccionada: Medida | null = null;
+
   readonly camposMedida = [
-    { grupo: 'Tronco', campos: [
-      { key: 'espalda', label: 'Espalda' },
-      { key: 'hombro', label: 'Hombro' },
-      { key: 'talleDelantero', label: 'Talle delantero' },
-      { key: 'talleTrasero', label: 'Talle trasero' },
-      { key: 'pecho', label: 'Pecho' },
-      { key: 'cintura', label: 'Cintura' },
-      { key: 'base', label: 'Base' },
-    ]},
-    { grupo: 'Mangas / Escote', campos: [
-      { key: 'largoManga', label: 'Largo manga' },
-      { key: 'anchoManga', label: 'Ancho manga' },
-      { key: 'escote', label: 'Escote' },
-      { key: 'distancia', label: 'Distancia' },
-      { key: 'separacion', label: 'Separación' },
-    ]},
-    { grupo: 'Parte inferior', campos: [
-      { key: 'largo', label: 'Largo' },
-      { key: 'tiro', label: 'Tiro' },
-      { key: 'pierna', label: 'Pierna' },
-      { key: 'rodilla', label: 'Rodilla' },
-      { key: 'bota', label: 'Bota' },
-    ]},
+    { key: 'espalda',        label: 'Espalda' },
+    { key: 'hombro',         label: 'Hombro' },
+    { key: 'talleDelantero', label: 'Talle delantero' },
+    { key: 'talleTrasero',   label: 'Talle trasero' },
+    { key: 'distancia',      label: 'Distancia' },
+    { key: 'separacion',     label: 'Separación' },
+    { key: 'pecho',          label: 'Pecho' },
+    { key: 'cintura',        label: 'Cintura' },
+    { key: 'largo',          label: 'Largo' },
+    { key: 'largoManga',     label: 'Largo manga' },
+    { key: 'anchoManga',     label: 'Ancho manga' },
+    { key: 'escote',         label: 'Escote' },
+    { key: 'base',           label: 'Base' },
+    { key: 'tiro',           label: 'Tiro' },
+    { key: 'pierna',         label: 'Pierna' },
+    { key: 'rodilla',        label: 'Rodilla' },
+    { key: 'bota',           label: 'Bota' },
   ];
+
+  readonly camposCamisa = ['espalda','hombro','talleDelantero','talleTrasero','distancia','separacion','pecho','cintura','base','largo','largoManga','anchoManga','escote'];
+  readonly camposPantalon = ['cintura','base','tiro','pierna','rodilla','bota','largo'];
 
   constructor(
     public dialogRef: MatDialogRef<ItemPedidoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ItemDialogData,
     private fb: FormBuilder,
+    private imagenService: ImagenService,
   ) {}
 
   ngOnInit(): void {
@@ -105,51 +118,86 @@ export class ItemPedidoDialogComponent implements OnInit {
 
     if (this.data.item?.idMedida) {
       this.modoMedida = 'guardada';
+      this.medidaSeleccionada = this.data.medidas.find(m => m.idMedida === this.data.item.idMedida) ?? null;
     }
 
     this.buildForms();
+
+    if (this.data.item?.idMedida) {
+      this.cargarFotosMedida(this.data.item.idMedida);
+    }
   }
 
   private buildForms(): void {
     const item = this.data.item ?? {};
-    const estadoPorDefecto = item.idEstado
-      ?? this.data.estados.find((e) => e.nombre === 'Pendiente')?.idEstado
-      ?? null;
     this.form = this.fb.group({
-      descripcion: [item.descripcion ?? '', Validators.required],
-      valor: [item.valor ?? '', [Validators.required, Validators.min(0)]],
-      comisionEmpleado: [item.comisionEmpleado ?? 0],
-      fechaEntrega: [item.fechaEntrega ? stringToDate(item.fechaEntrega) : null, Validators.required],
-      observacion: [item.observacion ?? ''],
-      idEstado: [estadoPorDefecto, Validators.required],
-      idEmpleado: [item.idEmpleado ?? null],
-      idMedidaGuardada: [item.idMedida ?? null],
+      descripcion:       [item.descripcion ?? '', Validators.required],
+      valor:             [item.valor ?? '', [Validators.required, Validators.min(0)]],
+      comisionEmpleado:  [item.comisionEmpleado ?? 0],
+      fechaEntrega:      [item.fechaEntrega ? stringToDate(item.fechaEntrega) : new Date(), Validators.required],
+      observacion:       [item.observacion ?? ''],
+      idEmpleado:        [item.idEmpleado ?? null],
+      idMedidaGuardada:  [item.idMedida ?? null],
     });
 
-    // Formulario de nueva medida
     const medidaFields: Record<string, any> = {
-      tipoPrenda: ['', Validators.required],
-      otros: [''],
+      tipoPrenda:    ['', Validators.required],
+      otros:         [0],
       observaciones: [''],
     };
-    this.camposMedida.forEach((g) =>
-      g.campos.forEach((c) => { medidaFields[c.key] = [0]; })
-    );
+    this.camposMedida.forEach(c => { medidaFields[c.key] = [0]; });
     this.medidaForm = this.fb.group(medidaFields);
   }
 
   onModoChange(): void {
-    // reset selección cuando cambia modo
     this.form.patchValue({ idMedidaGuardada: null });
+    this.medidaSeleccionada = null;
+    this.fotosMedidaSeleccionada = [];
     this.medidaForm.reset({ tipoPrenda: '' });
+    this.tipoPrendaNueva = '';
+    this.fotosNuevaMedida = [];
+    this.fotosPreviewNuevaMedida = [];
   }
 
+  onMedidaSeleccionadaChange(idMedida: number | null): void {
+    this.fotosMedidaSeleccionada = [];
+    this.medidaSeleccionada = idMedida ? (this.data.medidas.find(m => m.idMedida === idMedida) ?? null) : null;
+    if (idMedida) this.cargarFotosMedida(idMedida);
+  }
+
+  cargarFotosMedida(idMedida: number): void {
+    this.cargandoFotosMedida = true;
+    this.imagenService.listarPorReferencia('Medida', idMedida).subscribe({
+      next: (imgs: any) => {
+        this.fotosMedidaSeleccionada = Array.isArray(imgs) ? imgs : (imgs?.imagenes ?? []);
+        this.cargandoFotosMedida = false;
+      },
+      error: () => { this.cargandoFotosMedida = false; },
+    });
+  }
+
+  seleccionarTipoPrenda(tipo: string): void {
+    const esNuevoTipo = this.tipoPrendaNueva !== tipo;
+    this.tipoPrendaNueva = tipo;
+    this.medidaForm.patchValue({ tipoPrenda: tipo });
+
+    if (esNuevoTipo && !this.isEdit) {
+      const reset: Record<string, number> = {};
+      this.camposMedida.forEach(c => { reset[c.key] = 0; });
+      reset['otros'] = 0;
+      this.medidaForm.patchValue(reset);
+      this.fotosNuevaMedida = [];
+      this.fotosPreviewNuevaMedida = [];
+    }
+  }
+
+  // ── Fotos ítem ──────────────────────────────────────────────
   onFileChange(event: Event): void {
     const files = Array.from((event.target as HTMLInputElement).files ?? []);
-    files.forEach((f) => {
+    files.forEach(f => {
       this.fotosNuevas.push(f);
       const reader = new FileReader();
-      reader.onload = (e) => this.fotosPreview.push(e.target!.result as string);
+      reader.onload = e => this.fotosPreview.push(e.target!.result as string);
       reader.readAsDataURL(f);
     });
   }
@@ -161,9 +209,43 @@ export class ItemPedidoDialogComponent implements OnInit {
 
   marcarFotoParaEliminar(idImagen: number): void {
     this.fotosEliminar.push(idImagen);
-    this.fotosExistentes = this.fotosExistentes.filter((f) => f.idImagen !== idImagen);
+    this.fotosExistentes = this.fotosExistentes.filter(f => f.idImagen !== idImagen);
   }
 
+  // ── Fotos nueva medida ──────────────────────────────────────
+  onFileMedidaChange(event: Event): void {
+    const files = Array.from((event.target as HTMLInputElement).files ?? []);
+    this.procesarFotosMedida(files);
+  }
+
+  onDragOverMedida(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingMedida = true;
+  }
+
+  onDropMedida(event: DragEvent): void {
+    event.preventDefault();
+    this.isDraggingMedida = false;
+    const files = event.dataTransfer?.files;
+    if (files) this.procesarFotosMedida(Array.from(files));
+  }
+
+  procesarFotosMedida(files: File[]): void {
+    files.forEach(f => {
+      if (!f.type.startsWith('image/')) return;
+      this.fotosNuevaMedida.push(f);
+      const reader = new FileReader();
+      reader.onload = e => this.fotosPreviewNuevaMedida.push(e.target?.result as string);
+      reader.readAsDataURL(f);
+    });
+  }
+
+  eliminarFotoNuevaMedida(i: number): void {
+    this.fotosNuevaMedida.splice(i, 1);
+    this.fotosPreviewNuevaMedida.splice(i, 1);
+  }
+
+  // ── Guardar ────────────────────────────────────────────────
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (this.modoMedida === 'nueva' && this.medidaForm.invalid) {
@@ -174,15 +256,14 @@ export class ItemPedidoDialogComponent implements OnInit {
     const formVal = this.form.value;
     const item: any = {
       ...this.data.item,
-      idPedido: this.data.idPedido,
-      descripcion: formVal.descripcion,
-      valor: formVal.valor,
+      idPedido:         this.data.idPedido,
+      descripcion:      formVal.descripcion,
+      valor:            formVal.valor,
       comisionEmpleado: formVal.comisionEmpleado ?? 0,
-      observacion: formVal.observacion,
-      idEstado: formVal.idEstado,
-      idEmpleado: formVal.idEmpleado || null,
-      fechaEntrega: formVal.fechaEntrega,
-      idMedida: this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
+      observacion:      formVal.observacion,
+      idEmpleado:       formVal.idEmpleado || null,
+      fechaEntrega:     formVal.fechaEntrega,
+      idMedida:         this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
     };
 
     const result: ItemDialogResult = {
@@ -190,8 +271,9 @@ export class ItemPedidoDialogComponent implements OnInit {
       nuevaMedida: this.modoMedida === 'nueva'
         ? { ...this.medidaForm.value, idCliente: this.data.idCliente }
         : null,
-      fotosNuevas: this.fotosNuevas,
-      fotosEliminar: this.fotosEliminar,
+      fotosNuevas:       this.fotosNuevas,
+      fotosEliminar:     this.fotosEliminar,
+      fotosNuevaMedida:  this.fotosNuevaMedida,
     };
 
     this.dialogRef.close(result);
@@ -205,5 +287,10 @@ export class ItemPedidoDialogComponent implements OnInit {
 
   etiquetaMedida(m: Medida): string {
     return `${m.tipoPrenda || 'Sin tipo'} – Pecho ${m.pecho ?? '?'} / Cintura ${m.cintura ?? '?'}`;
+  }
+
+  valorMedida(key: string): number | null {
+    if (!this.medidaSeleccionada) return null;
+    return (this.medidaSeleccionada as any)[key] ?? null;
   }
 }

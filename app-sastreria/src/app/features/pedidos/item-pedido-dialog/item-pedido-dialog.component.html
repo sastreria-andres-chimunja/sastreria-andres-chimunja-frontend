@@ -53,17 +53,6 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Estado</mat-label>
-          <mat-icon matPrefix>flag</mat-icon>
-          <mat-select formControlName="idEstado">
-            <mat-option *ngFor="let e of data.estados" [value]="e.idEstado">
-              {{ e.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('idEstado')?.hasError('required')">Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Empleado encargado (opcional)</mat-label>
           <mat-icon matPrefix>person</mat-icon>
           <mat-select formControlName="idEmpleado">
@@ -94,80 +83,177 @@
         </mat-radio-group>
       </div>
 
-      <!-- Medida guardada -->
-      <div *ngIf="modoMedida === 'guardada'" class="medida-saved-select">
+      <!-- ── Medida guardada ─────────────────────────────────── -->
+      <div *ngIf="modoMedida === 'guardada'" class="medida-saved-section">
         <mat-form-field appearance="outline" class="form-field full-width">
           <mat-label>Seleccionar medida guardada</mat-label>
           <mat-icon matPrefix>list_alt</mat-icon>
-          <mat-select formControlName="idMedidaGuardada">
+          <mat-select formControlName="idMedidaGuardada"
+            (selectionChange)="onMedidaSeleccionadaChange($event.value)">
             <mat-option *ngFor="let m of data.medidas" [value]="m.idMedida">
               {{ etiquetaMedida(m) }}
             </mat-option>
           </mat-select>
         </mat-form-field>
-      </div>
 
-      <!-- Nueva medida -->
-      <div *ngIf="modoMedida === 'nueva'" class="nueva-medida-wrapper" [formGroup]="medidaForm">
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Tipo de prenda</mat-label>
-          <mat-icon matPrefix>checkroom</mat-icon>
-          <input matInput formControlName="tipoPrenda" placeholder="Ej: Camisa, Pantalón..." />
-          <mat-error>Requerido</mat-error>
-        </mat-form-field>
-
-        <mat-tab-group class="medida-tabs" animationDuration="150ms">
-          <mat-tab *ngFor="let grupo of camposMedida" [label]="grupo.grupo">
-            <div class="medida-fields-grid">
-              <mat-form-field appearance="outline" class="form-field"
-                *ngFor="let campo of grupo.campos">
-                <mat-label>{{ campo.label }} (cm)</mat-label>
-                <input matInput [formControlName]="campo.key" type="number" step="0.5" placeholder="0.0" />
-              </mat-form-field>
+        <!-- Campos llenos de la medida seleccionada -->
+        <div *ngIf="medidaSeleccionada" class="medida-campos-readonly">
+          <div class="section-label-small">
+            <mat-icon>straighten</mat-icon>
+            <span>Medidas de {{ medidaSeleccionada.tipoPrenda || 'sin tipo' }}</span>
+          </div>
+          <div class="fields-grid-readonly">
+            <div class="campo-readonly" *ngFor="let c of camposMedida">
+              <span class="campo-label">{{ c.label }}</span>
+              <span class="campo-valor">{{ valorMedida(c.key) ?? '—' }}</span>
             </div>
-          </mat-tab>
-        </mat-tab-group>
+            <div class="campo-readonly" *ngIf="medidaSeleccionada['otros']">
+              <span class="campo-label">Otros</span>
+              <span class="campo-valor">{{ medidaSeleccionada['otros'] }}</span>
+            </div>
+          </div>
+          <div *ngIf="medidaSeleccionada.observaciones" class="campo-observaciones-readonly">
+            <mat-icon>notes</mat-icon> {{ medidaSeleccionada.observaciones }}
+          </div>
+        </div>
 
-        <div class="medida-otros-row">
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Otros</mat-label>
-            <input matInput formControlName="otros" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Observaciones de medida</mat-label>
-            <input matInput formControlName="observaciones" />
-          </mat-form-field>
+        <!-- Fotos de la medida seleccionada -->
+        <div *ngIf="fotosMedidaSeleccionada.length > 0" class="medida-fotos-wrapper">
+          <p class="medida-fotos-label">
+            <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle">photo_library</mat-icon>
+            Fotos de referencia
+          </p>
+          <div class="fotos-grid">
+            <div class="foto-item" *ngFor="let f of fotosMedidaSeleccionada">
+              <img [src]="getImageUrl(f.rutaImagen)" [alt]="f.nombreArchivo ?? 'Foto medida'" />
+            </div>
+          </div>
+        </div>
+        <div class="medida-fotos-empty"
+          *ngIf="!cargandoFotosMedida && form.get('idMedidaGuardada')?.value && fotosMedidaSeleccionada.length === 0 && medidaSeleccionada">
+          <mat-icon>image_not_supported</mat-icon> Sin fotos de referencia
         </div>
       </div>
 
     </form>
 
-    <!-- ── Fotos ──────────────────────────────────────────────── -->
+    <!-- ── Nueva medida (fuera del formGroup principal) ───────── -->
+    <div *ngIf="modoMedida === 'nueva'" class="nueva-medida-wrapper" [formGroup]="medidaForm">
+
+      <!-- Selector tipo de prenda -->
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Tipo de prenda</mat-label>
+        <mat-select formControlName="tipoPrenda"
+          (selectionChange)="seleccionarTipoPrenda($event.value)">
+          <mat-option value="">Seleccione un tipo de prenda</mat-option>
+          <mat-option value="Camisa/Chaqueta">
+            <mat-icon>dry_cleaning</mat-icon> Camisa / Chaqueta
+          </mat-option>
+          <mat-option value="Pantalon">
+            <mat-icon>accessibility_new</mat-icon> Pantalón
+          </mat-option>
+        </mat-select>
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+
+      <!-- Campos de Camisa/Chaqueta -->
+      <div *ngIf="tipoPrendaNueva === 'Camisa/Chaqueta'" class="fields-section">
+        <div class="section-label">
+          <mat-icon>dry_cleaning</mat-icon>
+          <span>Medidas de Camisa / Chaqueta</span>
+        </div>
+        <div class="fields-grid">
+          <mat-form-field appearance="outline"><mat-label>Espalda</mat-label><input matInput formControlName="espalda" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Hombro</mat-label><input matInput formControlName="hombro" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Talle Delantero</mat-label><input matInput formControlName="talleDelantero" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Talle Trasero</mat-label><input matInput formControlName="talleTrasero" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Distancia</mat-label><input matInput formControlName="distancia" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Separación</mat-label><input matInput formControlName="separacion" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Pecho</mat-label><input matInput formControlName="pecho" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Cintura</mat-label><input matInput formControlName="cintura" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Base</mat-label><input matInput formControlName="base" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Largo</mat-label><input matInput formControlName="largo" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Largo Manga</mat-label><input matInput formControlName="largoManga" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Ancho Manga</mat-label><input matInput formControlName="anchoManga" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Escote</mat-label><input matInput formControlName="escote" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Otros</mat-label><input matInput formControlName="otros" type="number" /></mat-form-field>
+        </div>
+      </div>
+
+      <!-- Campos de Pantalón -->
+      <div *ngIf="tipoPrendaNueva === 'Pantalon'" class="fields-section">
+        <div class="section-label">
+          <mat-icon>accessibility_new</mat-icon>
+          <span>Medidas de Pantalón</span>
+        </div>
+        <div class="fields-grid">
+          <mat-form-field appearance="outline"><mat-label>Cintura</mat-label><input matInput formControlName="cintura" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Base</mat-label><input matInput formControlName="base" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Tiro</mat-label><input matInput formControlName="tiro" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Rodilla</mat-label><input matInput formControlName="rodilla" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Bota</mat-label><input matInput formControlName="bota" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Largo</mat-label><input matInput formControlName="largo" type="number" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Otros</mat-label><input matInput formControlName="otros" type="number" /></mat-form-field>
+        </div>
+      </div>
+
+      <!-- Observaciones (cuando hay tipo seleccionado) -->
+      <mat-form-field *ngIf="tipoPrendaNueva" appearance="outline" class="field-full">
+        <mat-label>Observaciones</mat-label>
+        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="6"
+          formControlName="observaciones" placeholder="Observaciones..." maxlength="1000"></textarea>
+        <mat-hint align="end">{{ medidaForm.get('observaciones')?.value?.length || 0 }}/1000</mat-hint>
+      </mat-form-field>
+
+    </div>
+
+    <!-- Fotos de referencia nueva medida (fuera del formGroup) -->
+    <div *ngIf="modoMedida === 'nueva' && tipoPrendaNueva" class="image-section">
+      <div class="section-label">
+        <mat-icon>photo_library</mat-icon>
+        <span>Fotos de referencia de la medida</span>
+      </div>
+      <div class="drop-zone" [class.drag-over]="isDraggingMedida"
+        (click)="fileInputMedida.click()"
+        (dragover)="onDragOverMedida($event)"
+        (dragleave)="isDraggingMedida = false"
+        (drop)="onDropMedida($event)">
+        <mat-icon class="drop-icon">cloud_upload</mat-icon>
+        <p class="drop-text">Arrastra fotos aquí o <span class="drop-link">selecciona archivos</span></p>
+        <p class="drop-hint">PNG, JPG hasta 10MB</p>
+        <input #fileInputMedida type="file" multiple accept="image/*" hidden (change)="onFileMedidaChange($event)" />
+      </div>
+      <div class="fotos-grid" *ngIf="fotosPreviewNuevaMedida.length > 0">
+        <div class="foto-item nueva" *ngFor="let url of fotosPreviewNuevaMedida; let i = index">
+          <img [src]="url" alt="foto medida {{ i + 1 }}" />
+          <button class="btn-del-foto" (click)="eliminarFotoNuevaMedida(i)" matTooltip="Quitar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Fotos del ítem ───────────────────────────────────── -->
     <div class="section-title">Fotos del ítem</div>
 
-    <!-- Fotos existentes (edit) -->
     <div class="fotos-grid" *ngIf="fotosExistentes.length > 0">
       <div class="foto-item" *ngFor="let f of fotosExistentes">
         <img [src]="getImageUrl(f.rutaImagen)" [alt]="f.nombreArchivo" />
-        <button class="btn-del-foto" (click)="marcarFotoParaEliminar(f.idImagen)"
-          matTooltip="Eliminar foto">
+        <button class="btn-del-foto" (click)="marcarFotoParaEliminar(f.idImagen)" matTooltip="Eliminar foto">
           <mat-icon>close</mat-icon>
         </button>
       </div>
     </div>
 
-    <!-- Previews de fotos nuevas -->
     <div class="fotos-grid" *ngIf="fotosPreview.length > 0">
       <div class="foto-item nueva" *ngFor="let url of fotosPreview; let i = index">
         <img [src]="url" alt="nueva foto" />
-        <button class="btn-del-foto" (click)="eliminarFotoNueva(i)"
-          matTooltip="Quitar">
+        <button class="btn-del-foto" (click)="eliminarFotoNueva(i)" matTooltip="Quitar">
           <mat-icon>close</mat-icon>
         </button>
       </div>
     </div>
 
-    <!-- Upload zone -->
     <label class="upload-zone">
       <mat-icon>add_photo_alternate</mat-icon>
       <span>Agregar fotos</span>
