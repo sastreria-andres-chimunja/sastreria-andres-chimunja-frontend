@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { NominaService } from '../../../core/services/nomina.service';
-import { Nomina } from '../../../shared/models/nomina';
+import { Nomina } from '../../../shared/models/Nomina';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';

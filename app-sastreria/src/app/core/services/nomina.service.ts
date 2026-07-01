@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Nomina } from '../../shared/models/nomina';
+import { Nomina } from '../../shared/models/Nomina';
 import { API } from '../../utils/constants';
 
 @Injectable({
