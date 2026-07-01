@@ -1,3 +1,9 @@
+@keyframes mic-pulse {
+  0%, 100% { color: #e53935; transform: scale(1); }
+  50%       { color: #ff5252; transform: scale(1.2); }
+}
+.mic-activo { animation: mic-pulse 1s ease-in-out infinite; }
+
 .dialog-wrapper {
   display: flex;
   flex-direction: column;
@@ -340,6 +346,29 @@
 }
 
 .fields-grid mat-form-field { width: 100%; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .dialog-wrapper { border-radius: 10px; }
+  .dialog-header  { padding: 12px 14px 10px; }
+  .dialog-body    { padding: 12px 14px; }
+  .dialog-actions { padding: 10px 14px 12px; }
+
+  .dialog-avatar { width: 36px; height: 36px; mat-icon { font-size: 18px; } }
+  .dialog-title  { font-size: 14px; }
+
+  .form-grid-2         { grid-template-columns: 1fr; }
+  .fields-grid         { grid-template-columns: 1fr 1fr; }
+  .fields-grid-readonly { grid-template-columns: 1fr 1fr; }
+  .medida-fields-grid  { grid-template-columns: 1fr 1fr; }
+  .medida-otros-row    { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 380px) {
+  .fields-grid          { grid-template-columns: 1fr; }
+  .fields-grid-readonly { grid-template-columns: 1fr; }
+  .medida-fields-grid   { grid-template-columns: 1fr; }
+}
 
 /* ── Drop zone nueva medida ───────────────────────────────────── */
 .image-section { margin-top: 12px; animation: fadeInMedida 0.25s ease; }

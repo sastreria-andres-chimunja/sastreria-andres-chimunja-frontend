@@ -59,8 +59,8 @@ export class CrearEmpleadoComponent implements OnInit {
 
   // Estado post-creación
   empleadoCreado: Empleado | null = null;
-  claveGenerada = '';
-  telefonoAdmin = '';
+  claveGenerada  = '';
+  telefonoAdmin  = '';
 
   constructor(
     private fb: FormBuilder,
@@ -77,7 +77,6 @@ export class CrearEmpleadoComponent implements OnInit {
     this.titulo = this.empleadoModel.idEmpleado! > 0 ? 'Editar' : 'Agregar';
     this.icono = this.empleadoModel.idEmpleado! > 0 ? 'create' : 'person_add';
 
-    // Obtener teléfono del admin actual para el botón WhatsApp
     const idAdmin = this.authService.getIdEmpleado();
     if (idAdmin) {
       this.empleadoService.buscarPorId(idAdmin).subscribe({
@@ -132,7 +131,7 @@ export class CrearEmpleadoComponent implements OnInit {
           this.isLoading = false;
           const r = resp as CrearEmpleadoResponse;
           this.empleadoCreado = r.empleado;
-          this.claveGenerada = r.clave;
+          this.claveGenerada  = r.clave;
         },
         error: (err) => {
           this.isLoading = false;
@@ -147,7 +146,7 @@ export class CrearEmpleadoComponent implements OnInit {
   }
 
   get telefonoEmpleado(): string {
-    return this.form.get('telefono')?.value ?? '';
+    return (this.form.get('telefono')?.value ?? '').replace(/\D/g, '');
   }
 
   get usernameEmpleado(): string {
@@ -160,32 +159,32 @@ export class CrearEmpleadoComponent implements OnInit {
     return `${pn}${pa}`;
   }
 
-  private mensajeWhatsApp(destino: 'empleado' | 'admin'): string {
-    const nombre = this.nombreCompleto;
-    const msg = destino === 'empleado'
-      ? `Hola ${nombre}! 👋 Aquí están tus credenciales de acceso al sistema de Sastrería Andrés Chimunja:\n\n` +
-        `🔑 *Usuario:* ${this.usernameEmpleado}\n` +
-        `🔐 *Contraseña temporal:* ${this.claveGenerada}\n\n` +
-        `⚠️ Al ingresar por primera vez, el sistema te pedirá que cambies tu contraseña.\n\n` +
-        `Ingresa en: ${window.location.origin}`
-      : `📋 *Nuevo empleado registrado*\n\n` +
-        `👤 Nombre: ${nombre}\n` +
-        `📱 Teléfono: ${this.telefonoEmpleado}\n` +
-        `🔑 Usuario: ${this.usernameEmpleado}\n` +
-        `🔐 Contraseña temp: ${this.claveGenerada}`;
-    return encodeURIComponent(msg);
+  private get mensajeCredenciales(): string {
+    return encodeURIComponent(
+      `Hola ${this.nombreCompleto}! 👋\n\n*Sastrería Andrés Chimunja*\n` +
+      `Tus credenciales de acceso al sistema:\n\n` +
+      `👤 Usuario: ${this.usernameEmpleado}\n` +
+      `🔑 Contraseña temporal: ${this.claveGenerada}\n\n` +
+      `⚠️ Cambia tu contraseña al ingresar por primera vez.`
+    );
   }
 
-  enviarWhatsAppEmpleado(): void {
-    const tel = this.telefonoEmpleado.replace(/\D/g, '');
-    if (!tel) return;
-    window.open(`https://wa.me/57${tel}?text=${this.mensajeWhatsApp('empleado')}`, '_blank');
+  get urlWaEmpleado(): string {
+    const tel = this.telefonoEmpleado;
+    return tel ? `https://wa.me/57${tel}?text=${this.mensajeCredenciales}` : '';
   }
 
-  enviarWhatsAppAdmin(): void {
+  get urlWaAdmin(): string {
     const tel = this.telefonoAdmin.replace(/\D/g, '');
-    if (!tel) return;
-    window.open(`https://wa.me/57${tel}?text=${this.mensajeWhatsApp('admin')}`, '_blank');
+    return tel ? `https://wa.me/57${tel}?text=${this.mensajeCredenciales}` : '';
+  }
+
+  abrirWaEmpleado(): void {
+    if (this.urlWaEmpleado) window.open(this.urlWaEmpleado, '_blank');
+  }
+
+  abrirWaAdmin(): void {
+    if (this.urlWaAdmin) window.open(this.urlWaAdmin, '_blank');
   }
 
   cerrar(): void {

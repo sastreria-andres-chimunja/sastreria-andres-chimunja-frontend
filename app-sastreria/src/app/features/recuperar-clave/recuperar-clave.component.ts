@@ -33,13 +33,13 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class RecuperarClaveComponent {
   form: FormGroup;
-  isLoading = false;
-  enviado = false;
+  isLoading      = false;
+  enviado        = false;
   telefonoMasked = '';
   nombreEmpleado = '';
-  waLink = '';
+  urlWhatsApp    = '';
   errorMsg: string | null = null;
-  currentYear = new Date().getFullYear();
+  currentYear    = new Date().getFullYear();
 
   constructor(
     private fb: FormBuilder,
@@ -54,39 +54,35 @@ export class RecuperarClaveComponent {
   recuperar(): void {
     if (this.form.invalid) return;
     this.isLoading = true;
-    this.errorMsg = null;
-    this.enviado = false;
+    this.errorMsg  = null;
+    this.enviado   = false;
 
     const username = this.form.get('username')!.value as string;
     this.authService.recuperarClave(username).subscribe({
       next: (resp) => {
-        this.isLoading = false;
-        const tel = resp.telefono.replace(/\D/g, '');
-        const digits = tel.slice(-4);
-        this.telefonoMasked = `****${digits}`;
+        this.isLoading      = false;
+        const tel           = resp.telefono.replace(/\D/g, '');
+        this.telefonoMasked = `****${tel.slice(-4)}`;
         this.nombreEmpleado = resp.nombre;
-
         const msg = encodeURIComponent(
-          `Hola ${resp.nombre}! 👋\n\n` +
-          `Aquí están tus credenciales de acceso al sistema de Sastrería Andrés Chimunja:\n\n` +
-          `🔑 *Usuario:* ${username}\n` +
-          `🔐 *Contraseña temporal:* ${resp.claveTemp}\n\n` +
-          `⚠️ Al ingresar por primera vez, el sistema te pedirá que cambies tu contraseña.\n\n` +
-          `Ingresa en: ${window.location.origin}`
+          `Hola ${resp.nombre}! 👋\n\n*Sastrería Andrés Chimunja*\n` +
+          `Tus credenciales de acceso al sistema:\n\n` +
+          `👤 Usuario: ${username}\n` +
+          `🔑 Contraseña temporal: ${resp.claveTemp}\n\n` +
+          `⚠️ Cambia tu contraseña al ingresar por primera vez.`
         );
-        this.waLink = `https://wa.me/57${tel}?text=${msg}`;
-        this.enviado = true;
-        window.open(this.waLink, '_blank');
+        this.urlWhatsApp = tel ? `https://wa.me/57${tel}?text=${msg}` : '';
+        this.enviado     = true;
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMsg = err.error?.error ?? 'No se encontró el usuario.';
+        this.errorMsg  = err.error?.error ?? 'No se encontró el usuario.';
       },
     });
   }
 
   abrirWhatsApp(): void {
-    if (this.waLink) window.open(this.waLink, '_blank');
+    if (this.urlWhatsApp) window.open(this.urlWhatsApp, '_blank');
   }
 
   irALogin(): void {

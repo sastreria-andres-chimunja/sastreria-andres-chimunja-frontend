@@ -17,6 +17,8 @@ export interface PagarItemDialogData {
   nombreCliente: string;
   telefonoCliente?: string;
   metodosPago: any[];
+  items?: { descripcion: string; valor: number }[];
+  fechaEntrega?: string;
 }
 
 @Component({
@@ -39,9 +41,12 @@ export interface PagarItemDialogData {
 export class PagarItemDialogComponent implements OnInit {
   form!: FormGroup;
   cargando = true;
-  guardando = false;
+  guardando    = false;
+  generandoPDF = false;
+  archivoPDF: File | null    = null;
+  urlFallback: string | null = null;
   abonos: any[] = [];
-  totalAbonado = 0;
+  totalAbonado  = 0;
   ultimoAbono: any = null;
 
   constructor(
@@ -120,19 +125,48 @@ export class PagarItemDialogComponent implements OnInit {
     });
   }
 
-  enviarWhatsApp(): void {
-    const metodo = this.ultimoAbono?.nombreMetodoPago ?? '';
-    this.reciboService.abrirWhatsApp({
-      idPedido: this.data.idPedido,
-      idItemPedido: 0,
-      nombreCliente: this.data.nombreCliente,
-      telefonoCliente: this.data.telefonoCliente,
-      valorTotalPedido: this.data.valorTotalPedido,
-      valorAbono: this.ultimoAbono?.valor ?? 0,
+  private get reciboData() {
+    return {
+      idPedido:          this.data.idPedido,
+      idItemPedido:      0,
+      nombreCliente:     this.data.nombreCliente,
+      telefonoCliente:   this.data.telefonoCliente,
+      valorTotalPedido:  this.data.valorTotalPedido,
+      valorAbono:        this.ultimoAbono?.valor ?? 0,
       totalPagadoPedido: this.totalAbonado,
-      metodoPago: metodo,
-      fechaPago: new Date().toLocaleDateString('es-CO'),
-    }, this.data.telefonoCliente);
+      metodoPago:        this.ultimoAbono?.nombreMetodoPago ?? '',
+      fechaPago:         new Date().toLocaleDateString('es-CO'),
+      fechaEntrega:      this.data.fechaEntrega,
+      items:             this.data.items,
+    };
+  }
+
+  /** Paso 1: genera el PDF en memoria (sin descargarlo todavía). */
+  async generarPDF(): Promise<void> {
+    this.generandoPDF = true;
+    this.archivoPDF   = null;
+    this.urlFallback  = null;
+    try {
+      this.archivoPDF = await this.reciboService.generarPDFBlob(this.reciboData);
+    } finally {
+      this.generandoPDF = false;
+    }
+  }
+
+  /** Paso 2: envía el PDF. En móvil va directo a WhatsApp; en PC descarga y abre WA. */
+  async enviarWhatsApp(): Promise<void> {
+    if (!this.archivoPDF) return;
+    const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
+    const url   = await this.reciboService.compartirConWhatsApp(
+      this.archivoPDF,
+      this.data.telefonoCliente ?? '',
+      texto,
+    );
+    if (url) this.urlFallback = url;
+  }
+
+  abrirWhatsAppFallback(): void {
+    if (this.urlFallback) window.open(this.urlFallback, '_blank');
   }
 
   cerrar(): void { this.dialogRef.close({ totalAbonado: this.totalAbonado }); }

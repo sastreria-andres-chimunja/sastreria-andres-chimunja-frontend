@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 import { PedidoService } from '../../../core/services/pedido.service';
@@ -38,6 +40,11 @@ import {
   PagarItemDialogComponent,
   PagarItemDialogData,
 } from '../pagar-item-dialog/pagar-item-dialog.component';
+import {
+  PedidoGuardadoDialogComponent,
+  PedidoGuardadoDialogData,
+} from '../pedido-guardado-dialog/pedido-guardado-dialog.component';
+import { ItemInlineFormComponent } from '../item-inline-form/item-inline-form.component';
 
 @Component({
   selector: 'app-crear-pedido',
@@ -53,6 +60,9 @@ import {
     MatDatepickerModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatExpansionModule,
+    MatSnackBarModule,
+    ItemInlineFormComponent,
   ],
   templateUrl: './crear-pedido.component.html',
   styleUrl: './crear-pedido.component.css',
@@ -76,10 +86,29 @@ export class CrearPedidoComponent implements OnInit {
   mostrarSugerencias = false;
   private busquedaCliente$ = new Subject<string>();
 
+  // Crear cliente inline
+  mostrarFormCrearCliente = false;
+  clienteForm!: FormGroup;
+  creandoCliente = false;
+
   // Ítems del pedido
   items: any[] = [];
   totalCalculado = 0;
   totalAbonado = 0;
+
+  // Acordeón de ítems (modo crear)
+  panelExpandidoIdx: number | null = null;
+  mostrarFormNuevoItem = true;
+  valorFormActual = 0;
+
+  // Abono inicial (solo en creación)
+  abonoForm!: FormGroup;
+
+  @ViewChild('formNuevoItem') formNuevoItemRef?: ItemInlineFormComponent;
+
+  get totalConFormActual(): number {
+    return this.totalCalculado + this.valorFormActual;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -95,10 +124,16 @@ export class CrearPedidoComponent implements OnInit {
     private clienteService: ClienteService,
     private metodoPagoService: MetodoPagoService,
     private authService: AuthService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
     this.buildForm();
+    this.buildClienteForm();
+    this.abonoForm = this.fb.group({
+      valor:        [null],
+      idMetodoPago: [null],
+    });
     this.cargarCatalogos();
     this.configurarBusquedaCliente();
 
@@ -110,10 +145,19 @@ export class CrearPedidoComponent implements OnInit {
 
   private buildForm(): void {
     this.form = this.fb.group({
-      idEstado: [null, Validators.required],
+      idEstado:      [null, Validators.required],
       fechaRecibido: [new Date(), Validators.required],
-      fechaEntrega: [new Date(), Validators.required],
-      valorTotal: [{ value: 0, disabled: true }],
+      fechaEntrega:  [new Date(), Validators.required],
+      valorTotal:    [{ value: 0, disabled: true }],
+    });
+  }
+
+  private buildClienteForm(): void {
+    this.clienteForm = this.fb.group({
+      nombres:   ['', Validators.required],
+      apellidos: ['', Validators.required],
+      cedula:    ['', Validators.required],
+      telefono:  [''],
     });
   }
 
@@ -127,7 +171,7 @@ export class CrearPedidoComponent implements OnInit {
     });
     this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados; });
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
-      this.metodosPago = r.metodosPago ?? r ?? [];
+      this.metodosPago = r.metodosPago ?? [];
     });
   }
 
@@ -146,6 +190,7 @@ export class CrearPedidoComponent implements OnInit {
   onClienteInput(event: Event): void {
     this.clienteQuery = (event.target as HTMLInputElement).value;
     this.clienteSeleccionado = null;
+    this.mostrarFormCrearCliente = false;
     this.busquedaCliente$.next(this.clienteQuery);
   }
 
@@ -154,7 +199,39 @@ export class CrearPedidoComponent implements OnInit {
     this.clienteQuery = `${c.nombres} ${c.apellidos}`;
     this.mostrarSugerencias = false;
     this.clientesSugeridos = [];
+    this.mostrarFormCrearCliente = false;
     this.cargarMedidasCliente(c.idCliente!);
+  }
+
+  abrirFormCrearCliente(): void {
+    this.mostrarSugerencias = false;
+    this.mostrarFormCrearCliente = true;
+    this.clienteForm.reset();
+    if (this.clienteQuery.trim()) {
+      const partes = this.clienteQuery.trim().split(' ');
+      this.clienteForm.patchValue({
+        nombres: partes[0] ?? '',
+        apellidos: partes.slice(1).join(' ') ?? '',
+      });
+    }
+  }
+
+  cancelarCrearCliente(): void {
+    this.mostrarFormCrearCliente = false;
+  }
+
+  guardarNuevoCliente(): void {
+    if (this.clienteForm.invalid) { this.clienteForm.markAllAsTouched(); return; }
+    this.creandoCliente = true;
+    this.clienteService.crear(this.clienteForm.value).subscribe({
+      next: (r: any) => {
+        const c: Cliente = r.cliente;
+        this.seleccionarCliente(c);
+        this.mostrarFormCrearCliente = false;
+        this.creandoCliente = false;
+      },
+      error: () => { this.creandoCliente = false; },
+    });
   }
 
   private cargarMedidasCliente(idCliente: number): void {
@@ -167,15 +244,15 @@ export class CrearPedidoComponent implements OnInit {
     this.pedidoService.buscarPorId(this.idPedido!).subscribe((r: any) => {
       const p: Pedido = r.pedido;
       this.form.patchValue({
-        idEstado: p.idEstado,
+        idEstado:      p.idEstado,
         fechaRecibido: stringToDate(p.fechaRecibido),
-        fechaEntrega: stringToDate(p.fechaEntrega),
-        valorTotal: p.valorTotal,
+        fechaEntrega:  stringToDate(p.fechaEntrega),
+        valorTotal:    p.valorTotal,
       });
       this.clienteQuery = p.nombreCliente ?? '';
       this.clienteSeleccionado = {
         idCliente: p.idCliente,
-        nombres: (p.nombreCliente ?? '').split(' ')[0],
+        nombres:   (p.nombreCliente ?? '').split(' ')[0],
         apellidos: (p.nombreCliente ?? '').split(' ').slice(1).join(' '),
         cedula: '', telefono: p.telefonoCliente ?? '',
       };
@@ -195,9 +272,7 @@ export class CrearPedidoComponent implements OnInit {
     });
   }
 
-  get saldoPedido(): number {
-    return this.totalCalculado - this.totalAbonado;
-  }
+  get saldoPedido(): number { return this.totalCalculado - this.totalAbonado; }
 
   private cargarItems(): void {
     this.itemService.listarPorPedido(this.idPedido!).subscribe((r: any) => {
@@ -219,8 +294,8 @@ export class CrearPedidoComponent implements OnInit {
     if (idEstadoActual === idTerminado || idEstadoActual === idEntregado) return;
 
     const tieneEmpleado = this.items.some(it => !!it.idEmpleado);
-    const idAsignado  = this.estados.find(e => e.nombre === 'Asignado')?.idEstado;
-    const idPendiente = this.estados.find(e => e.nombre === 'Pendiente')?.idEstado;
+    const idAsignado    = this.estados.find(e => e.nombre === 'Asignado')?.idEstado;
+    const idPendiente   = this.estados.find(e => e.nombre === 'Pendiente')?.idEstado;
 
     if (tieneEmpleado && idAsignado) {
       this.form.patchValue({ idEstado: idAsignado });
@@ -245,68 +320,84 @@ export class CrearPedidoComponent implements OnInit {
     return this.estados.find(e => e.idEstado === id)?.nombre ?? '';
   }
 
-  // ── Solo visible para admin y asistente ─────────────────────
-  get puedeEditarPedido(): boolean {
-    return !this.authService.esOperario();
+  get puedeEditarPedido(): boolean { return !this.authService.esOperario(); }
+
+  // ── Modo CREAR: inline form ───────────────────────────────────
+  onItemAgregado(result: ItemDialogResult): void {
+    this.items.push({
+      ...result.item,
+      _fotosNuevas:      result.fotosNuevas,
+      _nuevaMedida:      result.nuevaMedida,
+      _fotosNuevaMedida: result.fotosNuevaMedida,
+    });
+    this.mostrarFormNuevoItem = true;
+    this.recalcularTotal();
+    this.actualizarEstadoAutomatico();
   }
 
-  // ── Ítem dialog ───────────────────────────────────────────────
+  onItemActualizado(result: ItemDialogResult, idx: number): void {
+    this.items[idx] = {
+      ...result.item,
+      _fotosNuevas:      result.fotosNuevas,
+      _nuevaMedida:      result.nuevaMedida,
+      _fotosNuevaMedida: result.fotosNuevaMedida,
+    };
+    this.panelExpandidoIdx = null;
+    this.recalcularTotal();
+    this.actualizarEstadoAutomatico();
+  }
+
+  togglePanel(idx: number): void {
+    this.panelExpandidoIdx = this.panelExpandidoIdx === idx ? null : idx;
+  }
+
+  // ── Modo EDITAR: dialog (comportamiento actual) ───────────────
   abrirDialogoItem(item?: any): void {
     const dialogData: ItemDialogData = {
-      item: item ?? null,
-      idPedido: this.idPedido ?? 0,
+      item:      item ?? null,
+      idPedido:  this.idPedido ?? 0,
       idCliente: this.clienteSeleccionado?.idCliente ?? 0,
       empleados: this.empleados,
-      medidas: this.clienteMedidas,
-      imagenes: item?._fotos ?? [],
+      medidas:   this.clienteMedidas,
+      imagenes:  item?._fotos ?? [],
     };
 
     const ref = this.dialog.open(ItemPedidoDialogComponent, {
-      data: dialogData,
-      maxWidth: '95vw',
-      maxHeight: '92vh',
-      panelClass: 'nomina-dialog-panel',
-      autoFocus: false,
+      data:        dialogData,
+      maxWidth:    '95vw',
+      maxHeight:   '92vh',
+      panelClass:  'nomina-dialog-panel',
+      autoFocus:   false,
     });
 
     ref.afterClosed().subscribe((result: ItemDialogResult | null) => {
       if (!result) return;
-
-      if (this.isEdit) {
-        this.guardarItemDirecto(result, item);
-      } else {
-        const idx = this.items.indexOf(item);
-        if (idx >= 0) {
-          this.items[idx] = { ...result.item, _fotosNuevas: result.fotosNuevas };
-        } else {
-          this.items.push({ ...result.item, _fotosNuevas: result.fotosNuevas, _nuevaMedida: result.nuevaMedida, _fotosNuevaMedida: result.fotosNuevaMedida });
-        }
-        this.recalcularTotal();
-        this.actualizarEstadoAutomatico();
-      }
+      this.guardarItemDirecto(result, item);
     });
   }
 
-  // ── Abono del cliente al pedido ───────────────────────────────
   abrirDialogoPago(): void {
     if (!this.idPedido) return;
 
+    const fechaEntregaPedido = this.form.get('fechaEntrega')?.value;
     const dialogData: PagarItemDialogData = {
-      idPedido: this.idPedido,
+      idPedido:         this.idPedido,
       valorTotalPedido: this.totalCalculado,
-      nombreCliente: this.clienteSeleccionado
+      nombreCliente:    this.clienteSeleccionado
         ? `${this.clienteSeleccionado.nombres} ${this.clienteSeleccionado.apellidos}`
         : this.clienteQuery,
       telefonoCliente: this.clienteSeleccionado?.telefono,
-      metodosPago: this.metodosPago,
+      metodosPago:     this.metodosPago,
+      items:           this.items.map((it: any) => ({ descripcion: it.descripcion, valor: Number(it.valor) })),
+      fechaEntrega:    dateToString(fechaEntregaPedido) || undefined,
     };
 
     const ref = this.dialog.open(PagarItemDialogComponent, {
-      data: dialogData,
-      maxWidth: '95vw',
-      maxHeight: '90vh',
+      data:       dialogData,
+      maxWidth:   '95vw',
+      maxHeight:  '90vh',
       panelClass: 'nomina-dialog-panel',
-      autoFocus: false,
+      autoFocus:  false,
     });
 
     ref.afterClosed().subscribe((result: any) => {
@@ -355,6 +446,7 @@ export class CrearPedidoComponent implements OnInit {
       this.itemService.eliminar(item.idItemPedido).subscribe(() => this.cargarItems());
     } else {
       this.items.splice(i, 1);
+      if (this.panelExpandidoIdx === i) this.panelExpandidoIdx = null;
       this.recalcularTotal();
       this.actualizarEstadoAutomatico();
     }
@@ -370,14 +462,30 @@ export class CrearPedidoComponent implements OnInit {
     if (!this.clienteSeleccionado) { alert('Seleccione un cliente'); return; }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
+    // Capturar ítem del formulario inline si tiene datos sin agregar
+    if (!this.isEdit && this.formNuevoItemRef && this.mostrarFormNuevoItem) {
+      const pendiente = this.formNuevoItemRef.obtenerResultadoSiValido();
+      if (pendiente) {
+        this.items.push({
+          ...pendiente.item,
+          _fotosNuevas:      pendiente.fotosNuevas,
+          _nuevaMedida:      pendiente.nuevaMedida,
+          _fotosNuevaMedida: pendiente.fotosNuevaMedida,
+        });
+        this.recalcularTotal();
+      } else if (this.formNuevoItemRef.form.get('descripcion')?.value?.trim()) {
+        return; // form con datos inválidos — dejar que muestre los errores
+      }
+    }
+
     this.guardando = true;
     const fv = this.form.getRawValue();
     const pedidoData = {
-      idCliente: this.clienteSeleccionado.idCliente,
-      idEstado: fv.idEstado,
-      valorTotal: fv.valorTotal,
+      idCliente:     this.clienteSeleccionado.idCliente,
+      idEstado:      fv.idEstado,
+      valorTotal:    fv.valorTotal,
       fechaRecibido: dateToString(fv.fechaRecibido),
-      fechaEntrega: dateToString(fv.fechaEntrega),
+      fechaEntrega:  dateToString(fv.fechaEntrega),
     };
 
     try {
@@ -385,6 +493,15 @@ export class CrearPedidoComponent implements OnInit {
 
       if (this.isEdit) {
         await this.pedidoService.actualizar(idPed!, pedidoData).toPromise();
+        const itemsResumenEdit = this.items.map((it: any) => ({
+          descripcion: String(it.descripcion ?? ''),
+          valor: Number(it.valor ?? 0),
+        }));
+        this.abrirDialogoGuardado(
+          idPed!, 0, 0, '',
+          dateToString(fv.fechaEntrega),
+          itemsResumenEdit,
+        );
       } else {
         const resp: any = await this.pedidoService.crear(pedidoData).toPromise();
         idPed = resp.pedido.idPedido;
@@ -406,21 +523,76 @@ export class CrearPedidoComponent implements OnInit {
           delete itemData._fotosNuevas;
           delete itemData._nuevaMedida;
           delete itemData._fotos;
+          delete itemData._fotosNuevaMedida;
 
+          const fechaItem = itemData.fechaEntrega ?? fv.fechaEntrega;
           if (it._fotosNuevas?.length > 0) {
-            const ir: any = await this.itemService.crear({ ...itemData, fechaEntrega: dateToString(itemData.fechaEntrega) }).toPromise();
+            const ir: any = await this.itemService.crear({ ...itemData, fechaEntrega: dateToString(fechaItem) }).toPromise();
             await this.imagenService.subir('itemPedido', ir.item.idItemPedido, it._fotosNuevas).toPromise();
           } else {
-            await this.itemService.crear({ ...itemData, fechaEntrega: dateToString(itemData.fechaEntrega) }).toPromise();
+            await this.itemService.crear({ ...itemData, fechaEntrega: dateToString(fechaItem) }).toPromise();
           }
         }
-      }
 
-      this.router.navigate(['/app/pedidos']);
+        // Registrar abono inicial si el usuario ingresó un valor
+        const av = this.abonoForm.value;
+        const valorAbono = av.valor && Number(av.valor) > 0 ? Number(av.valor) : 0;
+        if (valorAbono > 0) {
+          await this.pedidoService.registrarAbono(idPed!, {
+            idMetodoPago: av.idMetodoPago ?? null,
+            valor:        valorAbono,
+          }).toPromise();
+        }
+
+        const metodo = this.metodosPago.find(m => m.idMetodoPago === av.idMetodoPago);
+        const itemsResumen = this.items.map(it => ({
+          descripcion: String(it.descripcion ?? ''),
+          valor: Number(it.valor ?? 0),
+        }));
+        this.abrirDialogoGuardado(
+          idPed!, valorAbono, valorAbono, metodo?.nombreMetodoPago ?? '',
+          dateToString(fv.fechaEntrega),
+          itemsResumen,
+        );
+      }
     } catch (e) {
       console.error(e);
+      this.snackBar.open('Error al guardar. Intenta de nuevo.', 'Cerrar', {
+        duration: 5000, panelClass: ['snack-error'],
+      });
       this.guardando = false;
     }
+  }
+
+  private abrirDialogoGuardado(
+    idPedido: number,
+    valorAbono: number,
+    totalPagado: number,
+    nombreMetodoPago: string,
+    fechaEntrega?: string,
+    items?: { descripcion: string; valor: number }[],
+  ): void {
+    this.guardando = false;
+    const data: PedidoGuardadoDialogData = {
+      idPedido,
+      nombreCliente:    this.clienteSeleccionado
+        ? `${this.clienteSeleccionado.nombres} ${this.clienteSeleccionado.apellidos}`
+        : this.clienteQuery,
+      telefonoCliente:  this.clienteSeleccionado?.telefono,
+      valorTotal:       this.totalCalculado,
+      valorAbono,
+      totalPagado,
+      nombreMetodoPago: nombreMetodoPago || undefined,
+      fechaEntrega,
+      items,
+    };
+    const ref = this.dialog.open(PedidoGuardadoDialogComponent, {
+      data,
+      width: '400px',
+      disableClose: true,
+      panelClass: 'nomina-dialog-panel',
+    });
+    ref.afterClosed().subscribe(() => this.router.navigate(['/app/pedidos']));
   }
 
   volver(): void { this.router.navigate(['/app/pedidos']); }
@@ -437,4 +609,26 @@ export class CrearPedidoComponent implements OnInit {
   }
 
   getImageUrl(ruta: string): string { return `http://localhost:3000/${ruta}`; }
+
+  getEstadoChipStyle(nombreEstado: string | undefined): Record<string, string> {
+    const estado = (nombreEstado || '').toLowerCase();
+    const map: Record<string, { bg: string; color: string }> = {
+      'pendiente':  { bg: '#f0f0f0', color: '#666' },
+      'asignado':   { bg: '#e3f2fd', color: '#1565c0' },
+      'en proceso': { bg: '#fff8e1', color: '#f57f17' },
+      'listo':      { bg: '#e8f5e9', color: '#2e7d32' },
+      'entregado':  { bg: '#1b5e20', color: '#fff' },
+    };
+    const style = map[estado] ?? { bg: '#f0f0f0', color: '#444' };
+    return { 'background-color': style.bg, color: style.color };
+  }
+
+  getNombreEmpleado(item: any): string {
+    if (item.nombreEmpleado) return item.nombreEmpleado;
+    if (item.idEmpleado) {
+      const emp = this.empleados.find(e => e.idEmpleado === item.idEmpleado);
+      return emp ? `${emp.nombres} ${emp.apellidos}` : `Empleado #${item.idEmpleado}`;
+    }
+    return '';
+  }
 }

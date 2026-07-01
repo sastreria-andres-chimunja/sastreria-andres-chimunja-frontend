@@ -125,6 +125,7 @@ export class NominaGeneralComponent implements OnInit {
         fechaInicio: inicio,
         fechaFin: fin,
         soloLectura: !this.puedePagar,
+        historial: !!(inicio || fin),
       },
       panelClass: 'nomina-dialog-panel',
       maxWidth: '95vw',

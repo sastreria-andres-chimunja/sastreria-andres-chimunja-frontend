@@ -17,211 +17,456 @@
 
 <!-- SCROLL AREA -->
 <div class="page-body">
-  <div class="layout-grid">
+  <div [formGroup]="form">
+    <div class="layout-grid">
 
-    <!-- ══ COLUMNA IZQUIERDA: datos del pedido ══ -->
-    <div class="col-left">
+      <!-- ══ COLUMNA IZQUIERDA ══ -->
+      <div class="col-left">
 
-      <!-- Cliente -->
-      <div class="card-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">person</mat-icon>
-          <span>Cliente</span>
-        </div>
-        <div class="autocomplete-wrapper">
-          <div class="search-box" [class.has-value]="!!clienteSeleccionado">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input
-              type="text"
-              placeholder="Buscar cliente por nombre o cédula..."
-              [value]="clienteQuery"
-              (input)="onClienteInput($event)"
-              (blur)="mostrarSugerencias = false"
-              (focus)="mostrarSugerencias = clientesSugeridos.length > 0"
-            />
-            <mat-icon class="check-icon" *ngIf="clienteSeleccionado">check_circle</mat-icon>
+        <!-- Cliente -->
+        <div class="card-section">
+          <div class="section-header">
+            <mat-icon class="section-icon">person</mat-icon>
+            <span>Cliente</span>
           </div>
-          <div class="sugerencias-panel" *ngIf="mostrarSugerencias && clientesSugeridos.length > 0">
-            <div class="sugerencia-item" *ngFor="let c of clientesSugeridos"
-              (mousedown)="seleccionarCliente(c)">
-              <div class="sug-avatar">{{ getInitials(c.nombres) }}</div>
-              <div class="sug-info">
-                <span class="sug-nombre">{{ c.nombres }} {{ c.apellidos }}</span>
-                <span class="sug-cc">CC {{ c.cedula }}</span>
+
+          <div class="autocomplete-wrapper">
+            <div class="search-box" [class.has-value]="!!clienteSeleccionado">
+              <mat-icon class="search-icon">search</mat-icon>
+              <input
+                type="text"
+                placeholder="Buscar cliente por nombre o cédula..."
+                [value]="clienteQuery"
+                (input)="onClienteInput($event)"
+                (blur)="mostrarSugerencias = false"
+                (focus)="mostrarSugerencias = clientesSugeridos.length > 0"
+              />
+              <mat-icon class="check-icon" *ngIf="clienteSeleccionado">check_circle</mat-icon>
+            </div>
+
+            <div class="sugerencias-panel" *ngIf="mostrarSugerencias && clientesSugeridos.length > 0">
+              <div class="sugerencia-item" *ngFor="let c of clientesSugeridos"
+                (mousedown)="seleccionarCliente(c)">
+                <div class="sug-avatar">{{ getInitials(c.nombres) }}</div>
+                <div class="sug-info">
+                  <span class="sug-nombre">{{ c.nombres }} {{ c.apellidos }}</span>
+                  <span class="sug-cc">CC {{ c.cedula }}</span>
+                </div>
               </div>
+            </div>
+          </div>
+
+          <div class="no-results-hint"
+            *ngIf="clienteQuery.length >= 2 && clientesSugeridos.length === 0 && !clienteSeleccionado && !mostrarFormCrearCliente">
+            <mat-icon>search_off</mat-icon>
+            <span>No se encontró el cliente.</span>
+            <button class="btn-link-crear" (click)="abrirFormCrearCliente()">
+              <mat-icon>person_add</mat-icon> Crear cliente
+            </button>
+          </div>
+
+          <!-- Formulario crear cliente -->
+          <div class="crear-cliente-form" *ngIf="mostrarFormCrearCliente" [formGroup]="clienteForm">
+            <div class="crear-cliente-header">
+              <mat-icon>person_add</mat-icon>
+              <span>Nuevo cliente</span>
+            </div>
+            <div class="cc-grid">
+              <mat-form-field appearance="outline" class="cc-field">
+                <mat-label>Nombres</mat-label>
+                <input matInput formControlName="nombres" />
+                <mat-error>Requerido</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="cc-field">
+                <mat-label>Apellidos</mat-label>
+                <input matInput formControlName="apellidos" />
+                <mat-error>Requerido</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="cc-field">
+                <mat-label>Cédula</mat-label>
+                <input matInput formControlName="cedula" />
+                <mat-error>Requerido</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="cc-field">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="telefono" />
+              </mat-form-field>
+            </div>
+            <div class="cc-actions">
+              <button class="btn-cc-cancelar" type="button" (click)="cancelarCrearCliente()">Cancelar</button>
+              <button class="btn-cc-guardar" type="button" (click)="guardarNuevoCliente()" [disabled]="creandoCliente">
+                <mat-spinner *ngIf="creandoCliente" diameter="14"></mat-spinner>
+                <mat-icon *ngIf="!creandoCliente">save</mat-icon>
+                Guardar cliente
+              </button>
+            </div>
+          </div>
+
+          <!-- Info cliente seleccionado -->
+          <div class="cliente-card" *ngIf="clienteSeleccionado">
+            <div class="cli-avatar">{{ getInitials(clienteSeleccionado.nombres) }}</div>
+            <div class="cli-data">
+              <p class="cli-nombre">{{ clienteSeleccionado.nombres }} {{ clienteSeleccionado.apellidos }}</p>
+              <p class="cli-meta">
+                <mat-icon>credit_card</mat-icon> {{ clienteSeleccionado.cedula }}
+                <mat-icon>phone</mat-icon> {{ clienteSeleccionado.telefono }}
+              </p>
+            </div>
+            <div class="cli-medidas-chip">
+              <mat-icon>straighten</mat-icon>
+              {{ clienteMedidas.length }} medida(s)
             </div>
           </div>
         </div>
 
-        <!-- Info cliente seleccionado -->
-        <div class="cliente-card" *ngIf="clienteSeleccionado">
-          <div class="cli-avatar">{{ getInitials(clienteSeleccionado.nombres) }}</div>
-          <div class="cli-data">
-            <p class="cli-nombre">{{ clienteSeleccionado.nombres }} {{ clienteSeleccionado.apellidos }}</p>
-            <p class="cli-meta">
-              <mat-icon>credit_card</mat-icon> {{ clienteSeleccionado.cedula }}
-              <mat-icon>phone</mat-icon> {{ clienteSeleccionado.telefono }}
-            </p>
+        <!-- Estado del pedido (solo estado + valor) -->
+        <div class="card-section">
+          <div class="section-header">
+            <mat-icon class="section-icon">assignment</mat-icon>
+            <span>Estado del pedido</span>
           </div>
-          <div class="cli-medidas-chip">
-            <mat-icon>straighten</mat-icon>
-            {{ clienteMedidas.length }} medida(s)
+          <div class="pedido-form">
+            <div class="estado-field-group" style="grid-column: 1 / -1">
+              <div class="estado-auto-badge" *ngIf="!estadoActualEsManual">
+                <mat-icon class="estado-icon">auto_awesome</mat-icon>
+                <span class="estado-badge-label">{{ nombreEstadoAuto }}</span>
+                <span class="estado-auto-hint">Calculado automáticamente</span>
+              </div>
+              <mat-form-field appearance="outline" class="form-field" style="width:100%">
+                <mat-label>Estado del pedido</mat-label>
+                <mat-icon matPrefix>flag</mat-icon>
+                <mat-select formControlName="idEstado">
+                  <mat-option *ngFor="let e of estados" [value]="e.idEstado"
+                    [disabled]="e.nombre === 'Pendiente' || e.nombre === 'Asignado'">
+                    {{ e.nombre }}
+                    <span *ngIf="e.nombre === 'Pendiente' || e.nombre === 'Asignado'"
+                      style="font-size:10px; color: var(--text-muted)"> — automático</span>
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
         </div>
+
       </div>
 
-      <!-- Datos del pedido -->
-      <div class="card-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">assignment</mat-icon>
-          <span>Datos del pedido</span>
-        </div>
-        <form [formGroup]="form" class="pedido-form">
-          <!-- Estado: Pendiente/Asignado son auto; solo Terminado/Entregado son manuales -->
-          <div class="estado-field-group">
-            <div class="estado-auto-badge" *ngIf="!estadoActualEsManual">
-              <mat-icon class="estado-icon">auto_awesome</mat-icon>
-              <span class="estado-badge-label">{{ nombreEstadoAuto }}</span>
-              <span class="estado-auto-hint">Calculado automáticamente</span>
+      <!-- ══ COLUMNA DERECHA ══ -->
+      <div class="col-right">
+
+        <!-- ════ MODO CREAR ════ -->
+        <ng-container *ngIf="!isEdit">
+
+          <!-- Sin cliente -->
+          <div class="card-section" *ngIf="!clienteSeleccionado">
+            <div class="section-header">
+              <mat-icon class="section-icon">list_alt</mat-icon>
+              <span>Ítems del pedido</span>
             </div>
-            <mat-form-field appearance="outline" class="form-field" style="width:100%">
-              <mat-label>Estado del pedido</mat-label>
-              <mat-icon matPrefix>flag</mat-icon>
-              <mat-select formControlName="idEstado">
-                <mat-option *ngFor="let e of estados" [value]="e.idEstado"
-                  [disabled]="e.nombre === 'Pendiente' || e.nombre === 'Asignado'">
-                  {{ e.nombre }}
-                  <span *ngIf="e.nombre === 'Pendiente' || e.nombre === 'Asignado'"
-                    style="font-size:10px; color: var(--text-muted)"> — automático</span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Fecha recibido</mat-label>
-            <mat-icon matPrefix>calendar_today</mat-icon>
-            <input matInput [matDatepicker]="pickerR" formControlName="fechaRecibido" readonly />
-            <mat-datepicker-toggle matIconSuffix [for]="pickerR"></mat-datepicker-toggle>
-            <mat-datepicker #pickerR></mat-datepicker>
-            <mat-error>Requerido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Fecha entrega</mat-label>
-            <mat-icon matPrefix>event</mat-icon>
-            <input matInput [matDatepicker]="pickerE" formControlName="fechaEntrega" readonly />
-            <mat-datepicker-toggle matIconSuffix [for]="pickerE"></mat-datepicker-toggle>
-            <mat-datepicker #pickerE></mat-datepicker>
-            <mat-error>Requerido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Valor total</mat-label>
-            <mat-icon matPrefix>attach_money</mat-icon>
-            <input matInput formControlName="valorTotal" type="number" readonly />
-          </mat-form-field>
-        </form>
-      </div>
-
-    </div>
-
-    <!-- ══ COLUMNA DERECHA: ítems del pedido ══ -->
-    <div class="col-right">
-      <div class="card-section items-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">list_alt</mat-icon>
-          <span>Ítems del pedido</span>
-          <span class="spacer"></span>
-          <button class="btn-add-item" (click)="abrirDialogoItem()"
-            [disabled]="!clienteSeleccionado && !isEdit"
-            matTooltip="{{ !clienteSeleccionado && !isEdit ? 'Seleccione un cliente primero' : 'Agregar ítem' }}">
-            <mat-icon>add</mat-icon> Agregar ítem
-          </button>
-        </div>
-
-        <!-- Lista de ítems -->
-        <div class="items-list" *ngIf="items.length > 0">
-          <div class="item-card" *ngFor="let it of items; let i = index">
-            <div class="item-stripe"></div>
-
-            <div class="item-top">
-              <div class="item-icon">
-                <mat-icon>checkroom</mat-icon>
-              </div>
-              <div class="item-info">
-                <p class="item-desc">{{ it.descripcion }}</p>
-                <p class="item-meta">
-                  <span *ngIf="it.nombreEmpleado || it.idEmpleado">
-                    <mat-icon>person</mat-icon> {{ it.nombreEmpleado || 'Empleado #' + it.idEmpleado }}
-                  </span>
-                  <span *ngIf="it.tipoPrendaMedida || it.idMedida">
-                    <mat-icon>straighten</mat-icon>
-                    {{ it.tipoPrendaMedida || (it._nuevaMedida ? it._nuevaMedida.tipoPrenda : 'Medida asignada') }}
-                  </span>
-                  <span *ngIf="it.fechaEntrega">
-                    <mat-icon>event</mat-icon> {{ it.fechaEntrega }}
-                  </span>
-                </p>
-              </div>
-              <div class="item-valor">{{ formatCOP(it.valor) }}</div>
-            </div>
-
-            <!-- Fotos preview -->
-            <div class="item-fotos" *ngIf="(it._fotos?.length > 0) || (it._fotosNuevas?.length > 0)">
-              <img *ngFor="let f of (it._fotos ?? [])"
-                [src]="getImageUrl(f.rutaImagen)" class="foto-thumb" [alt]="f.nombreArchivo" />
-              <div class="foto-count-chip" *ngIf="(it._fotosNuevas?.length ?? 0) > 0">
-                <mat-icon>photo</mat-icon> +{{ it._fotosNuevas.length }}
-              </div>
-            </div>
-
-            <div class="item-footer">
-              <span class="estado-chip">{{ it.nombreEstado || 'Sin estado' }}</span>
-              <div class="item-actions">
-                <button class="btn-item-action" (click)="abrirDialogoItem(it)" matTooltip="Editar ítem">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button class="btn-item-action danger" (click)="eliminarItem(it, i)" matTooltip="Eliminar ítem">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
+            <div class="items-empty">
+              <mat-icon>person_search</mat-icon>
+              <p>Seleccione un cliente para agregar ítems.</p>
             </div>
           </div>
-        </div>
 
-        <!-- Empty ítems -->
-        <div class="items-empty" *ngIf="items.length === 0">
-          <mat-icon>add_shopping_cart</mat-icon>
-          <p>Sin ítems. Agregue prendas al pedido.</p>
-        </div>
+          <ng-container *ngIf="clienteSeleccionado">
 
-        <!-- Total y abonos -->
-        <div class="items-total" *ngIf="items.length > 0">
-          <div class="total-summary">
-            <div class="total-row">
-              <span class="total-label">Total del pedido:</span>
-              <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
-            </div>
-            <ng-container *ngIf="isEdit">
-              <div class="total-row abonado-row">
-                <span class="total-label">Abonado:</span>
-                <span class="abonado-valor">{{ formatCOP(totalAbonado) }}</span>
+            <!-- 1. Acordeón de ítems ya agregados -->
+            <div class="card-section items-acordeon-section" *ngIf="items.length > 0">
+              <div class="section-header">
+                <mat-icon class="section-icon">list_alt</mat-icon>
+                <span>Ítems del pedido</span>
+                <span class="spacer"></span>
+                <span class="total-inline">{{ formatCOP(totalCalculado) }}</span>
               </div>
-              <div class="total-row restante-row">
-                <span class="total-label">Restante:</span>
-                <span class="restante-valor" [class.saldo-ok]="saldoPedido <= 0" [class.saldo-pen]="saldoPedido > 0">
-                  {{ saldoPedido <= 0 ? '¡Pagado!' : formatCOP(saldoPedido) }}
+
+              <div class="acordeon-list">
+                <div class="acordeon-item" *ngFor="let it of items; let i = index">
+
+                  <div class="acordeon-header" (click)="togglePanel(i)"
+                    [class.is-open]="panelExpandidoIdx === i">
+                    <div class="ac-stripe"></div>
+                    <div class="ac-icon"><mat-icon>checkroom</mat-icon></div>
+                    <div class="ac-info">
+                      <span class="ac-num">Ítem #{{ i + 1 }}</span>
+                      <span class="ac-desc">{{ it.descripcion }}</span>
+                      <span class="ac-meta">
+                        <span *ngIf="getNombreEmpleado(it)">
+                          <mat-icon>person</mat-icon> {{ getNombreEmpleado(it) }}
+                        </span>
+                        <span *ngIf="it.idMedida || it._nuevaMedida">
+                          <mat-icon>straighten</mat-icon>
+                          {{ it._nuevaMedida ? it._nuevaMedida.tipoPrenda : 'Medida asignada' }}
+                        </span>
+                      </span>
+                    </div>
+                    <span class="ac-valor">{{ formatCOP(it.valor) }}</span>
+                    <div class="ac-actions">
+                      <button class="btn-ac-action danger" (click)="$event.stopPropagation(); eliminarItem(it, i)"
+                        matTooltip="Quitar ítem">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <mat-icon class="ac-expand-icon">
+                        {{ panelExpandidoIdx === i ? 'expand_less' : 'expand_more' }}
+                      </mat-icon>
+                    </div>
+                  </div>
+
+                  <div class="acordeon-body" *ngIf="panelExpandidoIdx === i">
+                    <app-item-inline-form
+                      [empleados]="empleados"
+                      [medidas]="clienteMedidas"
+                      [idCliente]="clienteSeleccionado.idCliente ?? 0"
+                      [idPedido]="0"
+                      [item]="it"
+                      [modoEdicion]="true"
+                      (itemGuardado)="onItemActualizado($event, i)"
+                      (cancelarEdicion)="panelExpandidoIdx = null">
+                    </app-item-inline-form>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="items-total">
+                <div class="total-summary">
+                  <div class="total-row">
+                    <span class="total-label">Total del pedido:</span>
+                    <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Formulario para nuevo ítem -->
+            <div class="card-section item-form-section">
+              <div class="section-header">
+                <mat-icon class="section-icon">add_circle</mat-icon>
+                <span>Agregar ítem</span>
+                <span class="items-counter-chip" *ngIf="items.length > 0">
+                  {{ items.length }} ítem{{ items.length > 1 ? 's' : '' }} en el pedido
                 </span>
+                <span class="spacer"></span>
+                <button class="btn-close-form" *ngIf="mostrarFormNuevoItem"
+                  (click)="mostrarFormNuevoItem = false; valorFormActual = 0" matTooltip="Cerrar formulario">
+                  <mat-icon>close</mat-icon>
+                </button>
+                <button class="btn-add-item" *ngIf="!mostrarFormNuevoItem"
+                  (click)="mostrarFormNuevoItem = true">
+                  <mat-icon>add</mat-icon> Agregar ítem
+                </button>
               </div>
-            </ng-container>
+              <app-item-inline-form
+                #formNuevoItem
+                *ngIf="mostrarFormNuevoItem"
+                [empleados]="empleados"
+                [medidas]="clienteMedidas"
+                [idCliente]="clienteSeleccionado.idCliente ?? 0"
+                [idPedido]="0"
+                [modoEdicion]="false"
+                (itemGuardado)="onItemAgregado($event)"
+                (valorCambiado)="valorFormActual = $event">
+              </app-item-inline-form>
+            </div>
+
+            <!-- 3. Fechas del pedido -->
+            <div class="card-section fechas-section">
+              <div class="section-header">
+                <mat-icon class="section-icon">date_range</mat-icon>
+                <span>Fechas</span>
+              </div>
+              <div class="fechas-grid">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Fecha recibido</mat-label>
+                  <mat-icon matPrefix>calendar_today</mat-icon>
+                  <input matInput [matDatepicker]="pickerR" formControlName="fechaRecibido" readonly />
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerR"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerR></mat-datepicker>
+                  <mat-error>Requerido</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Fecha entrega</mat-label>
+                  <mat-icon matPrefix>event</mat-icon>
+                  <input matInput [matDatepicker]="pickerE" formControlName="fechaEntrega" readonly />
+                  <mat-datepicker-toggle matIconSuffix [for]="pickerE"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerE></mat-datepicker>
+                  <mat-error>Requerido</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- 4. Abono inicial + Guardar -->
+            <div class="card-section guardar-section" [formGroup]="abonoForm">
+              <div class="abono-inicial-row">
+                <mat-form-field appearance="outline" class="form-field abono-valor-field">
+                  <mat-label>Abono inicial (opcional)</mat-label>
+                  <mat-icon matPrefix>payments</mat-icon>
+                  <input matInput formControlName="valor" type="number" min="0" placeholder="0" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="form-field abono-metodo-field">
+                  <mat-label>Método de pago</mat-label>
+                  <mat-icon matPrefix>account_balance_wallet</mat-icon>
+                  <mat-select formControlName="idMetodoPago">
+                    <mat-option [value]="null">— Ninguno —</mat-option>
+                    <mat-option *ngFor="let m of metodosPago" [value]="m.idMetodoPago">
+                      {{ m.nombreMetodoPago }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="guardar-bottom-row">
+                <div class="total-pedido-display">
+                  <mat-icon>receipt_long</mat-icon>
+                  <div class="total-pedido-texts">
+                    <span class="total-pedido-label">Total pedido</span>
+                    <span class="total-pedido-valor">{{ formatCOP(totalConFormActual) }}</span>
+                  </div>
+                </div>
+                <div class="guardar-actions">
+                  <button class="btn-guardar-bottom" (click)="guardar()" [disabled]="guardando">
+                    <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
+                    <mat-icon *ngIf="!guardando">save</mat-icon>
+                    {{ guardando ? 'Guardando...' : 'Guardar pedido' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+
+        </ng-container>
+
+        <!-- ════ MODO EDITAR ════ -->
+        <ng-container *ngIf="isEdit">
+          <div class="card-section items-section">
+            <div class="section-header">
+              <mat-icon class="section-icon">list_alt</mat-icon>
+              <span>Ítems del pedido</span>
+              <span class="spacer"></span>
+              <button class="btn-add-item" (click)="abrirDialogoItem()">
+                <mat-icon>add</mat-icon> Agregar ítem
+              </button>
+            </div>
+
+            <div class="items-list" *ngIf="items.length > 0">
+              <div class="item-card" *ngFor="let it of items; let i = index">
+                <div class="item-stripe"></div>
+                <div class="item-top">
+                  <div class="item-icon"><mat-icon>checkroom</mat-icon></div>
+                  <div class="item-info">
+                    <p class="item-desc">{{ it.descripcion }}</p>
+                    <p class="item-meta">
+                      <span *ngIf="it.nombreEmpleado || it.idEmpleado">
+                        <mat-icon>person</mat-icon> {{ it.nombreEmpleado || 'Empleado #' + it.idEmpleado }}
+                      </span>
+                      <span *ngIf="it.tipoPrendaMedida || it.idMedida">
+                        <mat-icon>straighten</mat-icon>
+                        {{ it.tipoPrendaMedida || 'Medida asignada' }}
+                      </span>
+                    </p>
+                  </div>
+                  <div class="item-valor">{{ formatCOP(it.valor) }}</div>
+                </div>
+
+                <div class="item-fotos" *ngIf="it._fotos?.length > 0">
+                  <img *ngFor="let f of (it._fotos ?? [])"
+                    [src]="getImageUrl(f.rutaImagen)" class="foto-thumb" [alt]="f.nombreArchivo" />
+                </div>
+
+                <div class="item-footer">
+                  <span class="estado-chip" [ngStyle]="getEstadoChipStyle(it.nombreEstado)">{{ it.nombreEstado || 'Sin estado' }}</span>
+                  <div class="item-actions">
+                    <button class="btn-item-action" (click)="abrirDialogoItem(it)" matTooltip="Editar ítem">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="btn-item-action danger" (click)="eliminarItem(it, i)" matTooltip="Eliminar ítem">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="items-empty" *ngIf="items.length === 0">
+              <mat-icon>add_shopping_cart</mat-icon>
+              <p>Sin ítems. Agregue prendas al pedido.</p>
+            </div>
+
+            <div class="items-total" *ngIf="items.length > 0">
+              <div class="total-summary">
+                <div class="total-row">
+                  <span class="total-label">Total del pedido:</span>
+                  <span class="total-valor">{{ formatCOP(totalCalculado) }}</span>
+                </div>
+                <div class="total-row abonado-row">
+                  <span class="total-label">Abonado:</span>
+                  <span class="abonado-valor">{{ formatCOP(totalAbonado) }}</span>
+                </div>
+                <div class="total-row restante-row">
+                  <span class="total-label">Restante:</span>
+                  <span class="restante-valor"
+                    [class.saldo-ok]="saldoPedido <= 0" [class.saldo-pen]="saldoPedido > 0">
+                    {{ saldoPedido <= 0 ? '¡Pagado!' : formatCOP(saldoPedido) }}
+                  </span>
+                </div>
+              </div>
+              <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
+                <mat-icon>payments</mat-icon> Registrar abono
+              </button>
+            </div>
           </div>
-          <button class="btn-registrar-abono" *ngIf="isEdit" (click)="abrirDialogoPago()">
-            <mat-icon>payments</mat-icon> Registrar abono
-          </button>
-        </div>
+
+          <!-- Fechas en modo editar -->
+          <div class="card-section fechas-section">
+            <div class="section-header">
+              <mat-icon class="section-icon">date_range</mat-icon>
+              <span>Fechas</span>
+            </div>
+            <div class="fechas-grid">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Fecha recibido</mat-label>
+                <mat-icon matPrefix>calendar_today</mat-icon>
+                <input matInput [matDatepicker]="pickerR2" formControlName="fechaRecibido" readonly />
+                <mat-datepicker-toggle matIconSuffix [for]="pickerR2"></mat-datepicker-toggle>
+                <mat-datepicker #pickerR2></mat-datepicker>
+                <mat-error>Requerido</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Fecha entrega</mat-label>
+                <mat-icon matPrefix>event</mat-icon>
+                <input matInput [matDatepicker]="pickerE2" formControlName="fechaEntrega" readonly />
+                <mat-datepicker-toggle matIconSuffix [for]="pickerE2"></mat-datepicker-toggle>
+                <mat-datepicker #pickerE2></mat-datepicker>
+                <mat-error>Requerido</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Guardar en modo editar -->
+          <div class="card-section guardar-section">
+            <div class="total-pedido-display">
+              <mat-icon>receipt_long</mat-icon>
+              <div class="total-pedido-texts">
+                <span class="total-pedido-label">Total pedido</span>
+                <span class="total-pedido-valor">{{ formatCOP(totalCalculado) }}</span>
+              </div>
+            </div>
+            <div class="guardar-actions">
+              <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
+                <mat-icon>payments</mat-icon> Registrar abono
+              </button>
+              <button class="btn-guardar-bottom" (click)="guardar()" [disabled]="guardando">
+                <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
+                <mat-icon *ngIf="!guardando">save</mat-icon>
+                {{ guardando ? 'Guardando...' : 'Guardar pedido' }}
+              </button>
+            </div>
+          </div>
+
+        </ng-container>
+
       </div>
     </div>
-
   </div>
 </div>

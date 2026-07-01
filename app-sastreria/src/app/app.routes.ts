@@ -15,6 +15,7 @@ import { PedidosListComponent } from './features/pedidos/pedidos-list/pedidos-li
 import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedido.component';
 import { CambiarClaveComponent } from './features/cambiar-clave/cambiar-clave.component';
 import { RecuperarClaveComponent } from './features/recuperar-clave/recuperar-clave.component';
+import { MisItemsComponent } from './features/mis-items/mis-items.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -42,6 +43,9 @@ export const routes: Routes = [
       { path: 'pedidos', component: PedidosListComponent },
       { path: 'pedidos/crear', component: CrearPedidoComponent },
       { path: 'pedidos/editar/:id', component: CrearPedidoComponent },
+
+      // Vista exclusiva para operarios
+      { path: 'mis-items', component: MisItemsComponent },
 
       { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
     ],

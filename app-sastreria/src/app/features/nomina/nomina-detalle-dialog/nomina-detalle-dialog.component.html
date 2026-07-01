@@ -5,7 +5,7 @@
       <div class="dialog-avatar">{{ getInitials(data.nombres) }}</div>
       <div class="dialog-title-group">
         <h2 class="dialog-title">{{ data.nombres }} {{ data.apellidos }}</h2>
-        <p class="dialog-subtitle">Detalle de nómina</p>
+        <p class="dialog-subtitle">{{ esHistorial ? 'Historial de nómina' : 'Detalle de nómina' }}</p>
       </div>
     </div>
     <button class="btn-close-dialog" (click)="cerrar()">
@@ -25,7 +25,7 @@
     <!-- Resumen -->
     <div class="resumen-strip">
       <div class="resumen-item">
-        <span class="resumen-label">Pendiente de pago</span>
+        <span class="resumen-label">{{ esHistorial ? 'Total pagado' : 'Pendiente de pago' }}</span>
         <span class="resumen-value income">{{ formatCOP(detalle.entradas.total) }}</span>
       </div>
       <div class="resumen-divider"></div>
@@ -35,31 +35,43 @@
       </div>
       <div class="resumen-divider"></div>
       <div class="resumen-item">
-        <span class="resumen-label">Saldo</span>
+        <span class="resumen-label">{{ esHistorial ? 'Neto pagado' : 'Saldo' }}</span>
         <span class="resumen-value"
-          [class.pending]="detalle.saldo > 0"
-          [class.zero]="detalle.saldo === 0">
-          {{ formatCOP(detalle.saldo) }}
+          [class.pending]="(detalle.entradas.total - detalle.salidas.total) > 0"
+          [class.zero]="(detalle.entradas.total - detalle.salidas.total) === 0">
+          {{ formatCOP(detalle.entradas.total - detalle.salidas.total) }}
         </span>
       </div>
     </div>
 
-    <!-- Acciones de ticket tras un pago -->
+    <!-- Acciones de ticket tras un pago individual -->
     <div class="ticket-actions" *ngIf="ultimoItemPagado">
       <span class="ticket-label">Pago registrado — {{ ultimoItemPagado.descripcion }}</span>
       <button class="btn-ticket" (click)="imprimirTicketNomina()">
         <mat-icon>print</mat-icon> Imprimir
       </button>
-      <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()">
-        <mat-icon>send</mat-icon> WhatsApp
-      </button>
+      <ng-container *ngIf="!archivoPDFNomina">
+        <button class="btn-ticket" (click)="generarPDFNomina()" [disabled]="generandoPDFNomina">
+          <mat-spinner *ngIf="generandoPDFNomina" diameter="14"></mat-spinner>
+          <mat-icon *ngIf="!generandoPDFNomina">picture_as_pdf</mat-icon>
+          {{ generandoPDFNomina ? 'Generando…' : 'Generar PDF' }}
+        </button>
+      </ng-container>
+      <ng-container *ngIf="archivoPDFNomina">
+        <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()">
+          <mat-icon>send</mat-icon> WhatsApp
+        </button>
+        <button *ngIf="urlFallbackNomina" class="btn-ticket" (click)="abrirWhatsAppFallbackNomina()">
+          <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
+        </button>
+      </ng-container>
     </div>
 
   <!-- Tabs -->
     <mat-tab-group class="movimientos-tabs" animationDuration="150ms">
 
-      <!-- Tab Ingresos pendientes -->
-      <mat-tab>
+      <!-- ── MODO NORMAL: ítems pendientes de pago ── -->
+      <mat-tab *ngIf="!esHistorial">
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">schedule</mat-icon>
           Por pagar
@@ -72,19 +84,38 @@
             <p>Todo al día — sin ítems pendientes</p>
           </div>
 
+          <div class="pagar-todo-bar" *ngIf="detalle.entradas.items.length > 0 && !data.soloLectura">
+            <span class="pagar-todo-hint">{{ detalle.entradas.items.length }} ítem(s) pendiente(s) · {{ formatCOP(detalle.entradas.total) }}</span>
+            <button class="btn-pagar-todo" (click)="pagarTodo()" [disabled]="pagandoTodo">
+              <mat-icon *ngIf="!pagandoTodo">payments</mat-icon>
+              <mat-spinner *ngIf="pagandoTodo" diameter="14"></mat-spinner>
+              <span>{{ pagandoTodo ? 'Liquidando…' : 'Liquidar todo' }}</span>
+            </button>
+          </div>
+
           <div class="movimiento-list" *ngIf="detalle.entradas.items.length > 0">
-            <div class="mov-header-row">
+            <div class="mov-header-items">
               <span>Descripción</span>
-              <span>Fecha entrega</span>
+              <span>Entrega</span>
+              <span class="text-right">Valor ítem</span>
+              <span class="text-center">% Comisión</span>
               <span class="text-right">A pagar</span>
               <span></span>
             </div>
-            <div class="mov-row" *ngFor="let item of detalle.entradas.items">
+            <div class="mov-row-items" *ngFor="let item of detalle.entradas.items">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub">Pedido #{{ item.idPedido }} · {{ item.comisionEmpleado }}% de {{ formatCOP(item.valor) }}</span>
+                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
               </div>
               <span class="mov-fecha">{{ item.fechaEntrega || '—' }}</span>
+              <span class="mov-valor" style="text-align:right">{{ formatCOP(item.valor) }}</span>
+              <div style="display:flex;justify-content:center">
+                <input class="comision-input" type="number" min="0" max="100"
+                  [(ngModel)]="item.comisionEmpleado"
+                  (change)="actualizarComision(item, item.comisionEmpleado)"
+                  [disabled]="!!data.soloLectura"
+                  title="% comisión" />
+              </div>
               <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>
               <button class="btn-pagar"
                 *ngIf="!data.soloLectura"
@@ -100,7 +131,38 @@
         </div>
       </mat-tab>
 
-      <!-- Tab Abonos -->
+      <!-- ── MODO HISTORIAL: ítems ya pagados (cuenta cruzada) ── -->
+      <mat-tab *ngIf="esHistorial">
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">check_circle</mat-icon>
+          Pagado
+          <span class="tab-badge income-badge">{{ detalle.entradas.pagos.length }}</span>
+        </ng-template>
+
+        <div class="tab-content">
+          <div class="empty-state" *ngIf="detalle.entradas.pagos.length === 0">
+            <mat-icon>inbox</mat-icon>
+            <p>Sin pagos registrados en este período</p>
+          </div>
+
+          <div class="movimiento-list" *ngIf="detalle.entradas.pagos.length > 0">
+            <div class="mov-header-row">
+              <span>Descripción</span>
+              <span>Fecha pago</span>
+              <span class="text-right">Valor</span>
+            </div>
+            <div class="mov-row" *ngFor="let pago of detalle.entradas.pagos">
+              <div class="mov-desc">
+                <span class="mov-label">{{ pago.observacion || 'Pago nómina' }}</span>
+              </div>
+              <span class="mov-fecha">{{ pago.fecha || '—' }}</span>
+              <span class="mov-valor income">{{ formatCOP(pago.valor) }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Tab Abonos (igual en ambos modos) -->
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">arrow_upward</mat-icon>

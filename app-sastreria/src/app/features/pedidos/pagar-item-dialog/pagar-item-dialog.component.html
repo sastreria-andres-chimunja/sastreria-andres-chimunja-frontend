@@ -100,9 +100,30 @@
     <button class="btn-recibo" (click)="imprimirRecibo()">
       <mat-icon>print</mat-icon> Imprimir recibo
     </button>
-    <button class="btn-whatsapp" (click)="enviarWhatsApp()">
-      <mat-icon>send</mat-icon> WhatsApp
+
+    <!-- Paso 1: Generar PDF en memoria -->
+    <button class="btn-whatsapp" (click)="generarPDF()"
+      *ngIf="!archivoPDF" [disabled]="generandoPDF">
+      <mat-spinner *ngIf="generandoPDF" diameter="16"></mat-spinner>
+      <mat-icon *ngIf="!generandoPDF">picture_as_pdf</mat-icon>
+      {{ generandoPDF ? 'Generando...' : 'Generar PDF' }}
     </button>
+
+    <!-- Paso 2: Enviar (Web Share en móvil / descarga en PC) -->
+    <button class="btn-whatsapp" (click)="enviarWhatsApp()"
+      *ngIf="archivoPDF && !urlFallback">
+      <mat-icon>send</mat-icon> Enviar a WhatsApp
+    </button>
+
+    <!-- Fallback PC -->
+    <ng-container *ngIf="urlFallback">
+      <button class="btn-whatsapp" (click)="abrirWhatsAppFallback()">
+        <mat-icon>chat</mat-icon> Abrir WhatsApp
+      </button>
+      <p style="font-size:10px;color:#777;margin:4px 0 0;text-align:center;">
+        📎 Adjunta el PDF descargado en WhatsApp
+      </p>
+    </ng-container>
   </div>
 
 </div>

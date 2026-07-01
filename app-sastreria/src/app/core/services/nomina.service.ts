@@ -18,10 +18,15 @@ export class NominaService {
     return this.http.get(this.api, { params });
   }
 
-  nominaEmpleado(idEmpleado: number, fechaInicio?: string, fechaFin?: string) {
+  nominaEmpleado(idEmpleado: number, fechaInicio?: string, fechaFin?: string, historial?: boolean) {
     const params: Record<string, string> = {};
     if (fechaInicio) params['fechaInicio'] = fechaInicio;
     if (fechaFin) params['fechaFin'] = fechaFin;
+    if (historial) params['historial'] = 'true';
     return this.http.get(`${this.api}/${idEmpleado}`, { params });
+  }
+
+  liquidar(idEmpleado: number) {
+    return this.http.post(`${this.api}/${idEmpleado}/liquidar`, {});
   }
 }

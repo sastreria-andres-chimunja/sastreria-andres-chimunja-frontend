@@ -1,68 +1,54 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, OnDestroy, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { Empleado } from '../../../shared/models/Empleado';
 import { Medida } from '../../../shared/models/Medida';
-import { stringToDate } from '../../../utils/date.utils';
 import { ImagenService } from '../../../core/services/imagen.service';
-import { EstadoService } from '../../../core/services/estado.service';
-
-export interface ItemDialogData {
-  item?: any;
-  idPedido: number;
-  idCliente: number;
-  empleados: Empleado[];
-  medidas: Medida[];
-  imagenes?: any[];
-}
-
-export interface ItemDialogResult {
-  item: any;
-  nuevaMedida: any | null;
-  fotosNuevas: File[];
-  fotosEliminar: number[];
-  fotosNuevaMedida: File[];
-}
+import { ItemDialogResult } from '../item-pedido-dialog/item-pedido-dialog.component';
 
 @Component({
-  selector: 'app-item-pedido-dialog',
+  selector: 'app-item-inline-form',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatDialogModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatDatepickerModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
     MatRadioModule,
     MatTooltipModule,
     TextFieldModule,
   ],
-  templateUrl: './item-pedido-dialog.component.html',
-  styleUrl: './item-pedido-dialog.component.css',
+  templateUrl: './item-inline-form.component.html',
+  styleUrl: './item-inline-form.component.css',
 })
-export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
+export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() empleados: Empleado[] = [];
+  @Input() medidas: Medida[] = [];
+  @Input() idCliente = 0;
+  @Input() idPedido = 0;
+  @Input() item: any = null;
+  @Input() modoEdicion = false;
+
+  @Output() itemGuardado = new EventEmitter<ItemDialogResult>();
+  @Output() cancelarEdicion = new EventEmitter<void>();
+  @Output() valorCambiado = new EventEmitter<number>();
+
   form!: FormGroup;
   medidaForm!: FormGroup;
 
   modoMedida: 'ninguna' | 'guardada' | 'nueva' = 'ninguna';
-  estados: any[] = [];
 
   // ── Voz ──────────────────────────────────────────────────────
   escuchando = false;
@@ -97,24 +83,19 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void { this.rec?.stop(); }
   tipoPrendaNueva = '';
-  isEdit = false;
 
-  // fotos del ítem
   fotosNuevas: File[] = [];
   fotosPreview: string[] = [];
   fotosEliminar: number[] = [];
   fotosExistentes: any[] = [];
 
-  // fotos de la medida seleccionada (solo visualización)
   fotosMedidaSeleccionada: any[] = [];
   cargandoFotosMedida = false;
 
-  // fotos de la nueva medida
   fotosNuevaMedida: File[] = [];
   fotosPreviewNuevaMedida: string[] = [];
   isDraggingMedida = false;
 
-  // medida seleccionada completa (para mostrar campos)
   medidaSeleccionada: Medida | null = null;
 
   readonly camposMedida = [
@@ -137,49 +118,38 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     { key: 'bota',           label: 'Bota' },
   ];
 
-  readonly camposCamisa = ['espalda','hombro','talleDelantero','talleTrasero','distancia','separacion','pecho','cintura','base','largo','largoManga','anchoManga','escote'];
-  readonly camposPantalon = ['cintura','base','tiro','pierna','rodilla','bota','largo'];
-
-  constructor(
-    public dialogRef: MatDialogRef<ItemPedidoDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ItemDialogData,
-    private fb: FormBuilder,
-    private imagenService: ImagenService,
-    private estadoService: EstadoService,
-  ) {}
+  constructor(private fb: FormBuilder, private imagenService: ImagenService) {}
 
   ngOnInit(): void {
-    this.isEdit = !!this.data.item?.idItemPedido;
-    this.fotosExistentes = this.data.imagenes ?? [];
-
-    if (this.data.item?.idMedida) {
-      this.modoMedida = 'guardada';
-      this.medidaSeleccionada = this.data.medidas.find(m => m.idMedida === this.data.item.idMedida) ?? null;
-    }
-
-    this.estadoService.listar().subscribe({
-      next: (res: any) => { this.estados = Array.isArray(res) ? res : (res?.estados ?? []); },
-    });
-
     this.buildForms();
+    if (this.item?.idMedida) {
+      this.modoMedida = 'guardada';
+      this.medidaSeleccionada = this.medidas.find(m => m.idMedida === this.item.idMedida) ?? null;
+      this.cargarFotosMedida(this.item.idMedida);
+    }
+    this.fotosExistentes = this.item?._fotos ?? [];
+  }
 
-    if (this.data.item?.idMedida) {
-      this.cargarFotosMedida(this.data.item.idMedida);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['item'] && !changes['item'].firstChange && this.form) {
+      this.cargarItemEnForm();
     }
   }
 
   private buildForms(): void {
-    const item = this.data.item ?? {};
+    const it = this.item ?? {};
     this.form = this.fb.group({
-      descripcion:       [item.descripcion ?? '', Validators.required],
-      valor:             [item.valor ?? '', [Validators.required, Validators.min(0)]],
-      comisionEmpleado:  [item.comisionEmpleado ?? 0],
-      idEstado:          [item.idEstado ?? null],
-      fechaEntrega:      [item.fechaEntrega ? stringToDate(item.fechaEntrega) : new Date(), Validators.required],
-      observacion:       [item.observacion ?? ''],
-      idEmpleado:        [item.idEmpleado ?? null],
-      idMedidaGuardada:  [item.idMedida ?? null],
+      descripcion:      [it.descripcion ?? '', Validators.required],
+      valor:            [it.valor ?? '', [Validators.required, Validators.min(0)]],
+      idEmpleado:       [it.idEmpleado ?? null],
+      idMedidaGuardada: [it.idMedida ?? null],
     });
+
+    if (!this.modoEdicion) {
+      this.form.get('valor')?.valueChanges.subscribe(v => {
+        this.valorCambiado.emit(Number(v) || 0);
+      });
+    }
 
     const medidaFields: Record<string, any> = {
       tipoPrenda:    ['', Validators.required],
@@ -188,6 +158,44 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     };
     this.camposMedida.forEach(c => { medidaFields[c.key] = [0]; });
     this.medidaForm = this.fb.group(medidaFields);
+  }
+
+  private cargarItemEnForm(): void {
+    const it = this.item ?? {};
+    this.form.patchValue({
+      descripcion:      it.descripcion ?? '',
+      valor:            it.valor ?? '',
+      idEmpleado:       it.idEmpleado ?? null,
+      idMedidaGuardada: it.idMedida ?? null,
+    });
+    if (it.idMedida) {
+      this.modoMedida = 'guardada';
+      this.medidaSeleccionada = this.medidas.find(m => m.idMedida === it.idMedida) ?? null;
+    } else {
+      this.modoMedida = 'ninguna';
+      this.medidaSeleccionada = null;
+    }
+    this.fotosExistentes = it._fotos ?? [];
+    this.fotosNuevas = [];
+    this.fotosPreview = [];
+    this.fotosEliminar = [];
+    this.fotosNuevaMedida = [];
+    this.fotosPreviewNuevaMedida = [];
+  }
+
+  resetForm(): void {
+    this.valorCambiado.emit(0);
+    this.modoMedida = 'ninguna';
+    this.tipoPrendaNueva = '';
+    this.fotosNuevas = [];
+    this.fotosPreview = [];
+    this.fotosEliminar = [];
+    this.fotosExistentes = [];
+    this.fotosMedidaSeleccionada = [];
+    this.fotosNuevaMedida = [];
+    this.fotosPreviewNuevaMedida = [];
+    this.medidaSeleccionada = null;
+    this.buildForms();
   }
 
   onModoChange(): void {
@@ -202,7 +210,7 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
 
   onMedidaSeleccionadaChange(idMedida: number | null): void {
     this.fotosMedidaSeleccionada = [];
-    this.medidaSeleccionada = idMedida ? (this.data.medidas.find(m => m.idMedida === idMedida) ?? null) : null;
+    this.medidaSeleccionada = idMedida ? (this.medidas.find(m => m.idMedida === idMedida) ?? null) : null;
     if (idMedida) this.cargarFotosMedida(idMedida);
   }
 
@@ -221,8 +229,7 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     const esNuevoTipo = this.tipoPrendaNueva !== tipo;
     this.tipoPrendaNueva = tipo;
     this.medidaForm.patchValue({ tipoPrenda: tipo });
-
-    if (esNuevoTipo && !this.isEdit) {
+    if (esNuevoTipo) {
       const reset: Record<string, number> = {};
       this.camposMedida.forEach(c => { reset[c.key] = 0; });
       reset['otros'] = 0;
@@ -232,7 +239,6 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Fotos ítem ──────────────────────────────────────────────
   onFileChange(event: Event): void {
     const files = Array.from((event.target as HTMLInputElement).files ?? []);
     files.forEach(f => {
@@ -253,7 +259,6 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     this.fotosExistentes = this.fotosExistentes.filter(f => f.idImagen !== idImagen);
   }
 
-  // ── Fotos nueva medida ──────────────────────────────────────
   onFileMedidaChange(event: Event): void {
     const files = Array.from((event.target as HTMLInputElement).files ?? []);
     this.procesarFotosMedida(files);
@@ -286,7 +291,6 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     this.fotosPreviewNuevaMedida.splice(i, 1);
   }
 
-  // ── Guardar ────────────────────────────────────────────────
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     if (this.modoMedida === 'nueva' && this.medidaForm.invalid) {
@@ -295,37 +299,52 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     }
 
     const formVal = this.form.value;
-    const item: any = {
-      ...this.data.item,
-      idPedido:         this.data.idPedido,
-      descripcion:      formVal.descripcion,
-      valor:            formVal.valor,
-      comisionEmpleado: formVal.comisionEmpleado ?? 0,
-      idEstado:         formVal.idEstado ?? null,
-      observacion:      formVal.observacion,
-      idEmpleado:       formVal.idEmpleado || null,
-      fechaEntrega:     formVal.fechaEntrega,
-      idMedida:         this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
-    };
-
     const result: ItemDialogResult = {
-      item,
+      item: {
+        ...this.item,
+        idPedido:    this.idPedido,
+        descripcion: formVal.descripcion,
+        valor:       formVal.valor,
+        idEmpleado:  formVal.idEmpleado || null,
+        idMedida:    this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
+      },
       nuevaMedida: this.modoMedida === 'nueva'
-        ? { ...this.medidaForm.value, idCliente: this.data.idCliente }
+        ? { ...this.medidaForm.value, idCliente: this.idCliente }
         : null,
-      fotosNuevas:       this.fotosNuevas,
-      fotosEliminar:     this.fotosEliminar,
-      fotosNuevaMedida:  this.fotosNuevaMedida,
+      fotosNuevas:      this.fotosNuevas,
+      fotosEliminar:    this.fotosEliminar,
+      fotosNuevaMedida: this.fotosNuevaMedida,
     };
 
-    this.dialogRef.close(result);
+    this.itemGuardado.emit(result);
+    if (!this.modoEdicion) this.resetForm();
   }
 
-  cerrar(): void { this.dialogRef.close(null); }
+  cancelar(): void { this.cancelarEdicion.emit(); }
 
-  getImageUrl(ruta: string): string {
-    return `http://localhost:3000/${ruta}`;
+  obtenerResultadoSiValido(): ItemDialogResult | null {
+    const desc = this.form.get('descripcion')?.value?.trim();
+    if (!desc) return null;
+    if (this.form.invalid) { this.form.markAllAsTouched(); return null; }
+    if (this.modoMedida === 'nueva' && this.medidaForm.invalid) { this.medidaForm.markAllAsTouched(); return null; }
+
+    const formVal = this.form.value;
+    return {
+      item: {
+        idPedido:    this.idPedido,
+        descripcion: formVal.descripcion,
+        valor:       formVal.valor,
+        idEmpleado:  formVal.idEmpleado || null,
+        idMedida:    this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
+      },
+      nuevaMedida:      this.modoMedida === 'nueva' ? { ...this.medidaForm.value, idCliente: this.idCliente } : null,
+      fotosNuevas:      this.fotosNuevas,
+      fotosEliminar:    this.fotosEliminar,
+      fotosNuevaMedida: this.fotosNuevaMedida,
+    };
   }
+
+  getImageUrl(ruta: string): string { return `http://localhost:3000/${ruta}`; }
 
   etiquetaMedida(m: Medida): string {
     return `${m.tipoPrenda || 'Sin tipo'} – Pecho ${m.pecho ?? '?'} / Cintura ${m.cintura ?? '?'}`;

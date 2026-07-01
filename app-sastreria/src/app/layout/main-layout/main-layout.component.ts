@@ -59,6 +59,7 @@ export class MainLayoutComponent implements OnInit {
     '/app/metodosPago': 'Métodos de pago',
     '/app/categoriaMovimientos': 'Categorías de movimiento',
     '/app/roles': 'Roles',
+    '/app/mis-items': 'Mis ítems',
   };
 
   constructor(

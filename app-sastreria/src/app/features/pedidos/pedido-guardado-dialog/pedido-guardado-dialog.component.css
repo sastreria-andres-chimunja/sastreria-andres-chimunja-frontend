@@ -1,0 +1,122 @@
+.pg-dialog {
+  padding: 28px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-width: 300px;
+  max-width: 380px;
+}
+
+/* Cabecera */
+.pg-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.pg-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #16a34a;
+  }
+}
+
+.pg-titulo {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+.pg-subtitulo {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+/* Resumen */
+.pg-resumen {
+  width: 100%;
+  background: var(--bg, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pg-label { color: var(--text-secondary, #64748b); }
+
+.pg-valor {
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+.pg-valor.abono  { color: #16a34a; }
+.pg-valor.saldo  { color: #b45309; }
+.pg-valor.saldo-ok { color: #16a34a; }
+
+/* Botones */
+.pg-acciones {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.btn-wa, .btn-print, .btn-aceptar {
+  flex: 1;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.btn-wa {
+  background: #25d366;
+  color: #fff;
+  &:hover { background: #1ebe5d; }
+}
+
+.btn-print {
+  background: var(--surface, #fff);
+  color: var(--primary, #c8922a);
+  border: 1.5px solid var(--primary, #c8922a);
+  &:hover { background: #fef3e2; }
+}
+
+.btn-aceptar {
+  background: var(--primary, #c8922a);
+  color: #fff;
+  &:hover { background: var(--primary-hover, #b07820); }
+}

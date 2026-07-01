@@ -54,23 +54,26 @@
           </a>
         </form>
 
-        <!-- Resultado: enviado por WhatsApp -->
+        <!-- Resultado: credenciales listas -->
         <div *ngIf="enviado" class="result-box">
           <div class="result-icon result-icon--wa">
-            <mat-icon>whatsapp</mat-icon>
+            <mat-icon>verified_user</mat-icon>
           </div>
-          <h3 class="result-title">¡Clave enviada por WhatsApp!</h3>
+          <h3 class="result-title">¡Clave temporal generada!</h3>
           <p class="result-desc">
-            Se abrió WhatsApp para enviar la clave temporal a <strong>{{ nombreEmpleado }}</strong>
-            al número <strong>{{ telefonoMasked }}</strong>.<br />
-            Asegúrate de presionar <em>Enviar</em> en WhatsApp.
+            Credenciales generadas para <strong>{{ nombreEmpleado }}</strong>.<br/>
+            Número: <strong>{{ telefonoMasked }}</strong>.
           </p>
 
-          <button mat-stroked-button class="wa-btn full-width" (click)="abrirWhatsApp()">
-            <mat-icon>whatsapp</mat-icon> Reabrir WhatsApp
+          <button mat-raised-button class="submit-btn full-width"
+            style="background:#25D366;color:#fff;margin-top:8px;"
+            (click)="abrirWhatsApp()"
+            [disabled]="!urlWhatsApp">
+            <mat-icon>send</mat-icon>
+            Enviar por WhatsApp
           </button>
 
-          <button mat-raised-button color="primary" class="submit-btn full-width" style="margin-top:8px" (click)="irALogin()">
+          <button mat-stroked-button class="submit-btn full-width" style="margin-top:10px" (click)="irALogin()">
             <mat-icon>login</mat-icon> Ir al inicio de sesión
           </button>
         </div>

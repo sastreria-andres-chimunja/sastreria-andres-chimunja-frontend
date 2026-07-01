@@ -11,7 +11,10 @@
     <!-- LOGO -->
     <div class="logo-area">
       <img src="assets/logo-sastreria-transparente.png" class="logo-icon" />
-      <img src="assets/logo-sastreria-transparente.png" class="logo-collapsed" />
+      <img
+        src="assets/logo-sastreria-transparente.png"
+        class="logo-collapsed"
+      />
     </div>
 
     <!-- Usuario actual -->
@@ -23,11 +26,19 @@
       </div>
     </div>
 
-    <!-- Hoja de trabajo (todos) -->
-    <mat-nav-list class="nav-section">
+    <!-- Hoja de trabajo (admin y asistente) -->
+    <mat-nav-list class="nav-section" *ngIf="!authService.esOperario()">
       <a mat-list-item routerLink="/app/pedidos" routerLinkActive="active">
         <mat-icon matListItemIcon>content_cut</mat-icon>
         <span matListItemTitle class="nav-label">Hoja de trabajo</span>
+      </a>
+    </mat-nav-list>
+
+    <!-- Mis ítems (solo operarios) -->
+    <mat-nav-list class="nav-section" *ngIf="authService.esOperario()">
+      <a mat-list-item routerLink="/app/mis-items" routerLinkActive="active">
+        <mat-icon matListItemIcon>assignment_turned_in</mat-icon>
+        <span matListItemTitle class="nav-label">Mis trabajos</span>
       </a>
     </mat-nav-list>
 
@@ -53,8 +64,12 @@
         <mat-icon matListItemIcon>engineering</mat-icon>
         <span matListItemTitle class="nav-label">Nómina</span>
       </a>
-      <a mat-list-item routerLink="/app/movimientos" routerLinkActive="active"
-        *ngIf="authService.esAdmin()">
+      <a
+        mat-list-item
+        routerLink="/app/movimientos"
+        routerLinkActive="active"
+        *ngIf="authService.esAdmin()"
+      >
         <mat-icon matListItemIcon>trending_up</mat-icon>
         <span matListItemTitle class="nav-label">Movimientos</span>
       </a>
@@ -68,11 +83,19 @@
           <mat-icon matListItemIcon>badge</mat-icon>
           <span matListItemTitle class="nav-label">Roles</span>
         </a>
-        <a mat-list-item routerLink="/app/metodosPago" routerLinkActive="active">
+        <a
+          mat-list-item
+          routerLink="/app/metodosPago"
+          routerLinkActive="active"
+        >
           <mat-icon matListItemIcon>euro_symbol</mat-icon>
           <span matListItemTitle class="nav-label">Métodos de pago</span>
         </a>
-        <a mat-list-item routerLink="/app/categoriaMovimientos" routerLinkActive="active">
+        <a
+          mat-list-item
+          routerLink="/app/categoriaMovimientos"
+          routerLinkActive="active"
+        >
           <mat-icon matListItemIcon>assessment</mat-icon>
           <span matListItemTitle class="nav-label">Categorías</span>
         </a>
@@ -97,8 +120,14 @@
         <span>{{ pageTitle }}</span>
       </div>
       <span class="spacer"></span>
-      <button mat-icon-button (click)="toggleDarkMode()" [matTooltip]="isDarkMode ? 'Modo claro' : 'Modo oscuro'">
-        <mat-icon class="icon-logout">{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      <button
+        mat-icon-button
+        (click)="toggleDarkMode()"
+        [matTooltip]="isDarkMode ? 'Modo claro' : 'Modo oscuro'"
+      >
+        <mat-icon class="icon-logout">{{
+          isDarkMode ? "light_mode" : "dark_mode"
+        }}</mat-icon>
       </button>
       <button mat-icon-button (click)="logout()" matTooltip="Cerrar sesión">
         <mat-icon class="icon-logout">logout</mat-icon>

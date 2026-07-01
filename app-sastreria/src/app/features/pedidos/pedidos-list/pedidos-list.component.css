@@ -271,6 +271,15 @@
   &:hover { background: #e6f1fb; border-color: var(--primary); }
 }
 
+.btn-abono {
+  background: var(--primary); color: #fff; border: none;
+  border-radius: 8px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Sans', sans-serif; transition: background 0.13s;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: var(--primary-hover, #b07820); }
+}
+
 /* ── Estado vacío ────────────────────────────────────────────── */
 .empty-state {
   display: flex; flex-direction: column; align-items: center;

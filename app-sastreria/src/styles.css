@@ -223,3 +223,20 @@ body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; 
   background: transparent !important;
   opacity: 0.5;
 }
+
+
+/* ── Snackbar alerts ─────────────────────────────────────────── */
+.snack-success .mdc-snackbar__surface {
+  background: #1a6e3c !important;
+  color: #fff !important;
+}
+.snack-success .mdc-snackbar__label {
+  color: #fff !important;
+}
+.snack-error .mdc-snackbar__surface {
+  background: #b91c1c !important;
+  color: #fff !important;
+}
+.snack-error .mdc-snackbar__label {
+  color: #fff !important;
+}

@@ -11,6 +11,10 @@ export class ItemPedidoService {
     return this.http.get<any>(this.api, { params: { idPedido: String(idPedido) } });
   }
 
+  listarPorEmpleado(idEmpleado: number) {
+    return this.http.get<any>(this.api, { params: { idEmpleado: String(idEmpleado) } });
+  }
+
   buscarPorId(id: number) {
     return this.http.get<any>(`${this.api}/${id}`);
   }
@@ -37,5 +41,13 @@ export class ItemPedidoService {
 
   registrarPago(id: number, pago: { idMetodoPago: number | null; valor: number; observacion?: string }) {
     return this.http.post<any>(`${this.api}/${id}/registrar-pago`, pago);
+  }
+
+  actualizarEstado(id: number, idEstado: number) {
+    return this.http.put<any>(`${this.api}/${id}/estado`, { idEstado });
+  }
+
+  actualizarComision(id: number, comisionEmpleado: number) {
+    return this.http.put<any>(`${this.api}/${id}/comision`, { comisionEmpleado });
   }
 }

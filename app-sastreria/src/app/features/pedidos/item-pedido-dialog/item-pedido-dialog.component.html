@@ -27,6 +27,12 @@
           <mat-label>Descripción / tipo de prenda</mat-label>
           <mat-icon matPrefix>checkroom</mat-icon>
           <input matInput formControlName="descripcion" placeholder="Ej: Camisa manga larga" />
+          <button mat-icon-button matSuffix type="button" *ngIf="soportaVoz"
+            (click)="toggleVoz()"
+            [class.mic-activo]="escuchando"
+            [matTooltip]="escuchando ? 'Detener dictado' : 'Dictar descripción'">
+            <mat-icon>{{ escuchando ? 'mic' : 'mic_none' }}</mat-icon>
+          </button>
           <mat-error *ngIf="form.get('descripcion')?.hasError('required')">Requerido</mat-error>
         </mat-form-field>
 
@@ -38,9 +44,15 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Comisión empleado</mat-label>
-          <mat-icon matPrefix>percent</mat-icon>
-          <input matInput formControlName="comisionEmpleado" type="number" placeholder="0" />
+          <mat-label>Estado</mat-label>
+          <mat-icon matPrefix>flag</mat-icon>
+          <mat-select formControlName="idEstado">
+            <mat-option [value]="null">— Sin cambiar —</mat-option>
+            <mat-option *ngFor="let est of estados" [value]="est.idEstado"
+              [disabled]="est.nombre?.toLowerCase() === 'pendiente' || est.nombre?.toLowerCase() === 'asignado'">
+              {{ est.nombre }}
+            </mat-option>
+          </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="form-field">

@@ -1,0 +1,65 @@
+<div class="pg-dialog">
+
+  <!-- Cabecera de éxito -->
+  <div class="pg-header">
+    <div class="pg-icon-circle">
+      <mat-icon>check_circle</mat-icon>
+    </div>
+    <h2 class="pg-titulo">¡Pedido guardado!</h2>
+    <p class="pg-subtitulo">Pedido <strong>#{{ data.idPedido }}</strong> — {{ data.nombreCliente }}</p>
+  </div>
+
+  <!-- Resumen -->
+  <div class="pg-resumen">
+    <div class="pg-fila">
+      <span class="pg-label">Total del pedido</span>
+      <span class="pg-valor">{{ formatCOP(data.valorTotal) }}</span>
+    </div>
+    <div class="pg-fila" *ngIf="data.valorAbono > 0">
+      <span class="pg-label">Abono registrado</span>
+      <span class="pg-valor abono">{{ formatCOP(data.valorAbono) }}</span>
+    </div>
+    <div class="pg-fila" *ngIf="data.valorAbono > 0">
+      <span class="pg-label">Saldo pendiente</span>
+      <span class="pg-valor saldo" [class.saldo-ok]="data.totalPagado >= data.valorTotal">
+        {{ data.totalPagado >= data.valorTotal ? '¡Pagado completo!' : formatCOP(data.valorTotal - data.totalPagado) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="pg-acciones">
+
+    <!-- Paso 1: Generar PDF en memoria -->
+    <button class="btn-wa" (click)="generarPDF()"
+      *ngIf="data.items !== undefined && !archivoPDF" [disabled]="generandoPDF">
+      <mat-spinner *ngIf="generandoPDF" diameter="16"></mat-spinner>
+      <mat-icon *ngIf="!generandoPDF">picture_as_pdf</mat-icon>
+      {{ generandoPDF ? 'Generando PDF...' : 'Generar PDF' }}
+    </button>
+
+    <!-- Paso 2: Enviar a WhatsApp (Web Share en móvil, descarga en PC) -->
+    <button class="btn-wa" (click)="enviarWhatsApp()"
+      *ngIf="archivoPDF && !urlFallback">
+      <mat-icon>send</mat-icon> Enviar a WhatsApp
+    </button>
+
+    <!-- Fallback PC: el PDF fue descargado, abrir WhatsApp con texto -->
+    <ng-container *ngIf="urlFallback">
+      <button class="btn-wa" (click)="abrirWhatsAppFallback()">
+        <mat-icon>chat</mat-icon> Abrir WhatsApp
+      </button>
+      <p style="font-size:10px;color:#777;margin:2px 0 0;text-align:center;">
+        📎 Adjunta el PDF descargado en WhatsApp
+      </p>
+    </ng-container>
+
+    <button class="btn-print" (click)="imprimir()" *ngIf="data.items !== undefined">
+      <mat-icon>print</mat-icon> Imprimir
+    </button>
+    <button class="btn-aceptar" (click)="aceptar()">
+      <mat-icon>check</mat-icon> Aceptar
+    </button>
+  </div>
+
+</div>

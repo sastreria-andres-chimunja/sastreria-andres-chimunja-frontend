@@ -2,15 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { PedidoService } from '../../../core/services/pedido.service';
+import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
+import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { Pedido } from '../../../shared/models/Pedido';
 import { dateToString } from '../../../utils/date.utils';
 import { AuthService } from '../../../core/services/auth.service';
+import { PagarItemDialogComponent, PagarItemDialogData } from '../pagar-item-dialog/pagar-item-dialog.component';
 
 @Component({
   selector: 'app-pedidos-list',
@@ -23,6 +27,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
+    PagarItemDialogComponent,
   ],
   templateUrl: './pedidos-list.component.html',
   styleUrl: './pedidos-list.component.css',
@@ -38,14 +43,22 @@ export class PedidosListComponent implements OnInit {
   fechaInicioCtrl = new FormControl<Date | null>(null);
   fechaFinCtrl = new FormControl<Date | null>(null);
 
+  metodosPago: any[] = [];
+
   constructor(
     private pedidoService: PedidoService,
     private router: Router,
     private authService: AuthService,
+    private dialog: MatDialog,
+    private metodoPagoService: MetodoPagoService,
+    private itemPedidoService: ItemPedidoService,
   ) {}
 
   ngOnInit(): void {
     this.cargarPedidos();
+    this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
+      this.metodosPago = r.metodosPago ?? [];
+    });
   }
 
   // Operario solo ve los pedidos donde tiene ítems asignados
@@ -137,6 +150,32 @@ export class PedidosListComponent implements OnInit {
 
   irACrear(): void { this.router.navigate(['/app/pedidos/crear']); }
   irAEditar(p: Pedido): void { this.router.navigate(['/app/pedidos/editar', p.idPedido]); }
+
+  abrirDialogoPago(p: Pedido, event: Event): void {
+    event.stopPropagation();
+    this.itemPedidoService.listarPorPedido(p.idPedido!).subscribe((r: any) => {
+      const items = (r.items ?? []).map((it: any) => ({
+        descripcion: String(it.descripcion ?? ''),
+        valor: Number(it.valor ?? 0),
+      }));
+      const data: PagarItemDialogData = {
+        idPedido:         p.idPedido!,
+        valorTotalPedido: p.valorTotal ?? 0,
+        nombreCliente:    p.nombreCliente ?? '',
+        telefonoCliente:  p.telefonoCliente,
+        metodosPago:      this.metodosPago,
+        items,
+        fechaEntrega:     p.fechaEntrega ?? undefined,
+      };
+      this.dialog.open(PagarItemDialogComponent, {
+        data,
+        maxWidth:   '95vw',
+        maxHeight:  '92vh',
+        panelClass: 'nomina-dialog-panel',
+        autoFocus:  false,
+      });
+    });
+  }
 
   // ── Resumen ────────────────────────────────────────────────
   get total(): number { return this.pedidos.length; }
