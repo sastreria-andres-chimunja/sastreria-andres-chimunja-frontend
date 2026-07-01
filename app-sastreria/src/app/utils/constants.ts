@@ -1,5 +1,7 @@
 // src/app/core/constants/constants.ts
 
+import { environment } from '../../environments/environment';
+
 export const ROUTES = {
   HOME: '/hoja-trabajo',
   CLIENTES: '/clientes',
@@ -20,7 +22,7 @@ export const COLORS = {
 } as const;
 
 export const API = {
-  BASE_URL: 'http://localhost:3000',
+  BASE_URL: environment.apiUrl,
   AUTH: 'auth',
   CLIENTES: 'clientes',
   EMPLEADOS: 'empleado',
