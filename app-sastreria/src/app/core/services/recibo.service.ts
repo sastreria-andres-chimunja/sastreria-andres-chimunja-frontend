@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { API } from '../../utils/constants';
+import { QzPrintService } from './qz-print.service';
 
 export interface ReciboData {
   idPedido: number;
@@ -38,7 +39,7 @@ export interface ReciboNominaData {
 @Injectable({ providedIn: 'root' })
 export class ReciboService {
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private qzPrint: QzPrintService) {}
 
 
   // ─── RECIBO CLIENTE ───────────────────────────────────────────────────────────
@@ -144,7 +145,21 @@ export class ReciboService {
 </html>`;
   }
 
-  imprimir(data: ReciboData): void {
+  /**
+   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray (ESC/POS).
+   * Si QZ Tray no está instalado/corriendo, cae al diálogo de impresión del
+   * navegador (requiere que Windows tenga un driver de impresora configurado).
+   */
+  async imprimir(data: ReciboData): Promise<void> {
+    try {
+      await this.qzPrint.imprimirRecibo(data);
+    } catch (err) {
+      console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
+      this.imprimirNavegador(data);
+    }
+  }
+
+  private imprimirNavegador(data: ReciboData): void {
     const html = this.generarHtmlTermico(data);
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
@@ -770,7 +785,17 @@ export class ReciboService {
 </html>`;
   }
 
-  imprimirNomina(data: ReciboNominaData): void {
+  /** Igual que imprimir(), pero para el comprobante de pago de nómina. */
+  async imprimirNomina(data: ReciboNominaData): Promise<void> {
+    try {
+      await this.qzPrint.imprimirNomina(data);
+    } catch (err) {
+      console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
+      this.imprimirNominaNavegador(data);
+    }
+  }
+
+  private imprimirNominaNavegador(data: ReciboNominaData): void {
     const html = this.generarHtmlTermicoNomina(data);
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
