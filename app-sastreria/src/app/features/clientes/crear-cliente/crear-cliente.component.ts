@@ -61,7 +61,7 @@ export class CrearClienteComponent implements OnInit {
     this.form = this.fb.group({
       nombres: [this.clienteModel.nombres, [Validators.required]],
       apellidos: [this.clienteModel.apellidos, [Validators.required]],
-      cedula: [this.clienteModel.cedula, [Validators.required]],
+      cedula: [this.clienteModel.cedula],
       telefono: [this.clienteModel.telefono, [Validators.required]],
     });
   }

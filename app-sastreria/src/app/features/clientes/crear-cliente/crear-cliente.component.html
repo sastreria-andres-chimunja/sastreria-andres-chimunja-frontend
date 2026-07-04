@@ -33,12 +33,9 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Cédula</mat-label>
+        <mat-label>Cédula (opcional)</mat-label>
         <mat-icon matPrefix>fingerprint</mat-icon>
         <input matInput formControlName="cedula" placeholder="Ej: 1234567890" />
-        <mat-error *ngIf="form.get('cedula')?.hasError('required')">
-          La cédula es requerida
-        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="form-field">

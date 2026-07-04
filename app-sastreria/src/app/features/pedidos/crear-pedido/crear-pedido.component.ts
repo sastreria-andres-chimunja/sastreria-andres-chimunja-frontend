@@ -156,7 +156,7 @@ export class CrearPedidoComponent implements OnInit {
     this.clienteForm = this.fb.group({
       nombres:   ['', Validators.required],
       apellidos: ['', Validators.required],
-      cedula:    ['', Validators.required],
+      cedula:    [''],
       telefono:  [''],
     });
   }

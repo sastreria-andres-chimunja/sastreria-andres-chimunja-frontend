@@ -34,11 +34,11 @@
       </a>
     </mat-nav-list>
 
-    <!-- Mis ítems (solo operarios) -->
-    <mat-nav-list class="nav-section" *ngIf="authService.esOperario()">
+    <!-- Mis ítems (operarios y asistentes) -->
+    <mat-nav-list class="nav-section" *ngIf="authService.esOperario() || authService.esAsistente()">
       <a mat-list-item routerLink="/app/mis-items" routerLinkActive="active">
         <mat-icon matListItemIcon>assignment_turned_in</mat-icon>
-        <span matListItemTitle class="nav-label">Mis trabajos</span>
+        <span matListItemTitle class="nav-label">Mis ítems</span>
       </a>
     </mat-nav-list>
 

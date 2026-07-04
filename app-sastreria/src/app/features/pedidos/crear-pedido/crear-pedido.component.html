@@ -50,7 +50,7 @@
                 <div class="sug-avatar">{{ getInitials(c.nombres) }}</div>
                 <div class="sug-info">
                   <span class="sug-nombre">{{ c.nombres }} {{ c.apellidos }}</span>
-                  <span class="sug-cc">CC {{ c.cedula }}</span>
+                  <span class="sug-cc" *ngIf="c.cedula">CC {{ c.cedula }}</span>
                 </div>
               </div>
             </div>
@@ -83,9 +83,8 @@
                 <mat-error>Requerido</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="cc-field">
-                <mat-label>Cédula</mat-label>
+                <mat-label>Cédula (opcional)</mat-label>
                 <input matInput formControlName="cedula" />
-                <mat-error>Requerido</mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="cc-field">
                 <mat-label>Teléfono</mat-label>
@@ -108,7 +107,9 @@
             <div class="cli-data">
               <p class="cli-nombre">{{ clienteSeleccionado.nombres }} {{ clienteSeleccionado.apellidos }}</p>
               <p class="cli-meta">
-                <mat-icon>credit_card</mat-icon> {{ clienteSeleccionado.cedula }}
+                <ng-container *ngIf="clienteSeleccionado.cedula">
+                  <mat-icon>credit_card</mat-icon> {{ clienteSeleccionado.cedula }}
+                </ng-container>
                 <mat-icon>phone</mat-icon> {{ clienteSeleccionado.telefono }}
               </p>
             </div>
@@ -274,16 +275,7 @@
                 <mat-icon class="section-icon">date_range</mat-icon>
                 <span>Fechas</span>
               </div>
-              <div class="fechas-grid">
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Fecha recibido</mat-label>
-                  <mat-icon matPrefix>calendar_today</mat-icon>
-                  <input matInput [matDatepicker]="pickerR" formControlName="fechaRecibido" readonly />
-                  <mat-datepicker-toggle matIconSuffix [for]="pickerR"></mat-datepicker-toggle>
-                  <mat-datepicker #pickerR></mat-datepicker>
-                  <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
+              <div class="fechas-grid fechas-grid-single">
                 <mat-form-field appearance="outline" class="form-field">
                   <mat-label>Fecha entrega</mat-label>
                   <mat-icon matPrefix>event</mat-icon>

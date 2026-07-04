@@ -231,6 +231,11 @@
   padding: 14px 16px;
 }
 
+.fechas-grid-single {
+  grid-template-columns: 1fr;
+  max-width: 320px;
+}
+
 /* ── Guardar + abono inicial ─────────────────────────────────── */
 .guardar-section {
   padding: 14px 16px;

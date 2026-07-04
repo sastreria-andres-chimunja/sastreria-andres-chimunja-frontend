@@ -44,7 +44,7 @@ export const routes: Routes = [
       { path: 'pedidos/crear', component: CrearPedidoComponent },
       { path: 'pedidos/editar/:id', component: CrearPedidoComponent },
 
-      // Vista exclusiva para operarios
+      // Vista para operarios y asistentes: gestionar los ítems asignados a uno mismo
       { path: 'mis-items', component: MisItemsComponent },
 
       { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
