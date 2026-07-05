@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
+import Swal from 'sweetalert2';
 
 export interface NominaDetalleDialogData {
   idEmpleado: number;
@@ -42,6 +43,7 @@ export class NominaDetalleDialogComponent implements OnInit {
   ultimoItemPagado: any = null;
   archivoPDFNomina: File | null = null;
   generandoPDFNomina = false;
+  enviandoWhatsAppNomina = false;
   urlFallbackNomina: string | null = null;
 
   constructor(
@@ -120,14 +122,20 @@ export class NominaDetalleDialogComponent implements OnInit {
   }
 
   async enviarWhatsAppNomina(): Promise<void> {
-    if (!this.archivoPDFNomina) return;
+    if (!this.archivoPDFNomina || !this.data.telefono) return;
     const texto = this.reciboService.generarTextoWhatsAppNomina(this.nominaReciboData);
-    const url   = await this.reciboService.compartirConWhatsApp(
-      this.archivoPDFNomina,
-      this.data.telefono ?? '',
-      texto,
-    );
-    if (url) this.urlFallbackNomina = url;
+
+    this.enviandoWhatsAppNomina = true;
+    try {
+      await this.reciboService.enviarDocumentoViaBackend(this.archivoPDFNomina, this.data.telefono, texto);
+      Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
+    } catch (err) {
+      console.error('Envío automático por WhatsApp falló, usando método manual:', err);
+      const url = await this.reciboService.compartirConWhatsApp(this.archivoPDFNomina, this.data.telefono, texto);
+      if (url) this.urlFallbackNomina = url;
+    } finally {
+      this.enviandoWhatsAppNomina = false;
+    }
   }
 
   abrirWhatsAppFallbackNomina(): void {

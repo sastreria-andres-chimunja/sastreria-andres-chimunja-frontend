@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { ReciboService } from '../../../core/services/recibo.service';
+import Swal from 'sweetalert2';
 
 export interface PagarItemDialogData {
   idPedido: number;
@@ -43,6 +44,7 @@ export class PagarItemDialogComponent implements OnInit {
   cargando = true;
   guardando    = false;
   generandoPDF = false;
+  enviandoWhatsApp = false;
   archivoPDF: File | null    = null;
   urlFallback: string | null = null;
   abonos: any[] = [];
@@ -153,16 +155,25 @@ export class PagarItemDialogComponent implements OnInit {
     }
   }
 
-  /** Paso 2: envía el PDF. En móvil va directo a WhatsApp; en PC descarga y abre WA. */
+  /**
+   * Paso 2: envía el PDF por WhatsApp. Primero intenta el envío automático
+   * vía backend (Meta Cloud API); si falla, cae al método manual.
+   */
   async enviarWhatsApp(): Promise<void> {
-    if (!this.archivoPDF) return;
+    if (!this.archivoPDF || !this.data.telefonoCliente) return;
     const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
-    const url   = await this.reciboService.compartirConWhatsApp(
-      this.archivoPDF,
-      this.data.telefonoCliente ?? '',
-      texto,
-    );
-    if (url) this.urlFallback = url;
+
+    this.enviandoWhatsApp = true;
+    try {
+      await this.reciboService.enviarDocumentoViaBackend(this.archivoPDF, this.data.telefonoCliente, texto);
+      Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
+    } catch (err) {
+      console.error('Envío automático por WhatsApp falló, usando método manual:', err);
+      const url = await this.reciboService.compartirConWhatsApp(this.archivoPDF, this.data.telefonoCliente, texto);
+      if (url) this.urlFallback = url;
+    } finally {
+      this.enviandoWhatsApp = false;
+    }
   }
 
   abrirWhatsAppFallback(): void {

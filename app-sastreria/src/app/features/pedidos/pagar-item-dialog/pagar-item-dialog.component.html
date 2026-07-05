@@ -109,10 +109,12 @@
       {{ generandoPDF ? 'Generando...' : 'Generar PDF' }}
     </button>
 
-    <!-- Paso 2: Enviar (Web Share en móvil / descarga en PC) -->
+    <!-- Paso 2: Enviar (automático vía backend; si falla, cae a manual) -->
     <button class="btn-whatsapp" (click)="enviarWhatsApp()"
-      *ngIf="archivoPDF && !urlFallback">
-      <mat-icon>send</mat-icon> Enviar a WhatsApp
+      *ngIf="archivoPDF && !urlFallback" [disabled]="enviandoWhatsApp">
+      <mat-spinner *ngIf="enviandoWhatsApp" diameter="16"></mat-spinner>
+      <mat-icon *ngIf="!enviandoWhatsApp">send</mat-icon>
+      {{ enviandoWhatsApp ? 'Enviando...' : 'Enviar a WhatsApp' }}
     </button>
 
     <!-- Fallback PC -->

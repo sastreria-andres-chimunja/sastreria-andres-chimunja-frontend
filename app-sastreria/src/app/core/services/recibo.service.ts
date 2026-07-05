@@ -1114,6 +1114,32 @@ export class ReciboService {
     );
   }
 
+  /**
+   * Envía un PDF (recibo/orden/comprobante) al número de WhatsApp indicado
+   * usando el backend con Meta Cloud API. 100% automático: no abre ningún
+   * chat ni requiere adjuntar nada a mano. Lanza error si el backend no
+   * está configurado (falta WHATSAPP_TOKEN/WHATSAPP_PHONE_ID) o el envío falla.
+   */
+  async enviarDocumentoViaBackend(archivo: File, telefono: string, caption: string): Promise<void> {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(archivo);
+    });
+
+    const tel = telefono.replace(/\D/g, '').replace(/^57/, '');
+
+    await lastValueFrom(
+      this.http.post(`${API.BASE_URL}/whatsapp/enviar-documento`, {
+        telefono: tel,
+        documentoBase64: base64,
+        filename: archivo.name,
+        caption,
+      }),
+    );
+  }
+
   // ─── PRIVADOS ────────────────────────────────────────────────────────────────
 
   private esperarImagen(container: HTMLElement): Promise<void> {

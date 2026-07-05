@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReciboService } from '../../../core/services/recibo.service';
+import Swal from 'sweetalert2';
 
 export interface PedidoGuardadoDialogData {
   idPedido: number;
@@ -26,6 +27,7 @@ export interface PedidoGuardadoDialogData {
 })
 export class PedidoGuardadoDialogComponent {
   generandoPDF = false;
+  enviandoWhatsApp = false;
   archivoPDF: File | null   = null;
   urlFallback: string | null = null;
 
@@ -69,18 +71,26 @@ export class PedidoGuardadoDialogComponent {
 
   /**
    * Paso 2: Envía el PDF por WhatsApp.
-   * En móvil usa Web Share (el archivo llega adjunto automáticamente).
-   * En PC descarga el PDF y abre WhatsApp Web con texto.
+   * Primero intenta el envío 100% automático vía backend (Meta Cloud API,
+   * sin abrir nada ni pedir adjuntar el archivo). Si el backend no está
+   * configurado o falla, cae al método manual (Web Share en móvil, o
+   * descargar + abrir WhatsApp Web en PC).
    */
   async enviarWhatsApp(): Promise<void> {
-    if (!this.archivoPDF) return;
+    if (!this.archivoPDF || !this.data.telefonoCliente) return;
     const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
-    const url   = await this.reciboService.compartirConWhatsApp(
-      this.archivoPDF,
-      this.data.telefonoCliente ?? '',
-      texto,
-    );
-    if (url) this.urlFallback = url;
+
+    this.enviandoWhatsApp = true;
+    try {
+      await this.reciboService.enviarDocumentoViaBackend(this.archivoPDF, this.data.telefonoCliente, texto);
+      Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
+    } catch (err) {
+      console.error('Envío automático por WhatsApp falló, usando método manual:', err);
+      const url = await this.reciboService.compartirConWhatsApp(this.archivoPDF, this.data.telefonoCliente, texto);
+      if (url) this.urlFallback = url;
+    } finally {
+      this.enviandoWhatsApp = false;
+    }
   }
 
   /** Solo en PC (fallback): abre WhatsApp Web tras haber descargado el PDF. */
