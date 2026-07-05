@@ -137,12 +137,14 @@
                 <mat-label>Estado del pedido</mat-label>
                 <mat-icon matPrefix>flag</mat-icon>
                 <mat-select formControlName="idEstado">
-                  <mat-option *ngFor="let e of estados" [value]="e.idEstado"
-                    [disabled]="e.nombre === 'Pendiente' || e.nombre === 'Asignado'">
-                    {{ e.nombre }}
-                    <span *ngIf="e.nombre === 'Pendiente' || e.nombre === 'Asignado'"
-                      style="font-size:10px; color: var(--text-muted)"> — automático</span>
-                  </mat-option>
+                  <ng-container *ngFor="let e of estados">
+                    <mat-option *ngIf="e.nombre !== 'No realizado' || esAdmin" [value]="e.idEstado"
+                      [disabled]="e.nombre === 'Pendiente' || e.nombre === 'Asignado'">
+                      {{ e.nombre }}
+                      <span *ngIf="e.nombre === 'Pendiente' || e.nombre === 'Asignado'"
+                        style="font-size:10px; color: var(--text-muted)"> — automático</span>
+                    </mat-option>
+                  </ng-container>
                 </mat-select>
               </mat-form-field>
             </div>

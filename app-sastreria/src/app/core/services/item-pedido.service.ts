@@ -50,4 +50,8 @@ export class ItemPedidoService {
   actualizarComision(id: number, comisionEmpleado: number) {
     return this.http.put<any>(`${this.api}/${id}/comision`, { comisionEmpleado });
   }
+
+  asignarEmpleado(id: number, idEmpleado: number) {
+    return this.http.put<any>(`${this.api}/${id}/asignar`, { idEmpleado });
+  }
 }

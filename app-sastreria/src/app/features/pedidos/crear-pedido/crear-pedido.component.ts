@@ -290,8 +290,9 @@ export class CrearPedidoComponent implements OnInit {
     const idEstadoActual = this.form.get('idEstado')?.value;
     const idTerminado = this.estados.find(e => e.nombre === 'Terminado')?.idEstado;
     const idEntregado = this.estados.find(e => e.nombre === 'Entregado')?.idEstado;
+    const idNoRealizado = this.estados.find(e => e.nombre === 'No realizado')?.idEstado;
 
-    if (idEstadoActual === idTerminado || idEstadoActual === idEntregado) return;
+    if (idEstadoActual === idTerminado || idEstadoActual === idEntregado || idEstadoActual === idNoRealizado) return;
 
     const tieneEmpleado = this.items.some(it => !!it.idEmpleado);
     const idAsignado    = this.estados.find(e => e.nombre === 'Asignado')?.idEstado;
@@ -321,6 +322,7 @@ export class CrearPedidoComponent implements OnInit {
   }
 
   get puedeEditarPedido(): boolean { return !this.authService.esOperario(); }
+  get esAdmin(): boolean { return this.authService.esAdmin(); }
 
   // ── Modo CREAR: inline form ───────────────────────────────────
   onItemAgregado(result: ItemDialogResult): void {

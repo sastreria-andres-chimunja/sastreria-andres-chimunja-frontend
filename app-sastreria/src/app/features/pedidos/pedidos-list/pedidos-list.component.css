@@ -90,6 +90,7 @@
 .resumen-card:has(.pv-icon).activa         { border-color: #d97706; }
 .resumen-card:has(.vencido-icon).activa    { border-color: var(--danger); }
 .resumen-card:has(.entregado-icon).activa  { border-color: var(--success); }
+.resumen-card:has(.no-realizado-icon).activa { border-color: #1f2937; }
 
 .resumen-icon-circle {
   width: 34px; height: 34px; border-radius: 50%;
@@ -104,6 +105,7 @@
 .pv-icon        { background: #fff3e0; color: #d97706; }
 .vencido-icon   { background: #fdecea; color: var(--danger); }
 .entregado-icon { background: #e8f5e9; color: var(--success); }
+.no-realizado-icon { background: #e5e7eb; color: #1f2937; }
 
 .resumen-info { display: flex; flex-direction: column; gap: 2px; }
 
@@ -122,6 +124,7 @@
 .pv-valor        { color: #d97706; }
 .vencido-valor   { color: var(--danger); }
 .entregado-valor { color: var(--success); }
+.no-realizado-valor { color: #1f2937; }
 
 /* ── Grid de tarjetas ────────────────────────────────────────── */
 .card-list {
@@ -160,6 +163,7 @@
 .stripe-vencido    { background: linear-gradient(90deg, var(--danger) 0%, #e05050 100%); }
 .stripe-entregado  { background: linear-gradient(90deg, var(--success) 0%, #3ea03e 100%); }
 .stripe-cancelado  { background: linear-gradient(90deg, var(--text-muted) 0%, #9ca3af 100%); }
+.stripe-no-realizado { background: linear-gradient(90deg, #1f2937 0%, #4b5563 100%); }
 
 /* Cabecera */
 .card-top {
@@ -181,6 +185,7 @@
 .avatar-vencido    { background: linear-gradient(135deg, var(--danger) 0%, #e05050 100%); }
 .avatar-entregado  { background: linear-gradient(135deg, var(--success) 0%, #3ea03e 100%); }
 .avatar-cancelado  { background: linear-gradient(135deg, var(--text-muted) 0%, #9ca3af 100%); }
+.avatar-no-realizado { background: linear-gradient(135deg, #1f2937 0%, #4b5563 100%); }
 
 .card-info { flex: 1; min-width: 0; }
 
@@ -201,6 +206,7 @@
 .badge-vencido    { background: #fdecea; color: var(--danger); }
 .badge-entregado  { background: #e8f5e9; color: var(--success); }
 .badge-cancelado  { background: var(--surface-alt); color: var(--text-muted); }
+.badge-no-realizado { background: #e5e7eb; color: #1f2937; }
 
 /* Importes y fechas */
 .card-amounts {
@@ -278,6 +284,15 @@
   font-family: 'DM Sans', sans-serif; transition: background 0.13s;
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
   &:hover { background: var(--primary-hover, #b07820); }
+}
+
+.btn-asignar {
+  background: transparent; border: 1px solid var(--primary); color: var(--primary);
+  border-radius: 8px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Sans', sans-serif; transition: background 0.13s;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: #e6f1fb; }
 }
 
 /* ── Estado vacío ────────────────────────────────────────────── */

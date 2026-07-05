@@ -1,0 +1,63 @@
+<div class="dialog-wrapper">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon"><mat-icon>engineering</mat-icon></div>
+      <div>
+        <h2 class="dialog-title">Asignar empleado</h2>
+        <p class="dialog-subtitle">{{ data.nombreCliente }} — Pedido #{{ data.idPedido }}</p>
+      </div>
+    </div>
+    <button class="btn-close" (click)="cerrar()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <div class="dialog-body">
+    <p class="ayuda-texto" *ngIf="data.items.length > 0">
+      Se asignará el empleado seleccionado a los {{ data.items.length }} ítem(s) de este pedido.
+    </p>
+
+    <div class="empty-state" *ngIf="data.items.length === 0">
+      <mat-icon>info</mat-icon>
+      <span>Este pedido no tiene ítems para asignar.</span>
+    </div>
+
+    <div class="empleados-lista" *ngIf="data.items.length > 0">
+      <button
+        type="button"
+        class="empleado-row"
+        *ngFor="let emp of data.empleados"
+        [class.seleccionado]="idEmpleadoSeleccionado === emp.idEmpleado"
+        (click)="seleccionar(emp.idEmpleado!)"
+      >
+        <div class="empleado-avatar">{{ getInitials(emp.nombres + ' ' + emp.apellidos) }}</div>
+        <span class="empleado-nombre">{{ emp.nombres }} {{ emp.apellidos }}</span>
+        <mat-icon class="check-icon" *ngIf="idEmpleadoSeleccionado === emp.idEmpleado">check_circle</mat-icon>
+      </button>
+
+      <div class="empty-state" *ngIf="data.empleados.length === 0">
+        <mat-icon>info</mat-icon>
+        <span>No hay empleados registrados.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="guardando">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="loading-text">Asignando...</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="btn-cancelar" (click)="cerrar()" [disabled]="guardando">Cancelar</button>
+    <button
+      class="btn-asignar-confirmar"
+      (click)="confirmar()"
+      [disabled]="guardando || !idEmpleadoSeleccionado || data.items.length === 0"
+    >
+      <mat-icon>check</mat-icon> Asignar
+    </button>
+  </div>
+
+</div>

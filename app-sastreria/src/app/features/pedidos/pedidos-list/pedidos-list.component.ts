@@ -11,10 +11,16 @@ import { MatInputModule } from '@angular/material/input';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
+import { EmpleadoService } from '../../../core/services/empleado.service';
 import { Pedido } from '../../../shared/models/Pedido';
+import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString } from '../../../utils/date.utils';
 import { AuthService } from '../../../core/services/auth.service';
 import { PagarItemDialogComponent, PagarItemDialogData } from '../pagar-item-dialog/pagar-item-dialog.component';
+import {
+  AsignarEmpleadoDialogComponent,
+  AsignarEmpleadoDialogData,
+} from '../asignar-empleado-dialog/asignar-empleado-dialog.component';
 
 @Component({
   selector: 'app-pedidos-list',
@@ -28,6 +34,7 @@ import { PagarItemDialogComponent, PagarItemDialogData } from '../pagar-item-dia
     MatFormFieldModule,
     MatInputModule,
     PagarItemDialogComponent,
+    AsignarEmpleadoDialogComponent,
   ],
   templateUrl: './pedidos-list.component.html',
   styleUrl: './pedidos-list.component.css',
@@ -44,6 +51,7 @@ export class PedidosListComponent implements OnInit {
   fechaFinCtrl = new FormControl<Date | null>(null);
 
   metodosPago: any[] = [];
+  empleados: Empleado[] = [];
 
   constructor(
     private pedidoService: PedidoService,
@@ -52,12 +60,16 @@ export class PedidosListComponent implements OnInit {
     private dialog: MatDialog,
     private metodoPagoService: MetodoPagoService,
     private itemPedidoService: ItemPedidoService,
+    private empleadoService: EmpleadoService,
   ) {}
 
   ngOnInit(): void {
     this.cargarPedidos();
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
       this.metodosPago = r.metodosPago ?? [];
+    });
+    this.empleadoService.getAll().subscribe((r: any) => {
+      this.empleados = r.empleados ?? [];
     });
   }
 
@@ -84,6 +96,11 @@ export class PedidosListComponent implements OnInit {
   aplicarBusqueda(): void {
     let resultado = [...this.pedidos];
 
+    // Los pedidos "No realizado" quedan ocultos salvo que se active ese filtro a propósito
+    if (this.filtroEstado !== 'no-realizado') {
+      resultado = resultado.filter((p) => !this.esNoRealizado(p));
+    }
+
     // Texto
     const q = this.busqueda.toLowerCase().trim();
     if (q) {
@@ -103,6 +120,7 @@ export class PedidosListComponent implements OnInit {
           case 'asignado':   return nombre.includes('asignad');
           case 'terminado':  return nombre.includes('terminad');
           case 'entregado':  return this.esEntregado(p);
+          case 'no-realizado': return this.esNoRealizado(p);
           case 'por-vencer': {
             if (this.esEntregado(p)) return false;
             const limite = new Date(hoy); limite.setDate(limite.getDate() + 7);
@@ -177,8 +195,39 @@ export class PedidosListComponent implements OnInit {
     });
   }
 
+  abrirDialogoAsignar(p: Pedido, event: Event): void {
+    event.stopPropagation();
+    this.itemPedidoService.listarPorPedido(p.idPedido!).subscribe((r: any) => {
+      const items = (r.items ?? []).map((it: any) => ({
+        idItemPedido: it.idItemPedido,
+        descripcion: String(it.descripcion ?? ''),
+      }));
+      const data: AsignarEmpleadoDialogData = {
+        idPedido: p.idPedido!,
+        nombreCliente: p.nombreCliente ?? '',
+        items,
+        empleados: this.empleados,
+      };
+      const ref = this.dialog.open(AsignarEmpleadoDialogComponent, {
+        data,
+        maxWidth: '95vw',
+        maxHeight: '92vh',
+        autoFocus: false,
+      });
+      ref.afterClosed().subscribe((asignado) => {
+        if (asignado) this.cargarPedidos();
+      });
+    });
+  }
+
   // ── Resumen ────────────────────────────────────────────────
-  get total(): number { return this.pedidos.length; }
+  get total(): number {
+    return this.pedidos.filter((p) => !this.esNoRealizado(p)).length;
+  }
+
+  get noRealizados(): number {
+    return this.pedidos.filter((p) => this.esNoRealizado(p)).length;
+  }
 
   get pendientes(): number {
     return this.pedidos.filter(
@@ -227,6 +276,9 @@ export class PedidosListComponent implements OnInit {
   private esCancelado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('cancel');
   }
+  private esNoRealizado(p: Pedido): boolean {
+    return (p.nombreEstado ?? '').toLowerCase() === 'no realizado';
+  }
   private parseFechaEntrega(fecha: string): Date {
     if (!fecha) return new Date(0);
     const [d, m, y] = fecha.split('/');
@@ -242,6 +294,7 @@ export class PedidosListComponent implements OnInit {
   estadoClase(p: Pedido): string {
     if (this.esEntregado(p)) return 'entregado';
     if (this.esCancelado(p)) return 'cancelado';
+    if (this.esNoRealizado(p)) return 'no-realizado';
     const nombre = (p.nombreEstado ?? '').toLowerCase();
     if (nombre.includes('terminad')) return 'terminado';
     if (nombre.includes('asignad'))  return 'asignado';
