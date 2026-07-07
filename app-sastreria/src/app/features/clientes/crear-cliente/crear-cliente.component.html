@@ -45,6 +45,8 @@
           matInput
           formControlName="telefono"
           placeholder="Ej: 3001234567"
+          type="tel"
+          inputmode="numeric"
         />
         <mat-error *ngIf="form.get('telefono')?.hasError('required')">
           El teléfono es requerido

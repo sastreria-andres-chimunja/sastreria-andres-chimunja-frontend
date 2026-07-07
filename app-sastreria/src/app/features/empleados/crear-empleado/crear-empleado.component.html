@@ -95,7 +95,7 @@
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Teléfono</mat-label>
           <mat-icon matPrefix>phone</mat-icon>
-          <input matInput formControlName="telefono" placeholder="Ej: 3001234567" />
+          <input matInput formControlName="telefono" placeholder="Ej: 3001234567" type="tel" inputmode="numeric" />
           <mat-error *ngIf="form.get('telefono')?.hasError('required')">El teléfono es requerido</mat-error>
         </mat-form-field>
 
