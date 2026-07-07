@@ -12,4 +12,5 @@ export class Movimiento {
   nombreTipoMovimiento?: string;
   nombreCategoriaMovimiento?: string;
   nombreMetodoPago?: string;
+  nombreClienteReferencia?: string;
 }

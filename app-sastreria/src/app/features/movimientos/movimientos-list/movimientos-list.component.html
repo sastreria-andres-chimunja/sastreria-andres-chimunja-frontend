@@ -139,6 +139,10 @@
           <mat-icon style="font-size:12px;width:12px;height:12px;">credit_card</mat-icon>
           {{ mov['nombreMetodoPago'] }}
         </span>
+        <span class="cliente-badge" *ngIf="mov.nombreClienteReferencia">
+          <mat-icon style="font-size:12px;width:12px;height:12px;">person</mat-icon>
+          {{ mov.nombreClienteReferencia }}
+        </span>
         <span class="mov-ref" *ngIf="mov.idReferencia">
           Ref #{{ mov.idReferencia }}
         </span>
