@@ -41,6 +41,10 @@
   gap: 18px; align-items: start;
 }
 
+/* Sin esto, las columnas del grid no encogen por debajo del ancho de su
+   contenido (min-width: auto por defecto) y fuerzan scroll horizontal. */
+.col-left, .col-right { min-width: 0; }
+
 /* ── Card sección ────────────────────────────────────────────── */
 .card-section {
   background: var(--surface); border: 1px solid var(--border);
