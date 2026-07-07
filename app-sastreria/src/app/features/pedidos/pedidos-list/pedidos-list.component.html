@@ -187,17 +187,19 @@
         <span class="tel-chip" *ngIf="p.telefonoCliente">
           <mat-icon>phone</mat-icon> {{ p.telefonoCliente }}
         </span>
-        <button class="btn-asignar" (click)="abrirDialogoAsignar(p, $event)"
-          matTooltip="Asignar empleado" *ngIf="puedeCrearPedido">
-          <mat-icon>engineering</mat-icon> Asignar
-        </button>
-        <button class="btn-abono" (click)="abrirDialogoPago(p, $event)"
-          matTooltip="Registrar abono" *ngIf="puedeCrearPedido">
-          <mat-icon>payments</mat-icon> Abono
-        </button>
-        <button class="btn-view" (click)="irAEditar(p)">
-          <mat-icon>edit</mat-icon> Editar
-        </button>
+        <div class="card-footer-actions">
+          <button class="btn-asignar" (click)="abrirDialogoAsignar(p, $event)"
+            matTooltip="Asignar empleado" *ngIf="puedeCrearPedido">
+            <mat-icon>engineering</mat-icon> Asignar
+          </button>
+          <button class="btn-abono" (click)="abrirDialogoPago(p, $event)"
+            matTooltip="Registrar abono" *ngIf="puedeCrearPedido">
+            <mat-icon>payments</mat-icon> Abono
+          </button>
+          <button class="btn-view" (click)="irAEditar(p)">
+            <mat-icon>edit</mat-icon> Editar
+          </button>
+        </div>
       </div>
 
     </div>

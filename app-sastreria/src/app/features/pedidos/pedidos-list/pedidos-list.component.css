@@ -256,6 +256,7 @@
 /* Footer */
 .card-footer {
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; row-gap: 8px; column-gap: 8px;
   padding: 8px 14px 12px;
   border-top: 1px solid var(--border-light);
   margin-top: auto;
@@ -264,7 +265,14 @@
 .tel-chip {
   display: flex; align-items: center; gap: 4px;
   font-size: 11px; color: var(--text-secondary);
+  white-space: nowrap;
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+.card-footer-actions {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
 }
 
 .btn-view {
