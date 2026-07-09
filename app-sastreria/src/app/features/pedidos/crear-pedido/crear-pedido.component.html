@@ -159,19 +159,13 @@
         <!-- ════ MODO CREAR ════ -->
         <ng-container *ngIf="!isEdit">
 
-          <!-- Sin cliente -->
-          <div class="card-section" *ngIf="!clienteSeleccionado">
-            <div class="section-header">
-              <mat-icon class="section-icon">list_alt</mat-icon>
-              <span>Ítems del pedido</span>
-            </div>
-            <div class="items-empty">
-              <mat-icon>person_search</mat-icon>
-              <p>Seleccione un cliente para agregar ítems.</p>
-            </div>
-          </div>
+          <ng-container>
 
-          <ng-container *ngIf="clienteSeleccionado">
+            <!-- Aviso: cliente pendiente (no bloquea, solo recuerda que hace falta para guardar) -->
+            <div class="no-results-hint" *ngIf="!clienteSeleccionado">
+              <mat-icon>info</mat-icon>
+              <span>Puedes agregar los ítems ahora; el cliente se pedirá al guardar el pedido.</span>
+            </div>
 
             <!-- 1. Acordeón de ítems ya agregados -->
             <div class="card-section items-acordeon-section" *ngIf="items.length > 0">
@@ -218,7 +212,7 @@
                     <app-item-inline-form
                       [empleados]="empleados"
                       [medidas]="clienteMedidas"
-                      [idCliente]="clienteSeleccionado.idCliente ?? 0"
+                      [idCliente]="clienteSeleccionado?.idCliente ?? 0"
                       [idPedido]="0"
                       [item]="it"
                       [modoEdicion]="true"
@@ -263,7 +257,7 @@
                 *ngIf="mostrarFormNuevoItem"
                 [empleados]="empleados"
                 [medidas]="clienteMedidas"
-                [idCliente]="clienteSeleccionado.idCliente ?? 0"
+                [idCliente]="clienteSeleccionado?.idCliente ?? 0"
                 [idPedido]="0"
                 [modoEdicion]="false"
                 (itemGuardado)="onItemAgregado($event)"

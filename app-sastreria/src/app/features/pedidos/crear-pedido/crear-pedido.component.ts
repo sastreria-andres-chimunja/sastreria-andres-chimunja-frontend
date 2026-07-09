@@ -461,7 +461,12 @@ export class CrearPedidoComponent implements OnInit {
 
   // ── Guardar pedido completo ───────────────────────────────────
   async guardar(): Promise<void> {
-    if (!this.clienteSeleccionado) { alert('Seleccione un cliente'); return; }
+    if (!this.clienteSeleccionado) {
+      this.snackBar.open('Selecciona o crea un cliente para guardar el pedido.', 'Cerrar', {
+        duration: 5000, panelClass: ['snack-error'],
+      });
+      return;
+    }
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
     // Capturar ítem del formulario inline si tiene datos sin agregar

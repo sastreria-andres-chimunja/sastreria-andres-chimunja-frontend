@@ -26,7 +26,8 @@
         <mat-form-field appearance="outline" class="form-field full-width">
           <mat-label>Descripción / tipo de prenda</mat-label>
           <mat-icon matPrefix>checkroom</mat-icon>
-          <input matInput formControlName="descripcion" placeholder="Ej: Camisa manga larga" />
+          <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1"
+            formControlName="descripcion" placeholder="Ej: Camisa manga larga"></textarea>
           <button mat-icon-button matSuffix type="button" *ngIf="soportaVoz"
             (click)="toggleVoz()"
             [class.mic-activo]="escuchando"
