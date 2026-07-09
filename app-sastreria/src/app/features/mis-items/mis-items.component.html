@@ -72,6 +72,10 @@
 
       <!-- Datos del ítem -->
       <div class="card-meta">
+        <span class="meta-item" *ngIf="item.nombreCliente">
+          <mat-icon class="meta-icon">person</mat-icon>
+          {{ item.nombreCliente }}
+        </span>
         <span class="meta-item">
           <mat-icon class="meta-icon">event</mat-icon>
           {{ formatFecha(item.fechaEntrega) }}
