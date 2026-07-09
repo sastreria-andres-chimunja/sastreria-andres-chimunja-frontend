@@ -152,6 +152,10 @@
   flex-direction: column;
   gap: 10px;
   transition: box-shadow 0.15s;
+  /* Sin esto, la tarjeta (ítem de grid) no encoge por debajo del ancho de
+     su contenido (min-width: auto por defecto) y el badge de estado queda
+     fuera del área visible sin scroll para alcanzarlo. */
+  min-width: 0;
 }
 
 .item-card:hover {
