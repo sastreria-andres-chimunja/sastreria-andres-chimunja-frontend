@@ -16,6 +16,7 @@ import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedi
 import { CambiarClaveComponent } from './features/cambiar-clave/cambiar-clave.component';
 import { RecuperarClaveComponent } from './features/recuperar-clave/recuperar-clave.component';
 import { MisItemsComponent } from './features/mis-items/mis-items.component';
+import { ItemsAdminComponent } from './features/items-admin/items-admin.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -46,6 +47,8 @@ export const routes: Routes = [
 
       // Vista para operarios y asistentes: gestionar los ítems asignados a uno mismo
       { path: 'mis-items', component: MisItemsComponent },
+      // Vista para admin: todos los ítems de todos los pedidos, con el empleado a cargo
+      { path: 'items', component: ItemsAdminComponent },
 
       { path: '', redirectTo: 'pedidos', pathMatch: 'full' },
     ],

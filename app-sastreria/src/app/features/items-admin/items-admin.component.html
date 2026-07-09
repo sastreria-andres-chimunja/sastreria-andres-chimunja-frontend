@@ -1,0 +1,128 @@
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="top-actions">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" placeholder="Buscar descripción, cliente, empleado o # pedido..."
+        [value]="busqueda" (keyup)="onBusqueda($event)" />
+    </div>
+    <button class="btn-refresh" (click)="cargarItems()" matTooltip="Actualizar">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+</div>
+
+<div class="scroll-area">
+
+  <!-- RESUMEN -->
+  <div class="resumen-row">
+    <div class="resumen-card" [class.activa]="filtroEstado === null" (click)="setFiltro(null)">
+      <div class="resumen-icon-circle total-icon"><mat-icon>assignment</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Total</div>
+        <div class="resumen-valor">{{ totalItems }}</div>
+      </div>
+    </div>
+    <div class="resumen-card" [class.activa]="filtroEstado === 'pendiente'" (click)="setFiltro('pendiente')">
+      <div class="resumen-icon-circle pendiente-icon"><mat-icon>pending</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Pendientes</div>
+        <div class="resumen-valor">{{ countPendientes }}</div>
+      </div>
+    </div>
+    <div class="resumen-card" [class.activa]="filtroEstado === 'asignado'" (click)="setFiltro('asignado')">
+      <div class="resumen-icon-circle asignado-icon"><mat-icon>work</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Asignados</div>
+        <div class="resumen-valor">{{ countAsignados }}</div>
+      </div>
+    </div>
+    <div class="resumen-card" [class.activa]="filtroEstado === 'terminado'" (click)="setFiltro('terminado')">
+      <div class="resumen-icon-circle terminado-icon"><mat-icon>check_circle</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Terminados</div>
+        <div class="resumen-valor">{{ countTerminados }}</div>
+      </div>
+    </div>
+    <div class="resumen-card" [class.activa]="filtroEstado === 'entregado'" (click)="setFiltro('entregado')">
+      <div class="resumen-icon-circle entregado-icon"><mat-icon>local_shipping</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Entregados</div>
+        <div class="resumen-valor">{{ countEntregados }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+    <p>Cargando ítems...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" *ngIf="!cargando && itemsFiltrados.length === 0">
+    <mat-icon>inbox</mat-icon>
+    <p *ngIf="items.length === 0">No hay ítems registrados aún.</p>
+    <p *ngIf="items.length > 0 && itemsFiltrados.length === 0">
+      Sin resultados para la búsqueda actual.
+    </p>
+  </div>
+
+  <!-- LISTA DE ÍTEMS -->
+  <div class="items-grid" *ngIf="!cargando && itemsFiltrados.length > 0">
+    <div class="item-card" *ngFor="let item of itemsFiltrados"
+      [class.card-terminado]="estadoClase(item) === 'terminado' || estadoClase(item) === 'entregado'">
+
+      <!-- Encabezado de la card -->
+      <div class="card-header">
+        <div class="card-desc">
+          <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
+          <a class="pedido-ref" [routerLink]="['/app/pedidos/editar', item.idPedido]">Pedido #{{ item.idPedido }}</a>
+        </div>
+        <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
+          {{ item.nombreEstado }}
+        </span>
+      </div>
+
+      <!-- Empleado a cargo -->
+      <div class="empleado-row">
+        <span class="empleado-chip" *ngIf="item.nombreEmpleado">
+          <mat-icon class="meta-icon">engineering</mat-icon>
+          {{ item.nombreEmpleado }}
+        </span>
+        <span class="empleado-chip sin-asignar" *ngIf="!item.nombreEmpleado">
+          <mat-icon class="meta-icon">person_off</mat-icon>
+          Sin asignar
+        </span>
+      </div>
+
+      <!-- Datos del ítem -->
+      <div class="card-meta">
+        <span class="meta-item" *ngIf="item.nombreCliente">
+          <mat-icon class="meta-icon">person</mat-icon>
+          {{ item.nombreCliente }}
+        </span>
+        <span class="meta-item">
+          <mat-icon class="meta-icon">event</mat-icon>
+          {{ formatFecha(item.fechaEntrega) }}
+        </span>
+        <span class="meta-item">
+          <mat-icon class="meta-icon">attach_money</mat-icon>
+          {{ formatCOP(item.valor) }}
+        </span>
+        <span class="meta-item" *ngIf="item.tipoPrendaMedida">
+          <mat-icon class="meta-icon">straighten</mat-icon>
+          {{ item.tipoPrendaMedida }}
+        </span>
+      </div>
+
+      <!-- Observación -->
+      <div class="card-obs" *ngIf="item.observacion">
+        <mat-icon class="obs-icon">notes</mat-icon>
+        <span>{{ item.observacion }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>

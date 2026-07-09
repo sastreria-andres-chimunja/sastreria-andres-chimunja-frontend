@@ -15,6 +15,10 @@ export class ItemPedidoService {
     return this.http.get<any>(this.api, { params: { idEmpleado: String(idEmpleado) } });
   }
 
+  listarTodos() {
+    return this.http.get<any>(this.api);
+  }
+
   buscarPorId(id: number) {
     return this.http.get<any>(`${this.api}/${id}`);
   }

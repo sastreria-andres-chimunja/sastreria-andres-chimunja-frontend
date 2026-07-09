@@ -60,6 +60,7 @@ export class MainLayoutComponent implements OnInit {
     '/app/categoriaMovimientos': 'Categorías de movimiento',
     '/app/roles': 'Roles',
     '/app/mis-items': 'Mis ítems',
+    '/app/items': 'Ítems',
   };
 
   constructor(

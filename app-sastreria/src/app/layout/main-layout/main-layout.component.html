@@ -42,6 +42,14 @@
       </a>
     </mat-nav-list>
 
+    <!-- Ítems (solo admin): todos los ítems y quién los está trabajando -->
+    <mat-nav-list class="nav-section" *ngIf="authService.esAdmin()">
+      <a mat-list-item routerLink="/app/items" routerLinkActive="active">
+        <mat-icon matListItemIcon>checklist</mat-icon>
+        <span matListItemTitle class="nav-label">Ítems</span>
+      </a>
+    </mat-nav-list>
+
     <!-- Usuarios (solo admin y asistente) -->
     <ng-container *ngIf="!authService.esOperario()">
       <div class="nav-title nav-label">Usuarios</div>
