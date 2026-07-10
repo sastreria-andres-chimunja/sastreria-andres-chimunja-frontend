@@ -128,7 +128,7 @@ export class PedidosListComponent implements OnInit {
             return fe >= hoy && fe <= limite;
           }
           case 'vencido': {
-            if (this.esEntregado(p)) return false;
+            if (this.esEntregado(p) || this.esTerminado(p)) return false;
             return this.parseFechaEntrega(p.fechaEntrega) < hoy;
           }
           default: return true;
@@ -260,7 +260,7 @@ export class PedidosListComponent implements OnInit {
   get vencidos(): number {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     return this.pedidos.filter((p) => {
-      if (this.esEntregado(p) || this.esCancelado(p)) return false;
+      if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p)) return false;
       return this.parseFechaEntrega(p.fechaEntrega) < hoy;
     }).length;
   }
@@ -275,6 +275,9 @@ export class PedidosListComponent implements OnInit {
   }
   private esCancelado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('cancel');
+  }
+  private esTerminado(p: Pedido): boolean {
+    return (p.nombreEstado ?? '').toLowerCase().includes('terminad');
   }
   private esNoRealizado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase() === 'no realizado';

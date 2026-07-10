@@ -165,7 +165,7 @@
       </div>
 
       <!-- Días restantes -->
-      <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado'">
+      <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado' && estadoClase(p) !== 'terminado'">
         <ng-container [ngSwitch]="true">
           <ng-container *ngSwitchCase="diasRestantes(p.fechaEntrega) < 0">
             <mat-icon class="dias-icon vencido-icon-sm">warning</mat-icon>
