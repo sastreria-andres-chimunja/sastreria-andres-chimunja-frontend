@@ -122,7 +122,7 @@ export class PedidosListComponent implements OnInit {
           case 'entregado':  return this.esEntregado(p);
           case 'no-realizado': return this.esNoRealizado(p);
           case 'por-vencer': {
-            if (this.esEntregado(p)) return false;
+            if (this.esEntregado(p) || this.esTerminado(p)) return false;
             const limite = new Date(hoy); limite.setDate(limite.getDate() + 7);
             const fe = this.parseFechaEntrega(p.fechaEntrega);
             return fe >= hoy && fe <= limite;
@@ -251,7 +251,7 @@ export class PedidosListComponent implements OnInit {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const limite = new Date(hoy); limite.setDate(limite.getDate() + 7);
     return this.pedidos.filter((p) => {
-      if (this.esEntregado(p) || this.esCancelado(p)) return false;
+      if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p) || this.esNoRealizado(p)) return false;
       const fe = this.parseFechaEntrega(p.fechaEntrega);
       return fe >= hoy && fe <= limite;
     }).length;
@@ -260,7 +260,7 @@ export class PedidosListComponent implements OnInit {
   get vencidos(): number {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     return this.pedidos.filter((p) => {
-      if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p)) return false;
+      if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p) || this.esNoRealizado(p)) return false;
       return this.parseFechaEntrega(p.fechaEntrega) < hoy;
     }).length;
   }
