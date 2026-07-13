@@ -52,6 +52,54 @@
 /* ── Scroll area ─────────────────────────────────────────────── */
 .scroll-area { flex: 1; overflow-y: auto; padding: 18px 20px; background: var(--bg); }
 
+/* ── Tabs tipo de pedido ─────────────────────────────────────── */
+.tabs-row {
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+
+.tabs { display: flex; gap: 0; }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab .tab-icon { font-size: 14px; width: 14px; height: 14px; }
+.tab:not(.active):hover { color: var(--text-primary); }
+.tab.active { color: var(--primary); border-color: var(--primary); }
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.tab.active .tab-count {
+  background: #e3f0fb;
+  color: var(--primary);
+  border-color: transparent;
+}
+
 /* ── Resumen ─────────────────────────────────────────────────── */
 .resumen-row {
   display: grid;

@@ -120,6 +120,26 @@
           </div>
         </div>
 
+        <!-- Tipo de pedido -->
+        <div class="card-section">
+          <div class="section-header">
+            <mat-icon class="section-icon">category</mat-icon>
+            <span>Tipo de pedido</span>
+          </div>
+          <div class="pedido-form">
+            <mat-form-field appearance="outline" class="form-field" style="grid-column: 1 / -1; width:100%">
+              <mat-label>Tipo de pedido</mat-label>
+              <mat-icon matPrefix>category</mat-icon>
+              <mat-select formControlName="idTipoPedido">
+                <mat-option *ngFor="let t of tiposPedido" [value]="t.idTipoPedido">
+                  {{ t.nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('idTipoPedido')?.hasError('required')">Requerido</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
         <!-- Estado del pedido (solo estado + valor) -->
         <div class="card-section">
           <div class="section-header">

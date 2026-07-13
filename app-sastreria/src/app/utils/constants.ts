@@ -37,4 +37,5 @@ export const API = {
   PEDIDOS: 'pedidos',
   ITEM_PEDIDO: 'itemPedido',
   ESTADO: 'estado',
+  TIPO_PEDIDO: 'tipoPedido',
 } as const;

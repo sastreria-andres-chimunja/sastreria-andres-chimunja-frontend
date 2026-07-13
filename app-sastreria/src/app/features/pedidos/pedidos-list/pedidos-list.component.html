@@ -48,6 +48,22 @@
 <!-- SCROLL AREA -->
 <div class="scroll-area">
 
+  <!-- TABS TIPO DE PEDIDO -->
+  <div class="tabs-row">
+    <div class="tabs">
+      <div class="tab" [class.active]="tabTipo === 'arreglo'" (click)="cambiarTab('arreglo')">
+        <mat-icon class="tab-icon">build</mat-icon>
+        <span>Arreglos</span>
+        <span class="tab-count">{{ countTabArreglo }}</span>
+      </div>
+      <div class="tab" [class.active]="tabTipo === 'confeccion'" (click)="cambiarTab('confeccion')">
+        <mat-icon class="tab-icon">checkroom</mat-icon>
+        <span>Confecciones</span>
+        <span class="tab-count">{{ countTabConfeccion }}</span>
+      </div>
+    </div>
+  </div>
+
   <!-- RESUMEN -->
   <div class="resumen-row">
 

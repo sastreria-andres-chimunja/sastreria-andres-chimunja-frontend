@@ -17,6 +17,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EstadoService } from '../../../core/services/estado.service';
+import { TipoPedidoService } from '../../../core/services/tipo-pedido.service';
 import { ImagenService } from '../../../core/services/imagen.service';
 import { MedidaService } from '../../../core/services/medida.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
@@ -27,6 +28,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Cliente } from '../../../shared/models/Cliente';
 import { Empleado } from '../../../shared/models/Empleado';
 import { Estado } from '../../../shared/models/Estado';
+import { TipoPedido } from '../../../shared/models/TipoPedido';
 import { Medida } from '../../../shared/models/Medida';
 import { Pedido } from '../../../shared/models/Pedido';
 
@@ -75,6 +77,7 @@ export class CrearPedidoComponent implements OnInit {
 
   // Datos de apoyo
   estados: Estado[] = [];
+  tiposPedido: TipoPedido[] = [];
   empleados: Empleado[] = [];
   clienteMedidas: Medida[] = [];
   metodosPago: any[] = [];
@@ -118,6 +121,7 @@ export class CrearPedidoComponent implements OnInit {
     private pedidoService: PedidoService,
     private itemService: ItemPedidoService,
     private estadoService: EstadoService,
+    private tipoPedidoService: TipoPedidoService,
     private imagenService: ImagenService,
     private medidaService: MedidaService,
     private empleadoService: EmpleadoService,
@@ -146,6 +150,7 @@ export class CrearPedidoComponent implements OnInit {
   private buildForm(): void {
     this.form = this.fb.group({
       idEstado:      [null, Validators.required],
+      idTipoPedido:  [null, Validators.required],
       fechaRecibido: [new Date(), Validators.required],
       fechaEntrega:  [new Date(), Validators.required],
       valorTotal:    [{ value: 0, disabled: true }],
@@ -169,6 +174,7 @@ export class CrearPedidoComponent implements OnInit {
         if (pendiente) this.form.patchValue({ idEstado: pendiente.idEstado });
       }
     });
+    this.tipoPedidoService.listar().subscribe((r: any) => { this.tiposPedido = r.tiposPedido ?? []; });
     this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados; });
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
       this.metodosPago = r.metodosPago ?? [];
@@ -245,6 +251,7 @@ export class CrearPedidoComponent implements OnInit {
       const p: Pedido = r.pedido;
       this.form.patchValue({
         idEstado:      p.idEstado,
+        idTipoPedido:  p.idTipoPedido,
         fechaRecibido: stringToDate(p.fechaRecibido),
         fechaEntrega:  stringToDate(p.fechaEntrega),
         valorTotal:    p.valorTotal,
@@ -490,6 +497,7 @@ export class CrearPedidoComponent implements OnInit {
     const pedidoData = {
       idCliente:     this.clienteSeleccionado.idCliente,
       idEstado:      fv.idEstado,
+      idTipoPedido:  fv.idTipoPedido,
       valorTotal:    fv.valorTotal,
       fechaRecibido: dateToString(fv.fechaRecibido),
       fechaEntrega:  dateToString(fv.fechaEntrega),

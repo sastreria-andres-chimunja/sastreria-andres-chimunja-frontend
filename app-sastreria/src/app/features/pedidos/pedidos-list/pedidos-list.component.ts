@@ -22,6 +22,8 @@ import {
   AsignarEmpleadoDialogData,
 } from '../asignar-empleado-dialog/asignar-empleado-dialog.component';
 
+type TabTipoPedido = 'arreglo' | 'confeccion';
+
 @Component({
   selector: 'app-pedidos-list',
   standalone: true,
@@ -44,6 +46,7 @@ export class PedidosListComponent implements OnInit {
   pedidosFiltrados: Pedido[] = [];
   busqueda = '';
   filtroEstado: string | null = null;
+  tabTipo: TabTipoPedido = 'arreglo';
 
   filtroFechaAbierto = false;
   filtroFechaActivo = false;
@@ -93,8 +96,32 @@ export class PedidosListComponent implements OnInit {
     });
   }
 
+  // ── Tab tipo de pedido ────────────────────────────────────────
+  get pedidosDelTab(): Pedido[] {
+    return this.pedidos.filter((p) => this.perteneceATab(p, this.tabTipo));
+  }
+
+  get countTabArreglo(): number {
+    return this.pedidos.filter((p) => this.perteneceATab(p, 'arreglo')).length;
+  }
+
+  get countTabConfeccion(): number {
+    return this.pedidos.filter((p) => this.perteneceATab(p, 'confeccion')).length;
+  }
+
+  cambiarTab(tab: TabTipoPedido): void {
+    this.tabTipo = tab;
+    this.filtroEstado = null;
+    this.aplicarBusqueda();
+  }
+
+  private perteneceATab(p: Pedido, tab: TabTipoPedido): boolean {
+    const nombre = (p.nombreTipoPedido ?? '').toLowerCase();
+    return tab === 'arreglo' ? nombre.includes('arreglo') : nombre.includes('confecci');
+  }
+
   aplicarBusqueda(): void {
-    let resultado = [...this.pedidos];
+    let resultado = [...this.pedidosDelTab];
 
     // Los pedidos "No realizado" quedan ocultos salvo que se active ese filtro a propósito
     if (this.filtroEstado !== 'no-realizado') {
@@ -220,29 +247,29 @@ export class PedidosListComponent implements OnInit {
     });
   }
 
-  // ── Resumen ────────────────────────────────────────────────
+  // ── Resumen (dentro del tab activo) ─────────────────────────
   get total(): number {
-    return this.pedidos.filter((p) => !this.esNoRealizado(p)).length;
+    return this.pedidosDelTab.filter((p) => !this.esNoRealizado(p)).length;
   }
 
   get noRealizados(): number {
-    return this.pedidos.filter((p) => this.esNoRealizado(p)).length;
+    return this.pedidosDelTab.filter((p) => this.esNoRealizado(p)).length;
   }
 
   get pendientes(): number {
-    return this.pedidos.filter(
+    return this.pedidosDelTab.filter(
       (p) => (p.nombreEstado ?? '').toLowerCase().includes('pendiente')
     ).length;
   }
 
   get asignados(): number {
-    return this.pedidos.filter(
+    return this.pedidosDelTab.filter(
       (p) => (p.nombreEstado ?? '').toLowerCase().includes('asignad')
     ).length;
   }
 
   get terminados(): number {
-    return this.pedidos.filter(
+    return this.pedidosDelTab.filter(
       (p) => (p.nombreEstado ?? '').toLowerCase().includes('terminad')
     ).length;
   }
@@ -250,7 +277,7 @@ export class PedidosListComponent implements OnInit {
   get porVencer(): number {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const limite = new Date(hoy); limite.setDate(limite.getDate() + 7);
-    return this.pedidos.filter((p) => {
+    return this.pedidosDelTab.filter((p) => {
       if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p) || this.esNoRealizado(p)) return false;
       const fe = this.parseFechaEntrega(p.fechaEntrega);
       return fe >= hoy && fe <= limite;
@@ -259,14 +286,14 @@ export class PedidosListComponent implements OnInit {
 
   get vencidos(): number {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-    return this.pedidos.filter((p) => {
+    return this.pedidosDelTab.filter((p) => {
       if (this.esEntregado(p) || this.esCancelado(p) || this.esTerminado(p) || this.esNoRealizado(p)) return false;
       return this.parseFechaEntrega(p.fechaEntrega) < hoy;
     }).length;
   }
 
   get entregados(): number {
-    return this.pedidos.filter((p) => this.esEntregado(p)).length;
+    return this.pedidosDelTab.filter((p) => this.esEntregado(p)).length;
   }
 
   // ── Helpers ────────────────────────────────────────────────
