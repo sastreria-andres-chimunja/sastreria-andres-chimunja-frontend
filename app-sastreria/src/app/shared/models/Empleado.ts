@@ -6,4 +6,5 @@ export class Empleado {
   telefono: string = '';
   fechaCumpleanios = '';
   idRol: number = 0;
+  activo?: boolean = true;
 }

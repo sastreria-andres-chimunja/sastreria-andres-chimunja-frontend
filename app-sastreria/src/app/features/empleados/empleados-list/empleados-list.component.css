@@ -93,6 +93,9 @@
 
 .card-stripe { height: 4px; flex-shrink: 0; }
 .stripe-success { background: linear-gradient(90deg, #2e7d32 0%, #3ea03e 100%); }
+.stripe-inactivo { background: linear-gradient(90deg, #9ca3af 0%, #d1d5db 100%); }
+
+.item-card-inactivo { opacity: 0.75; }
 
 .card-top {
   display: flex;
@@ -113,6 +116,20 @@
   color: #fff;
 }
 .avatar-success { background: linear-gradient(135deg, #2e7d32 0%, #3ea03e 100%); }
+.avatar-inactivo { background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%); }
+
+.estado-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  align-self: flex-start;
+}
+.badge-activo   { background: #e8f5e9; color: #2e7d32; }
+.badge-inactivo { background: #f3f4f6; color: #6b7280; }
 
 .item-info { flex: 1; min-width: 0; }
 
@@ -168,6 +185,12 @@
 }
 .btn-action mat-icon { font-size: 14px; width: 14px; height: 14px; }
 .btn-action:hover { background: #e6f1fb; border-color: var(--primary); box-shadow: 0 2px 6px rgba(24,95,165,0.12); }
+
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: #fdecea; border-color: var(--danger); }
+
+.btn-success { color: #2e7d32; }
+.btn-success:hover { background: #e8f5e9; border-color: #2e7d32; }
 
 .empty-state {
   display: flex;

@@ -78,4 +78,33 @@ export class EmpleadosListComponent implements OnInit {
       width: '400px', height: '600px', data: mov,
     }).afterClosed().subscribe(() => this.loadEmpleados());
   }
+
+  cambiarEstado(e: Empleado) {
+    const nombre = `${e.nombres} ${e.apellidos}`;
+    const activar = !e.activo;
+    Swal.fire({
+      title: activar ? '¿Activar empleado?' : '¿Inactivar empleado?',
+      text: activar
+        ? `${nombre} volverá a estar disponible para asignarle trabajo.`
+        : `${nombre} ya no podrá ser asignado a nuevos trabajos.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: activar ? '#185FA5' : '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: activar ? 'Sí, activar' : 'Sí, inactivar',
+      cancelButtonText: 'Cancelar',
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.EmpleadoService.cambiarEstado(e.idEmpleado!, activar).subscribe(() => {
+          this.loadEmpleados();
+          Swal.fire({
+            title: activar ? '¡Activado!' : '¡Inactivado!',
+            text: `${nombre} quedó ${activar ? 'activo' : 'inactivo'}.`,
+            icon: 'success',
+            confirmButtonColor: '#2563eb',
+          });
+        });
+      }
+    });
+  }
 }

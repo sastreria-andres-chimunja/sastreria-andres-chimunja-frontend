@@ -28,4 +28,8 @@ export class EmpleadoService {
     const { idEmpleado } = Empleado;
     return this.http.put(`${this.api}/${idEmpleado}`, Empleado);
   }
+
+  cambiarEstado(idEmpleado: number, activo: boolean) {
+    return this.http.patch(`${this.api}/${idEmpleado}/estado`, { activo });
+  }
 }

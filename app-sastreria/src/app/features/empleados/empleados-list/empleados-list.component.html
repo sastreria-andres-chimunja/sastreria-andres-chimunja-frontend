@@ -12,10 +12,10 @@
 
 <div class="scroll-area">
   <div class="card-list" *ngIf="empleadosFiltrados.length > 0; else sinResultados">
-    <div class="item-card" *ngFor="let e of empleadosFiltrados">
-      <div class="card-stripe stripe-success"></div>
+    <div class="item-card" [class.item-card-inactivo]="!e.activo" *ngFor="let e of empleadosFiltrados">
+      <div class="card-stripe" [ngClass]="e.activo ? 'stripe-success' : 'stripe-inactivo'"></div>
       <div class="card-top">
-        <div class="item-avatar avatar-success">{{ initials(e) }}</div>
+        <div class="item-avatar" [ngClass]="e.activo ? 'avatar-success' : 'avatar-inactivo'">{{ initials(e) }}</div>
         <div class="item-info">
           <p class="item-nombre">{{ e.nombres }} {{ e.apellidos }}</p>
           <div class="item-meta">
@@ -27,6 +27,9 @@
             </span>
           </div>
         </div>
+        <span class="estado-badge" [ngClass]="e.activo ? 'badge-activo' : 'badge-inactivo'">
+          {{ e.activo ? 'Activo' : 'Inactivo' }}
+        </span>
       </div>
       <div class="card-footer">
         <button class="btn-action" (click)="openDialog(e)">
@@ -34,6 +37,11 @@
         </button>
         <button class="btn-action" (click)="openDialogMovimiento(e)">
           <mat-icon>payments</mat-icon> Pago
+        </button>
+        <button class="btn-action" [class.btn-danger]="e.activo" [class.btn-success]="!e.activo"
+          (click)="cambiarEstado(e)">
+          <mat-icon>{{ e.activo ? 'person_off' : 'person' }}</mat-icon>
+          {{ e.activo ? 'Inactivar' : 'Activar' }}
         </button>
       </div>
     </div>
