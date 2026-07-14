@@ -38,4 +38,5 @@ export const API = {
   ITEM_PEDIDO: 'itemPedido',
   ESTADO: 'estado',
   TIPO_PEDIDO: 'tipoPedido',
+  LIMITE_DIARIO: 'limiteDiario',
 } as const;

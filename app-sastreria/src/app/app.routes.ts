@@ -17,6 +17,7 @@ import { CambiarClaveComponent } from './features/cambiar-clave/cambiar-clave.co
 import { RecuperarClaveComponent } from './features/recuperar-clave/recuperar-clave.component';
 import { MisItemsComponent } from './features/mis-items/mis-items.component';
 import { ItemsAdminComponent } from './features/items-admin/items-admin.component';
+import { LimiteDiarioComponent } from './features/limite-diario/limite-diario.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -39,6 +40,7 @@ export const routes: Routes = [
       { path: 'tipoMovimientos', component: TipoMovimientoListComponent },
       { path: 'categoriaMovimientos', component: CategoriaMovimientoListComponent },
       { path: 'roles', component: RolesListComponent },
+      { path: 'limite-diario', component: LimiteDiarioComponent },
       { path: 'nomina', component: NominaGeneralComponent },
       // Pedidos
       { path: 'pedidos', component: PedidosListComponent },

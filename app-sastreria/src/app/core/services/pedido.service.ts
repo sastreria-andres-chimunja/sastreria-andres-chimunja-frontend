@@ -38,4 +38,10 @@ export class PedidoService {
   registrarAbono(id: number, abono: { idMetodoPago: number | null; valor: number; observacion?: string }) {
     return this.http.post<any>(`${this.api}/${id}/registrar-abono`, abono);
   }
+
+  getValorProgramado(fecha: string, excluirIdPedido?: number) {
+    const params: Record<string, string> = { fecha };
+    if (excluirIdPedido) params['excluirIdPedido'] = String(excluirIdPedido);
+    return this.http.get<any>(`${this.api}/valor-programado`, { params });
+  }
 }

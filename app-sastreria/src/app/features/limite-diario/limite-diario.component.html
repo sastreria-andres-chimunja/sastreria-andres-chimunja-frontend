@@ -1,0 +1,39 @@
+<div class="scroll-area">
+  <div class="config-card">
+    <div class="config-header">
+      <mat-icon class="config-icon">payments</mat-icon>
+      <div>
+        <h2 class="config-title">Límite diario de entregas</h2>
+        <p class="config-sub">
+          Monto máximo (suma del total de pedidos) que se puede programar para
+          entregar en un mismo día. Si al crear un pedido se supera este límite
+          para la fecha de entrega elegida, el sistema pedirá cambiar la fecha.
+        </p>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="cargando">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <form [formGroup]="form" *ngIf="!cargando" (ngSubmit)="guardar()">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Límite diario (COP)</mat-label>
+        <mat-icon matPrefix>attach_money</mat-icon>
+        <input matInput type="number" min="0" formControlName="monto" />
+        <mat-error *ngIf="form.get('monto')?.hasError('required')">Requerido</mat-error>
+        <mat-error *ngIf="form.get('monto')?.hasError('min')">Debe ser mayor o igual a 0</mat-error>
+      </mat-form-field>
+
+      <p class="preview" *ngIf="form.get('monto')?.value">
+        Equivale a {{ formatCOP(form.get('monto')?.value) }} por día.
+      </p>
+
+      <button class="btn-guardar" type="submit" [disabled]="guardando">
+        <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </form>
+  </div>
+</div>

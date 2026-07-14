@@ -61,6 +61,7 @@ export class MainLayoutComponent implements OnInit {
     '/app/roles': 'Roles',
     '/app/mis-items': 'Mis ítems',
     '/app/items': 'Ítems',
+    '/app/limite-diario': 'Límite diario',
   };
 
   constructor(

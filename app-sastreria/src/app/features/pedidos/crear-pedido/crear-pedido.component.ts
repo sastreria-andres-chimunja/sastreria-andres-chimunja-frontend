@@ -18,6 +18,7 @@ import { PedidoService } from '../../../core/services/pedido.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EstadoService } from '../../../core/services/estado.service';
 import { TipoPedidoService } from '../../../core/services/tipo-pedido.service';
+import { LimiteDiarioService } from '../../../core/services/limite-diario.service';
 import { ImagenService } from '../../../core/services/imagen.service';
 import { MedidaService } from '../../../core/services/medida.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
@@ -122,6 +123,7 @@ export class CrearPedidoComponent implements OnInit {
     private itemService: ItemPedidoService,
     private estadoService: EstadoService,
     private tipoPedidoService: TipoPedidoService,
+    private limiteDiarioService: LimiteDiarioService,
     private imagenService: ImagenService,
     private medidaService: MedidaService,
     private empleadoService: EmpleadoService,
@@ -492,8 +494,29 @@ export class CrearPedidoComponent implements OnInit {
       }
     }
 
-    this.guardando = true;
     const fv = this.form.getRawValue();
+
+    // Límite diario de entregas: no dejar programar más del monto configurado para esa fecha.
+    const fechaEntregaStr = dateToString(fv.fechaEntrega);
+    const [limiteResp, programadoResp]: [any, any] = await Promise.all([
+      this.limiteDiarioService.obtener().toPromise(),
+      this.pedidoService.getValorProgramado(fechaEntregaStr, this.idPedido).toPromise(),
+    ]);
+    const limite = Number(limiteResp?.limiteDiario?.monto ?? Infinity);
+    const yaProgramado = Number(programadoResp?.valorProgramado ?? 0);
+    const totalDia = yaProgramado + Number(fv.valorTotal ?? 0);
+    if (totalDia > limite) {
+      this.snackBar.open(
+        `Se supera el límite diario de entregas para el ${fechaEntregaStr} ` +
+        `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados). ` +
+        `Cambia la fecha de entrega.`,
+        'Cerrar',
+        { duration: 8000, panelClass: ['snack-error'] },
+      );
+      return;
+    }
+
+    this.guardando = true;
     const pedidoData = {
       idCliente:     this.clienteSeleccionado.idCliente,
       idEstado:      fv.idEstado,
