@@ -334,6 +334,10 @@ export class PedidosListComponent implements OnInit {
     return 'pendiente';
   }
 
+  saldoPedido(p: Pedido): number {
+    return Number(p.valorTotal ?? 0) - Number(p.totalAbonado ?? 0);
+  }
+
   getInitials(nombre: string): string {
     return (nombre ?? '??')
       .split(' ')

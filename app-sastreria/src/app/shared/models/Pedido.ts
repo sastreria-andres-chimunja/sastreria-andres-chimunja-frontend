@@ -10,6 +10,7 @@ export class Pedido {
   nombreEstado?: string = '';
   idTipoPedido?: number = 0;
   nombreTipoPedido?: string = '';
+  totalAbonado?: number = 0;
   created_at?: string = '';
   updated_at?: string = '';
 }

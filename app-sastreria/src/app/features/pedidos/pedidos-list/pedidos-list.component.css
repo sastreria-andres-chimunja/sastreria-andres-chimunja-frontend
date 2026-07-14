@@ -284,6 +284,17 @@
 .fecha-vencida { color: var(--danger); }
 .fecha-proxima { color: #d97706; }
 
+.card-amounts-pago {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: -4px;
+  padding-top: 6px;
+  border-top: none;
+}
+
+.valor-abonado { color: var(--success, #2e7d32); }
+.valor-saldo-pendiente { color: var(--danger); }
+.valor-saldo-pagado { color: var(--success, #2e7d32); }
+
 /* Chip días restantes */
 .dias-chip {
   display: flex;

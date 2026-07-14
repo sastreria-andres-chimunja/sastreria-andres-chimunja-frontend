@@ -180,6 +180,20 @@
         </div>
       </div>
 
+      <!-- Abonos y saldo -->
+      <div class="card-amounts card-amounts-pago">
+        <div class="amount-item">
+          <span class="amount-label">Abonado</span>
+          <span class="amount-value valor-abonado">{{ formatCOP(p.totalAbonado ?? 0) }}</span>
+        </div>
+        <div class="amount-item">
+          <span class="amount-label">Saldo</span>
+          <span class="amount-value" [ngClass]="saldoPedido(p) > 0 ? 'valor-saldo-pendiente' : 'valor-saldo-pagado'">
+            {{ formatCOP(saldoPedido(p)) }}
+          </span>
+        </div>
+      </div>
+
       <!-- Días restantes -->
       <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado' && estadoClase(p) !== 'terminado'">
         <ng-container [ngSwitch]="true">
