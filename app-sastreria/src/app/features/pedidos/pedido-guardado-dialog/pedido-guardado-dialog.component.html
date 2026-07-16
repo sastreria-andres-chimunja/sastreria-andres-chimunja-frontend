@@ -59,6 +59,9 @@
     <button class="btn-print" (click)="imprimir()" *ngIf="data.items !== undefined">
       <mat-icon>print</mat-icon> Imprimir
     </button>
+    <button class="btn-print" (click)="imprimirTicket()" *ngIf="data.items !== undefined">
+      <mat-icon>local_offer</mat-icon> Imprimir ticket
+    </button>
     <button class="btn-aceptar" (click)="aceptar()">
       <mat-icon>check</mat-icon> Aceptar
     </button>

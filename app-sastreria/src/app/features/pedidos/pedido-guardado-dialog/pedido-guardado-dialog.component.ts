@@ -57,6 +57,10 @@ export class PedidoGuardadoDialogComponent {
     this.reciboService.imprimir(this.reciboData);
   }
 
+  imprimirTicket(): void {
+    this.reciboService.imprimirTicket(this.reciboData);
+  }
+
   /** Paso 1: Genera el PDF en memoria (sin descargarlo). */
   async generarPDF(): Promise<void> {
     this.generandoPDF  = true;

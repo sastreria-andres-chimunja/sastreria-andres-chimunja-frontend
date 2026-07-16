@@ -189,6 +189,97 @@ export class ReciboService {
     }
   }
 
+  /**
+   * Ticket adhesivo (10cm x 5cm) para pegar en la prenda — cliente, celular,
+   * fecha de entrega, total/abono y saldo. Va a una impresora de etiquetas
+   * distinta de la térmica de recibos, así que se imprime siempre vía el
+   * diálogo de impresión del navegador/Windows (no hay ruta QZ Tray para
+   * esta impresora todavía; se puede agregar más adelante en
+   * qz-print.service.ts una vez se confirme el modelo/protocolo del
+   * segundo equipo).
+   */
+  generarHtmlTicketAdhesivo(data: ReciboData, logoSrc?: string): string {
+    const saldo  = data.valorTotalPedido - data.totalPagadoPedido;
+    const imgSrc = logoSrc ?? this.logoUrlTermico;
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ticket</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      width: 100mm;
+      height: 50mm;
+      padding: 2.5mm 3.5mm;
+      color: #000;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 3mm; line-height: 1; }
+    .negocio { font-size: 11px; font-weight: 700; line-height: 1.15; max-width: 65mm; }
+    .logo-mini { width: 11mm; height: auto; flex-shrink: 0; }
+    .cliente-lbl { font-size: 8px; margin-top: 1.5mm; line-height: 1; }
+    .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.3mm; }
+    .fila { font-size: 9.5px; margin-top: 1mm; line-height: 1; }
+    .bottom-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 3mm; margin-top: 1.5mm; line-height: 1; }
+    .total-abono { font-size: 9.5px; font-weight: 700; }
+    .saldo { font-size: 9.5px; font-weight: 700; text-align: right; white-space: nowrap; }
+    @media print {
+      @page { margin: 0; size: 100mm 50mm; }
+      body { width: 100mm; height: 50mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-row">
+    <div class="negocio">SASTRERÍA ANDRÉS CHIMUNJA</div>
+    <img class="logo-mini" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
+  </div>
+
+  <div class="cliente-lbl">CLIENTE:</div>
+  <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
+  ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+  <div class="fila">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+
+  <div class="bottom-row">
+    <div class="total-abono">TOTAL: ${this.formatCOP(data.valorTotalPedido)}&nbsp;&nbsp;&nbsp;ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
+    <div class="saldo">SALDO: ${this.formatCOP(saldo)}</div>
+  </div>
+</body>
+</html>`;
+  }
+
+  /** Imprime el ticket adhesivo vía el diálogo de impresión del navegador. */
+  imprimirTicket(data: ReciboData): void {
+    const html = this.generarHtmlTicketAdhesivo(data);
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument!.open();
+    iframe.contentDocument!.write(html);
+    iframe.contentDocument!.close();
+
+    const ejecutarImpresion = () => {
+      iframe.contentWindow!.focus();
+      iframe.contentWindow!.print();
+      setTimeout(() => document.body.removeChild(iframe), 1500);
+    };
+
+    const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
+    if (img && !img.complete) {
+      img.onload  = ejecutarImpresion;
+      img.onerror = ejecutarImpresion;
+      setTimeout(ejecutarImpresion, 3000);
+    } else {
+      setTimeout(ejecutarImpresion, 300);
+    }
+  }
+
   /** Genera la factura/orden como PDF A4 bonito (para WhatsApp). No toca el recibo de impresión. */
   async generarPDFBlob(data: ReciboData): Promise<File> {
     const html    = this.generarHtmlFacturaA4(data);
@@ -1177,6 +1268,21 @@ export class ReciboService {
       if (!isNaN(a) && !isNaN(b) && !isNaN(c)) {
         const [dia, mes, anio] = a > 31 ? [c, b, a] : [a, b, c];
         return `${dia} - ${meses[mes - 1] ?? ''} - ${anio}`;
+      }
+    }
+    return dateStr;
+  }
+
+  /** Formato "13 JULIO" (día + mes en mayúsculas, sin año) para el ticket adhesivo. */
+  private formatFechaEtiqueta(dateStr?: string): string {
+    if (!dateStr) return '';
+    const meses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+    const partes = dateStr.replace(/-/g, '/').split('/');
+    if (partes.length === 3) {
+      const a = Number(partes[0]), b = Number(partes[1]), c = Number(partes[2]);
+      if (!isNaN(a) && !isNaN(b) && !isNaN(c)) {
+        const [dia, mes] = a > 31 ? [c, b] : [a, b];
+        return `${dia} ${meses[mes - 1] ?? ''}`;
       }
     }
     return dateStr;
