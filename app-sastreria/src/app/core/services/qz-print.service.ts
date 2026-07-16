@@ -12,7 +12,7 @@ import * as qz from 'qz-tray';
 
 const NOMBRE_IMPRESORA_KEY = 'qz_impresora_nombre';
 const NOMBRE_IMPRESORA_DEFAULT = 'SAT TICKETS';
-const ANCHO_COLUMNAS = 48; // 80mm, fuente A (12x24), típico en impresoras POS-80
+const ANCHO_COLUMNAS = 48; // papel de 58mm — valor confirmado contra la impresora física (no cambiar sin volver a probar en el equipo real)
 
 const ESC = 0x1b;
 const GS = 0x1d;
@@ -203,10 +203,15 @@ export class QzPrintService {
       // veces salía sin centrar).
       { type: 'raw', format: 'base64', data: this.bytesToBase64([ESC, 0x40, ESC, 0x61, 1]) },
       {
+        // Logo pre-convertido a blanco/negro puro (sin gris ni rojo, ver
+        // logo-sastreria-termico.png): la impresora térmica es 1-bit, así que
+        // cualquier imagen con tonos intermedios se tramaría en puntos grises.
+        // quantization:'black' además evita que QZ Tray use su umbral por
+        // canal alfa por defecto (que ya no aplica, esta imagen no tiene alfa).
         type: 'raw',
         format: 'image',
-        data: `${window.location.origin}/assets/logo-sastreria-transparente.png`,
-        options: { language: 'ESCPOS', dotDensity: 'double' },
+        data: `${window.location.origin}/assets/logo-sastreria-termico.png`,
+        options: { language: 'ESCPOS', dotDensity: 'double', quantization: 'black', threshold: 128 },
       },
       { type: 'raw', format: 'base64', data: this.bytesToBase64(cmds) },
     ]);

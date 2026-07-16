@@ -48,12 +48,17 @@ export class ReciboService {
     return `${window.location.origin}/assets/logo-sastreria-transparente.png`;
   }
 
+  /** Logo pre-convertido a blanco/negro puro para impresión térmica (1-bit) — evita el tramado en puntos grises que sale con el logo a color. */
+  private get logoUrlTermico(): string {
+    return `${window.location.origin}/assets/logo-sastreria-termico.png`;
+  }
+
   generarHtmlTermico(data: ReciboData, logoSrc?: string): string {
     const saldo     = data.valorTotalPedido - data.totalPagadoPedido;
     const esOrden   = Array.isArray(data.items);
     const titulo    = esOrden ? 'ORDEN DE PEDIDO' : 'RECIBO DE PAGO';
     const noOrden   = String(data.idPedido).padStart(4, '0');
-    const imgSrc    = logoSrc ?? this.logoUrl;
+    const imgSrc    = logoSrc ?? this.logoUrlTermico;
 
     const itemsHtml = esOrden
       ? (data.items!.length > 0
