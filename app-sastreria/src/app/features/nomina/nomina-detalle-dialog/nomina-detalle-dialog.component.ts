@@ -41,10 +41,10 @@ export class NominaDetalleDialogComponent implements OnInit {
   pagandoId: number | null = null;
   pagandoTodo = false;
   ultimoItemPagado: any = null;
-  archivoPDFNomina: File | null = null;
   generandoPDFNomina = false;
   enviandoWhatsAppNomina = false;
   urlFallbackNomina: string | null = null;
+  avisoPegarImagenNomina = false;
 
   constructor(
     public dialogRef: MatDialogRef<NominaDetalleDialogComponent>,
@@ -78,8 +78,8 @@ export class NominaDetalleDialogComponent implements OnInit {
   pagar(item: any): void {
     this.pagandoId = item.idItemPedido;
     this.ultimoItemPagado   = null;
-    this.archivoPDFNomina   = null;
     this.urlFallbackNomina  = null;
+    this.avisoPegarImagenNomina = false;
     this.itemPedidoService.pagar(item.idItemPedido).subscribe({
       next: (resp: any) => {
         this.pagandoId = null;
@@ -110,29 +110,41 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.reciboService.imprimirNomina(this.nominaReciboData);
   }
 
+  /** Genera el PDF y lo descarga directo, para quien quiera guardarlo/imprimirlo aparte. */
   async generarPDFNomina(): Promise<void> {
     this.generandoPDFNomina = true;
-    this.archivoPDFNomina   = null;
-    this.urlFallbackNomina  = null;
     try {
-      this.archivoPDFNomina = await this.reciboService.generarPDFBlobNomina(this.nominaReciboData);
+      const archivo = await this.reciboService.generarPDFBlobNomina(this.nominaReciboData);
+      this.reciboService.descargarBlob(archivo, archivo.name);
     } finally {
       this.generandoPDFNomina = false;
     }
   }
 
+  /**
+   * Genera una imagen del comprobante y la envía por WhatsApp (se ve grande
+   * de inmediato en el chat, como un comprobante bancario). Primero intenta
+   * el envío automático vía backend (Meta Cloud API); si falla, cae al
+   * método manual (Web Share en móvil, o copiar al portapapeles + WhatsApp Web en PC).
+   */
   async enviarWhatsAppNomina(): Promise<void> {
-    if (!this.archivoPDFNomina || !this.data.telefono) return;
+    if (!this.data.telefono) return;
     const texto = this.reciboService.generarTextoWhatsAppNomina(this.nominaReciboData);
 
     this.enviandoWhatsAppNomina = true;
+    this.urlFallbackNomina = null;
+    this.avisoPegarImagenNomina = false;
     try {
-      await this.reciboService.enviarDocumentoViaBackend(this.archivoPDFNomina, this.data.telefono, texto);
-      Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
-    } catch (err) {
-      console.error('Envío automático por WhatsApp falló, usando método manual:', err);
-      const url = await this.reciboService.compartirConWhatsApp(this.archivoPDFNomina, this.data.telefono, texto);
-      if (url) this.urlFallbackNomina = url;
+      const imagen = await this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
+      try {
+        await this.reciboService.enviarViaBackend(imagen, this.data.telefono, texto);
+        Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
+      } catch (err) {
+        console.error('Envío automático por WhatsApp falló, usando método manual:', err);
+        const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefono, texto);
+        if (resultado === '_clipboard_') this.avisoPegarImagenNomina = true;
+        else if (resultado) this.urlFallbackNomina = resultado;
+      }
     } finally {
       this.enviandoWhatsAppNomina = false;
     }
@@ -147,8 +159,8 @@ export class NominaDetalleDialogComponent implements OnInit {
     if (pendientes.length === 0) return;
     this.pagandoTodo       = true;
     this.ultimoItemPagado  = null;
-    this.archivoPDFNomina  = null;
     this.urlFallbackNomina = null;
+    this.avisoPegarImagenNomina = false;
 
     this.nominaService.liquidar(this.data.idEmpleado).subscribe({
       next: () => {

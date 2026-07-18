@@ -50,23 +50,23 @@
       <button class="btn-ticket" (click)="imprimirTicketNomina()">
         <mat-icon>print</mat-icon> Imprimir
       </button>
-      <ng-container *ngIf="!archivoPDFNomina">
-        <button class="btn-ticket" (click)="generarPDFNomina()" [disabled]="generandoPDFNomina">
-          <mat-spinner *ngIf="generandoPDFNomina" diameter="14"></mat-spinner>
-          <mat-icon *ngIf="!generandoPDFNomina">picture_as_pdf</mat-icon>
-          {{ generandoPDFNomina ? 'Generando…' : 'Generar PDF' }}
-        </button>
-      </ng-container>
-      <ng-container *ngIf="archivoPDFNomina">
-        <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()" [disabled]="enviandoWhatsAppNomina">
-          <mat-spinner *ngIf="enviandoWhatsAppNomina" diameter="14"></mat-spinner>
-          <mat-icon *ngIf="!enviandoWhatsAppNomina">send</mat-icon>
-          {{ enviandoWhatsAppNomina ? 'Enviando…' : 'WhatsApp' }}
-        </button>
-        <button *ngIf="urlFallbackNomina" class="btn-ticket" (click)="abrirWhatsAppFallbackNomina()">
-          <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
-        </button>
-      </ng-container>
+      <button class="btn-ticket" (click)="generarPDFNomina()" [disabled]="generandoPDFNomina">
+        <mat-spinner *ngIf="generandoPDFNomina" diameter="14"></mat-spinner>
+        <mat-icon *ngIf="!generandoPDFNomina">picture_as_pdf</mat-icon>
+        {{ generandoPDFNomina ? 'Generando…' : 'Generar PDF' }}
+      </button>
+      <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()"
+        *ngIf="!urlFallbackNomina" [disabled]="enviandoWhatsAppNomina">
+        <mat-spinner *ngIf="enviandoWhatsAppNomina" diameter="14"></mat-spinner>
+        <mat-icon *ngIf="!enviandoWhatsAppNomina">send</mat-icon>
+        {{ enviandoWhatsAppNomina ? 'Enviando…' : 'WhatsApp' }}
+      </button>
+      <button *ngIf="urlFallbackNomina" class="btn-ticket" (click)="abrirWhatsAppFallbackNomina()">
+        <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
+      </button>
+      <span *ngIf="avisoPegarImagenNomina" class="ticket-label">
+        📋 Se abrió WhatsApp Web — pega la imagen (Ctrl+V) y envíala
+      </span>
     </div>
 
   <!-- Tabs -->

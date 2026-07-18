@@ -45,8 +45,8 @@ export class PagarItemDialogComponent implements OnInit {
   guardando    = false;
   generandoPDF = false;
   enviandoWhatsApp = false;
-  archivoPDF: File | null    = null;
   urlFallback: string | null = null;
+  avisoPegarImagen = false;
   abonos: any[] = [];
   totalAbonado  = 0;
   ultimoAbono: any = null;
@@ -143,34 +143,41 @@ export class PagarItemDialogComponent implements OnInit {
     };
   }
 
-  /** Paso 1: genera el PDF en memoria (sin descargarlo todavía). */
+  /** Genera el PDF y lo descarga directo, para quien quiera guardarlo/imprimirlo aparte. */
   async generarPDF(): Promise<void> {
     this.generandoPDF = true;
-    this.archivoPDF   = null;
-    this.urlFallback  = null;
     try {
-      this.archivoPDF = await this.reciboService.generarPDFBlob(this.reciboData);
+      const archivo = await this.reciboService.generarPDFBlob(this.reciboData);
+      this.reciboService.descargarBlob(archivo, archivo.name);
     } finally {
       this.generandoPDF = false;
     }
   }
 
   /**
-   * Paso 2: envía el PDF por WhatsApp. Primero intenta el envío automático
-   * vía backend (Meta Cloud API); si falla, cae al método manual.
+   * Genera una imagen del recibo y la envía por WhatsApp (se ve grande de
+   * inmediato en el chat, como un comprobante bancario). Primero intenta el
+   * envío automático vía backend (Meta Cloud API); si falla, cae al método
+   * manual (Web Share en móvil, o copiar al portapapeles + WhatsApp Web en PC).
    */
   async enviarWhatsApp(): Promise<void> {
-    if (!this.archivoPDF || !this.data.telefonoCliente) return;
+    if (!this.data.telefonoCliente) return;
     const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
 
     this.enviandoWhatsApp = true;
+    this.urlFallback = null;
+    this.avisoPegarImagen = false;
     try {
-      await this.reciboService.enviarDocumentoViaBackend(this.archivoPDF, this.data.telefonoCliente, texto);
-      Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
-    } catch (err) {
-      console.error('Envío automático por WhatsApp falló, usando método manual:', err);
-      const url = await this.reciboService.compartirConWhatsApp(this.archivoPDF, this.data.telefonoCliente, texto);
-      if (url) this.urlFallback = url;
+      const imagen = await this.reciboService.generarImagenBlob(this.reciboData);
+      try {
+        await this.reciboService.enviarViaBackend(imagen, this.data.telefonoCliente, texto);
+        Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
+      } catch (err) {
+        console.error('Envío automático por WhatsApp falló, usando método manual:', err);
+        const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
+        if (resultado === '_clipboard_') this.avisoPegarImagen = true;
+        else if (resultado) this.urlFallback = resultado;
+      }
     } finally {
       this.enviandoWhatsApp = false;
     }

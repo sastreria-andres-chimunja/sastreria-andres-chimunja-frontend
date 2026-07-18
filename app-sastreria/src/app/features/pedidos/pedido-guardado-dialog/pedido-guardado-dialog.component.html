@@ -30,31 +30,36 @@
   <!-- Acciones -->
   <div class="pg-acciones">
 
-    <!-- Paso 1: Generar PDF en memoria -->
+    <!-- Generar PDF (descarga directa, para quien quiera guardarlo/imprimirlo aparte) -->
     <button class="btn-wa" (click)="generarPDF()"
-      *ngIf="data.items !== undefined && !archivoPDF" [disabled]="generandoPDF">
+      *ngIf="data.items !== undefined" [disabled]="generandoPDF">
       <mat-spinner *ngIf="generandoPDF" diameter="16"></mat-spinner>
       <mat-icon *ngIf="!generandoPDF">picture_as_pdf</mat-icon>
       {{ generandoPDF ? 'Generando PDF...' : 'Generar PDF' }}
     </button>
 
-    <!-- Paso 2: Enviar a WhatsApp (automático vía backend; si falla, cae a manual) -->
+    <!-- Enviar a WhatsApp como imagen (automático vía backend; si falla, cae a manual) -->
     <button class="btn-wa" (click)="enviarWhatsApp()"
-      *ngIf="archivoPDF && !urlFallback" [disabled]="enviandoWhatsApp">
+      *ngIf="data.items !== undefined && !urlFallback" [disabled]="enviandoWhatsApp">
       <mat-spinner *ngIf="enviandoWhatsApp" diameter="16"></mat-spinner>
       <mat-icon *ngIf="!enviandoWhatsApp">send</mat-icon>
       {{ enviandoWhatsApp ? 'Enviando...' : 'Enviar a WhatsApp' }}
     </button>
 
-    <!-- Fallback PC: el PDF fue descargado, abrir WhatsApp con texto -->
+    <!-- Fallback PC: la imagen fue descargada, abrir WhatsApp con texto -->
     <ng-container *ngIf="urlFallback">
       <button class="btn-wa" (click)="abrirWhatsAppFallback()">
         <mat-icon>chat</mat-icon> Abrir WhatsApp
       </button>
       <p style="font-size:10px;color:#777;margin:2px 0 0;text-align:center;">
-        📎 Adjunta el PDF descargado en WhatsApp
+        📎 Adjunta la imagen descargada en WhatsApp
       </p>
     </ng-container>
+
+    <!-- Fallback PC: la imagen quedó copiada al portapapeles y WhatsApp Web ya se abrió -->
+    <p *ngIf="avisoPegarImagen" style="font-size:10px;color:#777;margin:2px 0 0;text-align:center;">
+      📋 Se abrió WhatsApp Web — pega la imagen (Ctrl+V) y envíala
+    </p>
 
     <button class="btn-print" (click)="imprimir()" *ngIf="data.items !== undefined">
       <mat-icon>print</mat-icon> Imprimir

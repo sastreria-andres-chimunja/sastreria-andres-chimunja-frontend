@@ -336,6 +336,41 @@ export class ReciboService {
     }
   }
 
+  /** Genera la factura/orden A4 como imagen PNG en memoria (para WhatsApp: se ve grande de inmediato en el chat, como un comprobante bancario). */
+  async generarImagenBlob(data: ReciboData): Promise<File> {
+    const html    = this.generarHtmlFacturaA4(data);
+    const noOrden = String(data.idPedido).padStart(4, '0');
+    const nombre  = `${(data.valorAbono ?? 0) > 0 ? 'recibo' : 'orden'}-pedido-${noOrden}.png`;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText =
+      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    document.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    try {
+      const html2canvasModule = await import('html2canvas');
+      const canvas = await html2canvasModule.default(wrapper, {
+        scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+      });
+      document.body.removeChild(wrapper);
+
+      const blob = await new Promise<Blob>(res =>
+        canvas.toBlob(b => res(b!), 'image/png'),
+      );
+      return new File([blob], nombre, { type: 'image/png' });
+    } catch (err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      throw err;
+    }
+  }
+
   /** HTML de factura A4 con diseño profesional (logo, colores, tabla). Solo para WhatsApp/PDF. */
   generarHtmlFacturaA4(data: ReciboData, logoSrc?: string): string {
     const saldo      = data.valorTotalPedido - data.totalPagadoPedido;
@@ -1184,6 +1219,41 @@ export class ReciboService {
     }
   }
 
+  /** Genera el comprobante de nómina como imagen PNG en memoria (para WhatsApp). */
+  async generarImagenBlobNomina(data: ReciboNominaData): Promise<File> {
+    const html    = this.generarHtmlFacturaA4Nomina(data);
+    const noOrden = String(data.idPedido).padStart(4, '0');
+    const nombre  = `comprobante-nomina-${noOrden}.png`;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText =
+      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    document.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    try {
+      const html2canvasModule = await import('html2canvas');
+      const canvas = await html2canvasModule.default(wrapper, {
+        scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+      });
+      document.body.removeChild(wrapper);
+
+      const blob = await new Promise<Blob>(res =>
+        canvas.toBlob(b => res(b!), 'image/png'),
+      );
+      return new File([blob], nombre, { type: 'image/png' });
+    } catch (err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      throw err;
+    }
+  }
+
   // ─── ENVÍO AUTOMÁTICO VÍA BACKEND (META CLOUD API) ───────────────────────────
 
   /**
@@ -1205,32 +1275,6 @@ export class ReciboService {
       this.http.post(`${API.BASE_URL}/whatsapp/enviar`, {
         telefono: tel,
         imagenBase64: base64,
-        caption,
-      }),
-    );
-  }
-
-  /**
-   * Envía un PDF (recibo/orden/comprobante) al número de WhatsApp indicado
-   * usando el backend con Meta Cloud API. 100% automático: no abre ningún
-   * chat ni requiere adjuntar nada a mano. Lanza error si el backend no
-   * está configurado (falta WHATSAPP_TOKEN/WHATSAPP_PHONE_ID) o el envío falla.
-   */
-  async enviarDocumentoViaBackend(archivo: File, telefono: string, caption: string): Promise<void> {
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload  = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(archivo);
-    });
-
-    const tel = telefono.replace(/\D/g, '').replace(/^57/, '');
-
-    await lastValueFrom(
-      this.http.post(`${API.BASE_URL}/whatsapp/enviar-documento`, {
-        telefono: tel,
-        documentoBase64: base64,
-        filename: archivo.name,
         caption,
       }),
     );
