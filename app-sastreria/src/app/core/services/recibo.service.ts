@@ -469,8 +469,8 @@ export class ReciboService {
   table.items thead th.val-h { text-align:right; }
   table.items tbody tr { border-bottom:1px solid #e8edf5; }
   table.items tbody tr:nth-child(even) { background:#f7f9ff; }
-  table.items tbody td { padding:11px 16px; font-size:13px; color:#2a3550; vertical-align:top; }
-  td.num { width:36px; font-weight:700; color:#1a3580; font-size:13px; }
+  table.items tbody td { padding:11px 16px; font-size:15px; font-weight:700; color:#2a3550; vertical-align:top; }
+  td.num { width:36px; font-weight:700; color:#1a3580; font-size:15px; }
   td.desc { }
   td.val { text-align:right; font-weight:700; color:#1a2744; white-space:nowrap; }
   td.empty { text-align:center; color:#999; font-style:italic; padding:16px; }
@@ -502,7 +502,7 @@ export class ReciboService {
   /* FOOTER */
   .spacer { flex:1; }
   .footer { border-top:2px solid #e0e6ef; padding-top:18px; margin-top:32px; }
-  .footer-terms { font-size:16px; font-weight:700; color:#7a8cb0; line-height:1.7; text-align:center; }
+  .footer-terms { font-size:16px; font-weight:700; color:#d32f2f; line-height:1.7; text-align:center; }
   .footer-brand { text-align:center; margin-top:10px; font-size:12px; font-weight:700; color:#1a3580; letter-spacing:0.3px; }
   .footer-sep { height:1px; background:#e0e6ef; margin:8px auto; width:60%; }
 </style>
