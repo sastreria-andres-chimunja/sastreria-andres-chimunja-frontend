@@ -155,7 +155,7 @@ export class ReciboService {
   <div class="total-row total-saldo"><span>SALDO:</span><span>${this.formatCOP(saldo)}</span></div>
   <div class="hr-s"></div>
 
-  <div class="footer">DESPUÉS DE 7 DÍAS, NO SE RESPONDE POR GARANTÍA. NO SE RESPONDE POR PRENDA NI SE HACE DEVOLUCIÓN DE DINERO DESPUÉS DE 30 DÍAS.</div>
+  <div class="footer">DESPUÉS DE 30 DÍAS NO SE RESPONDE POR NINGUNA PRENDA, Y PARA EFECTOS DE GARANTÍA, 7 DÍAS DESPUÉS DE LA ENTREGA. TIEMPO PARA RECOGER PRENDAS: 30 DÍAS. NO NOS HACEMOS RESPONSABLES.</div>
 </body>
 </html>`;
   }
@@ -642,8 +642,8 @@ export class ReciboService {
 
   <div class="footer">
     <div class="footer-terms">
-      Después de 7 días, no se responde por garantía de confección.<br/>
-      No se responde por prenda ni se hace devolución de dinero después de 30 días.
+      Después de 30 días no se responde por ninguna prenda, y para efectos de garantía, 7 días después de la entrega.<br/>
+      Tiempo para recoger prendas: 30 días. No nos hacemos responsables.
     </div>
     <div class="footer-sep"></div>
     <div class="footer-brand">Sastrería Andrés Chimunja · Armenia, Quindío · CEL: 311 380 1749</div>
@@ -1052,7 +1052,7 @@ export class ReciboService {
         : `${em.check} *¡PEDIDO PAGADO COMPLETAMENTE!*`,
       ...(data.metodoPago ? [`${em.tarjeta} Método: ${data.metodoPago}`] : []),
       ``,
-      `_Después de 7 días no se responde por garantía ni devolución de dinero después de 30 días._`,
+      `_Después de 30 días no se responde por ninguna prenda, y para efectos de garantía, 7 días después de la entrega. Tiempo para recoger prendas: 30 días. No nos hacemos responsables._`,
     ];
     return lineas.join('\n');
   }
