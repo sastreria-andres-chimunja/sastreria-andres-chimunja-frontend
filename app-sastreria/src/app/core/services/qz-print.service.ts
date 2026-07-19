@@ -35,6 +35,20 @@ const CP850_MAP: Record<string, number> = {
 // valor es específico del firmware de este modelo (clon POS-80 "SAT TICKETS").
 const CODEPAGE_TABLA = 19;
 
+// Densidad de calor del cabezal térmico (comando ESC 7 n1 n2 n3, estándar en
+// impresoras compatibles ESC/POS tipo Epson, incluidos la mayoría de clones):
+//   n1 = puntos máximos calentables a la vez
+//   n2 = tiempo de calentamiento por punto (mayor = más oscuro, pero más lento)
+//   n3 = intervalo de enfriamiento entre líneas
+// Se sube n2 al máximo (255) para intentar compensar que esta impresora
+// imprime parejo y débil sin importar el contenido (ni la negrita ni mandar
+// todo como imagen ya convertida a blanco/negro puro cambiaron el resultado,
+// lo que apunta a que el cabezal necesita más tiempo de calentamiento por
+// punto). Pendiente de confirmar en la impresora física si tiene efecto real
+// — si no lo tiene, el problema es mecánico (cabezal, alimentación o papel),
+// no algo resoluble por software.
+const AJUSTE_CALOR = [ESC, 0x37, 9, 255, 2];
+
 type Align = 'L' | 'C' | 'R';
 
 @Injectable({ providedIn: 'root' })
@@ -159,6 +173,7 @@ export class QzPrintService {
 
     const cmds: number[] = [
       ESC, 0x40, // init
+      ...AJUSTE_CALOR,
       ESC, 0x74, CODEPAGE_TABLA, // seleccionar codepage
       ...this.linea('CONFECCIÓN DE PRENDAS A LA MEDIDA', { align: 'C' }),
       ...this.linea('ARREGLOS EN GENERAL', { align: 'C' }),
@@ -206,7 +221,7 @@ export class QzPrintService {
       // Init + centrado ANTES de la imagen: si no, el logo hereda la
       // alineación que haya quedado de una impresión anterior (por eso a
       // veces salía sin centrar).
-      { type: 'raw', format: 'base64', data: this.bytesToBase64([ESC, 0x40, ESC, 0x61, 1]) },
+      { type: 'raw', format: 'base64', data: this.bytesToBase64([ESC, 0x40, ...AJUSTE_CALOR, ESC, 0x61, 1]) },
       {
         // Logo pre-convertido a blanco/negro puro (sin gris ni rojo, ver
         // logo-sastreria-termico.png): la impresora térmica es 1-bit, así que
@@ -237,6 +252,7 @@ export class QzPrintService {
 
     const cmds: number[] = [
       ESC, 0x40,
+      ...AJUSTE_CALOR,
       ESC, 0x74, CODEPAGE_TABLA,
       ...this.linea(data.negocio ?? 'SASTRERÍA ANDRÉS CHIMUNJA', { align: 'C' }),
       ...this.linea('COMPROBANTE DE PAGO NÓMINA', { align: 'C' }),
