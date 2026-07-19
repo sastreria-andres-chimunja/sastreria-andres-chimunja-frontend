@@ -151,66 +151,16 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray.
-   * Se renderiza el recibo completo como una sola imagen ya convertida a
-   * blanco/negro puro (igual que el logo) en vez de mandar el texto como
-   * comandos ESC/POS: el texto en modo ESC/POS imprimía con muy poca
-   * densidad en esta impresora y se veía gris/débil, incluso en negrita.
+   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray (ESC/POS).
    * Si QZ Tray no está instalado/corriendo, cae al diálogo de impresión del
    * navegador (requiere que Windows tenga un driver de impresora configurado).
    */
   async imprimir(data: ReciboData): Promise<void> {
     try {
-      const imagenDataUrl = await this.generarImagenTermica(data);
-      await this.qzPrint.imprimirImagen(imagenDataUrl);
+      await this.qzPrint.imprimirRecibo(data);
     } catch (err) {
       console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
       this.imprimirNavegador(data);
-    }
-  }
-
-  /** Renderiza generarHtmlTermico() a una imagen con umbral duro a blanco/negro puro (sin gris). */
-  private async generarImagenTermica(data: ReciboData): Promise<string> {
-    const html = this.generarHtmlTermico(data);
-
-    const wrapper = document.createElement('div');
-    // width:58mm duplicado a propósito: el CSS de generarHtmlTermico() trae
-    // "body { width: 58mm; ... }", pero ese selector no aplica a este <div>
-    // envoltorio (no es un <body> real) — sin este ancho explícito el
-    // contenido no se restringe a 58mm y el recibo sale con proporciones
-    // incorrectas. Mismo patrón ya usado en generarPDFBlob/generarImagenCredencial.
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:58mm;background:#fff;box-sizing:border-box;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
-
-    try {
-      const html2canvasModule = await import('html2canvas');
-      const canvas = await html2canvasModule.default(wrapper, {
-        scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
-      });
-      document.body.removeChild(wrapper);
-
-      const ctx = canvas.getContext('2d')!;
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const px = imgData.data;
-      for (let i = 0; i < px.length; i += 4) {
-        const luminancia = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
-        const valor = luminancia < 170 ? 0 : 255;
-        px[i] = px[i + 1] = px[i + 2] = valor;
-        px[i + 3] = 255;
-      }
-      ctx.putImageData(imgData, 0, 0);
-
-      return canvas.toDataURL('image/png');
-    } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
-      throw err;
     }
   }
 
