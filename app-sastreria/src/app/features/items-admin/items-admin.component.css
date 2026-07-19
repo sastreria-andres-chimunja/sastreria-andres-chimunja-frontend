@@ -42,7 +42,23 @@
   color: var(--text-secondary, #757575);
 }
 
-.btn-refresh {
+.filtro-select,
+.filtro-fecha {
+  background: var(--bg, #f5f5f5);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  color: var(--text, #212121);
+  outline: none;
+}
+
+.filtro-select {
+  max-width: 200px;
+}
+
+.btn-refresh,
+.btn-limpiar {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,7 +71,8 @@
   transition: background 0.15s;
 }
 
-.btn-refresh:hover {
+.btn-refresh:hover,
+.btn-limpiar:hover {
   background: var(--bg, #f5f5f5);
 }
 

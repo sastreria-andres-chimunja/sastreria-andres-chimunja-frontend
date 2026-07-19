@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
+import { EmpleadoService } from '../../core/services/empleado.service';
 
 @Component({
   selector: 'app-items-admin',
@@ -28,10 +29,20 @@ export class ItemsAdminComponent implements OnInit {
   busqueda = '';
   filtroEstado: 'pendiente' | 'asignado' | 'terminado' | 'entregado' | null = null;
 
-  constructor(private itemPedidoService: ItemPedidoService) {}
+  empleados: any[] = [];
+  filtroEmpleado: string = '';
+  filtroFecha = '';
+
+  constructor(
+    private itemPedidoService: ItemPedidoService,
+    private empleadoService: EmpleadoService,
+  ) {}
 
   ngOnInit(): void {
     this.cargarItems();
+    this.empleadoService.getAll().subscribe((r: any) => {
+      this.empleados = r.empleados ?? [];
+    });
   }
 
   cargarItems(): void {
@@ -61,6 +72,14 @@ export class ItemsAdminComponent implements OnInit {
     if (this.filtroEstado) {
       res = res.filter((i) => this.estadoClase(i) === this.filtroEstado);
     }
+    if (this.filtroEmpleado === 'sin-asignar') {
+      res = res.filter((i) => !i.idEmpleado);
+    } else if (this.filtroEmpleado) {
+      res = res.filter((i) => String(i.idEmpleado) === this.filtroEmpleado);
+    }
+    if (this.filtroFecha) {
+      res = res.filter((i) => this.fechaAIso(i.fechaEntrega) === this.filtroFecha);
+    }
     this.itemsFiltrados = res;
   }
 
@@ -74,6 +93,22 @@ export class ItemsAdminComponent implements OnInit {
     this.aplicarFiltro();
   }
 
+  /** Convierte "dd/mm/yyyy" (formato del backend) a "yyyy-mm-dd" (formato de <input type="date">). */
+  private fechaAIso(fecha: string): string {
+    const partes = (fecha ?? '').split('/');
+    if (partes.length !== 3) return '';
+    const [dia, mes, anio] = partes;
+    return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  }
+
+  limpiarFiltros(): void {
+    this.busqueda = '';
+    this.filtroEstado = null;
+    this.filtroEmpleado = '';
+    this.filtroFecha = '';
+    this.aplicarFiltro();
+  }
+
   estadoClase(item: any): 'pendiente' | 'asignado' | 'terminado' | 'entregado' | 'no-realizado' {
     const n = (item.nombreEstado ?? '').toLowerCase();
     if (n.includes('no realizado')) return 'no-realizado';
@@ -81,6 +116,10 @@ export class ItemsAdminComponent implements OnInit {
     if (n.includes('terminad')) return 'terminado';
     if (n.includes('asignad')) return 'asignado';
     return 'pendiente';
+  }
+
+  get hayFiltrosActivos(): boolean {
+    return !!this.busqueda || !!this.filtroEstado || !!this.filtroEmpleado || !!this.filtroFecha;
   }
 
   // ── Resumen ──────────────────────────────────────────────────

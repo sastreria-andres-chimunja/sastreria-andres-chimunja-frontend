@@ -6,6 +6,20 @@
       <input type="text" placeholder="Buscar descripción, cliente, empleado o # pedido..."
         [value]="busqueda" (keyup)="onBusqueda($event)" />
     </div>
+
+    <select class="filtro-select" [(ngModel)]="filtroEmpleado" (ngModelChange)="aplicarFiltro()">
+      <option value="">Todos los empleados</option>
+      <option value="sin-asignar">Sin asignar</option>
+      <option *ngFor="let e of empleados" [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
+    </select>
+
+    <input class="filtro-fecha" type="date" [(ngModel)]="filtroFecha" (ngModelChange)="aplicarFiltro()"
+      title="Filtrar por fecha de entrega" />
+
+    <button class="btn-limpiar" *ngIf="hayFiltrosActivos" (click)="limpiarFiltros()" matTooltip="Limpiar filtros">
+      <mat-icon>filter_alt_off</mat-icon>
+    </button>
+
     <button class="btn-refresh" (click)="cargarItems()" matTooltip="Actualizar">
       <mat-icon>refresh</mat-icon>
     </button>
