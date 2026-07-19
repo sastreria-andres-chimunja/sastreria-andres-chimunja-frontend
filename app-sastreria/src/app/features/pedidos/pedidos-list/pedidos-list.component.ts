@@ -196,7 +196,7 @@ export class PedidosListComponent implements OnInit {
     this.cargarPedidos();
   }
 
-  irACrear(): void { this.router.navigate(['/app/pedidos/crear']); }
+  irACrear(): void { this.router.navigate(['/app/pedidos/crear'], { queryParams: { tipo: this.tabTipo } }); }
   irAEditar(p: Pedido): void { this.router.navigate(['/app/pedidos/editar', p.idPedido]); }
 
   abrirDialogoPago(p: Pedido, event: Event): void {

@@ -183,7 +183,18 @@ export class CrearPedidoComponent implements OnInit {
         if (pendiente) this.form.patchValue({ idEstado: pendiente.idEstado });
       }
     });
-    this.tipoPedidoService.listar().subscribe((r: any) => { this.tiposPedido = r.tiposPedido ?? []; });
+    this.tipoPedidoService.listar().subscribe((r: any) => {
+      this.tiposPedido = r.tiposPedido ?? [];
+      if (!this.isEdit) {
+        const tipoTab = this.route.snapshot.queryParamMap.get('tipo');
+        const match = this.tiposPedido.find((t) =>
+          tipoTab === 'confeccion'
+            ? t.nombre.toLowerCase().includes('confecci')
+            : t.nombre.toLowerCase().includes('arreglo'),
+        );
+        if (tipoTab && match) this.form.patchValue({ idTipoPedido: match.idTipoPedido });
+      }
+    });
     this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados; });
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
       this.metodosPago = r.metodosPago ?? [];
