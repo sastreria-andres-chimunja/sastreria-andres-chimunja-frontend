@@ -104,11 +104,16 @@ export class QzPrintService {
     return bytes;
   }
 
-  private linea(texto: string, opts: { align?: Align; bold?: boolean; doble?: boolean } = {}): number[] {
+  private linea(texto: string, opts: { align?: Align; doble?: boolean } = {}): number[] {
     const alineacion = opts.align === 'C' ? 1 : opts.align === 'R' ? 2 : 0;
     return [
       ESC, 0x61, alineacion,
-      ESC, 0x45, opts.bold ? 1 : 0,
+      // Negrita (emphasized) siempre activa: en texto ESC/POS normal (sin
+      // negrita) esta impresora imprime con muy poca densidad de tinta
+      // térmica y se ve gris/débil comparado con el logo (que va como
+      // imagen ya convertida a blanco/negro puro). La negrita duplica el
+      // trazo y compensa esa densidad baja.
+      ESC, 0x45, 1,
       GS, 0x21, opts.doble ? 0x11 : 0x00,
       ...this.textoACp850(texto),
       0x0a,
@@ -160,7 +165,7 @@ export class QzPrintService {
       ...this.linea('CEL: 311 380 1749', { align: 'C' }),
       ...this.linea('CALLE 15 NO. 13-47 - ARMENIA', { align: 'C' }),
       ...this.separador('='),
-      ...this.linea(titulo, { align: 'C', bold: true }),
+      ...this.linea(titulo, { align: 'C' }),
       ...this.separador('='),
       ...this.linea(`NO.: ${noOrden}`),
       ...this.linea(`FECHA ENTREGA: ${data.fechaEntrega ?? ''}`),
@@ -185,10 +190,10 @@ export class QzPrintService {
 
     cmds.push(
       ...this.separador(),
-      ...this.linea(this.columnas('TOTAL:', this.formatCOP(data.valorTotalPedido)), { bold: true }),
+      ...this.linea(this.columnas('TOTAL:', this.formatCOP(data.valorTotalPedido))),
       ...this.linea(this.columnas('ABONO:', `(-${this.formatCOP(data.totalPagadoPedido)})`)),
       ...this.separador(),
-      ...this.linea(this.columnas('SALDO:', this.formatCOP(saldo)), { bold: true, doble: true }),
+      ...this.linea(this.columnas('SALDO:', this.formatCOP(saldo)), { doble: true }),
       ...this.separador('='),
       ...this.linea('DESPUÉS DE 7 DÍAS, NO SE RESPONDE POR GARANTÍA.', { align: 'C' }),
       ...this.linea('NO SE RESPONDE POR PRENDA NI SE HACE DEVOLUCIÓN', { align: 'C' }),
@@ -233,17 +238,17 @@ export class QzPrintService {
     const cmds: number[] = [
       ESC, 0x40,
       ESC, 0x74, CODEPAGE_TABLA,
-      ...this.linea(data.negocio ?? 'SASTRERÍA ANDRÉS CHIMUNJA', { align: 'C', bold: true }),
+      ...this.linea(data.negocio ?? 'SASTRERÍA ANDRÉS CHIMUNJA', { align: 'C' }),
       ...this.linea('COMPROBANTE DE PAGO NÓMINA', { align: 'C' }),
       ...this.linea(data.fechaPago, { align: 'C' }),
       ...this.separador(),
       ...this.linea(`PEDIDO #: ${data.idPedido}`),
       ...this.linea(`EMPLEADO: ${data.nombreEmpleado.toUpperCase()}`),
       ...this.separador(),
-      ...this.linea('ÍTEM:', { bold: true }),
+      ...this.linea('ÍTEM:'),
       ...this.linea(data.descripcion),
       ...this.separador(),
-      ...this.linea(this.columnas('VALOR PAGADO:', this.formatCOP(data.valor)), { bold: true, doble: true }),
+      ...this.linea(this.columnas('VALOR PAGADO:', this.formatCOP(data.valor)), { doble: true }),
       ...this.separador(),
       ...this.linea('PAGO REGISTRADO EXITOSAMENTE', { align: 'C' }),
       0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
