@@ -77,6 +77,12 @@ export class CrearPedidoComponent implements OnInit {
   idPedido?: number;
   guardando = false;
 
+  // Snapshot al cargar en modo edición: el límite diario solo se evalúa si
+  // cambia la fecha de entrega o el valor total (ítems), no en cambios de
+  // estado ni pagos.
+  private fechaEntregaOriginal: string | null = null;
+  private valorTotalOriginal = 0;
+
   // Datos de apoyo
   estados: Estado[] = [];
   tiposPedido: TipoPedido[] = [];
@@ -259,6 +265,8 @@ export class CrearPedidoComponent implements OnInit {
         fechaEntrega:  stringToDate(p.fechaEntrega),
         valorTotal:    p.valorTotal,
       });
+      this.fechaEntregaOriginal = p.fechaEntrega;
+      this.valorTotalOriginal   = Number(p.valorTotal ?? 0);
       this.clienteQuery = p.nombreCliente ?? '';
       this.clienteSeleccionado = {
         idCliente: p.idCliente,
@@ -497,29 +505,35 @@ export class CrearPedidoComponent implements OnInit {
 
     const fv = this.form.getRawValue();
 
-    // Límite diario de entregas: no dejar programar más del monto configurado para esa fecha.
+    // Límite diario de entregas: solo se evalúa al crear un pedido nuevo, o al
+    // editar si cambia la fecha de entrega o el valor total (ítems agregados/
+    // quitados). Cambios de estado o pagos no deben verse afectados por esto.
     const fechaEntregaStr = dateToString(fv.fechaEntrega);
-    const [limiteResp, programadoResp]: [any, any] = await Promise.all([
-      this.limiteDiarioService.obtener().toPromise(),
-      this.pedidoService.getValorProgramado(fechaEntregaStr, this.idPedido).toPromise(),
-    ]);
-    const limite = Number(limiteResp?.limiteDiario?.monto ?? Infinity);
-    const yaProgramado = Number(programadoResp?.valorProgramado ?? 0);
-    const totalDia = yaProgramado + Number(fv.valorTotal ?? 0);
-    if (totalDia > limite) {
-      const confirmacion = await Swal.fire({
-        icon: 'warning',
-        title: 'Límite diario superado',
-        html:
-          `Se supera el límite diario de entregas para el <b>${fechaEntregaStr}</b> ` +
-          `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados).<br><br>` +
-          `¿Deseas crear el pedido de todas formas?`,
-        showCancelButton: true,
-        confirmButtonText: 'Sí, crear de todas formas',
-        cancelButtonText: 'Cambiar fecha',
-        confirmButtonColor: '#d32f2f',
-      });
-      if (!confirmacion.isConfirmed) return;
+    const fechaCambio = this.isEdit && fechaEntregaStr !== this.fechaEntregaOriginal;
+    const totalCambio = this.isEdit && Number(fv.valorTotal ?? 0) !== this.valorTotalOriginal;
+    if (!this.isEdit || fechaCambio || totalCambio) {
+      const [limiteResp, programadoResp]: [any, any] = await Promise.all([
+        this.limiteDiarioService.obtener().toPromise(),
+        this.pedidoService.getValorProgramado(fechaEntregaStr, this.idPedido).toPromise(),
+      ]);
+      const limite = Number(limiteResp?.limiteDiario?.monto ?? Infinity);
+      const yaProgramado = Number(programadoResp?.valorProgramado ?? 0);
+      const totalDia = yaProgramado + Number(fv.valorTotal ?? 0);
+      if (totalDia > limite) {
+        const confirmacion = await Swal.fire({
+          icon: 'warning',
+          title: 'Límite diario superado',
+          html:
+            `Se supera el límite diario de entregas para el <b>${fechaEntregaStr}</b> ` +
+            `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados).<br><br>` +
+            `¿Deseas crear el pedido de todas formas?`,
+          showCancelButton: true,
+          confirmButtonText: 'Sí, crear de todas formas',
+          cancelButtonText: 'Cambiar fecha',
+          confirmButtonColor: '#d32f2f',
+        });
+        if (!confirmacion.isConfirmed) return;
+      }
     }
 
     this.guardando = true;
