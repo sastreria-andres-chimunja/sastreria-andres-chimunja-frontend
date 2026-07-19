@@ -68,7 +68,7 @@ export class ReciboService {
             <span class="item-desc">${it.descripcion.toUpperCase()}</span>
             <span class="item-val">${this.formatCOP(it.valor)}</span>
           </div>`).join('\n')
-          : `<div style="font-size:8px;text-align:center;padding:2px 0">Sin ítems registrados</div>`)
+          : `<div style="font-size:9.5px;font-weight:700;text-align:center;padding:2px 0">Sin ítems registrados</div>`)
       : `<div class="item-row">
           <span class="item-num">1.</span>
           <span class="item-desc">ABONO AL PEDIDO${data.metodoPago ? ' – ' + data.metodoPago.toUpperCase() : ''}</span>
@@ -82,31 +82,41 @@ export class ReciboService {
   <title>${titulo}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    /*
+     * Fuente sans-serif en negrita (no Courier New) a propósito: esta
+     * plantilla se convierte a imagen de 1 bit para la impresora térmica
+     * (ver generarImagenTermica() en este mismo archivo), y los trazos
+     * delgados de una fuente monoespaciada a 8-9px se perdían/aclaraban al
+     * reducirse a la resolución real del cabezal térmico — el texto salía
+     * gris/débil aunque el umbral de blanco/negro ya fuera puro. Trazos más
+     * gruesos y letra más grande sobreviven mejor esa reducción.
+     */
     body {
-      font-family: 'Courier New', monospace;
-      font-size: 9px;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-weight: 700;
+      font-size: 10.5px;
       width: 58mm;
       padding: 2mm 3mm 4mm;
       color: #000;
       background: #fff;
     }
     .c  { text-align: center; }
-    .b  { font-weight: bold; }
-    .hr-s { border-top: 1.5px solid #000; margin: 3px 0; }
-    .hr-d { border-top: 1px dashed #000; margin: 2px 0; }
+    .b  { font-weight: 700; }
+    .hr-s { border-top: 2px solid #000; margin: 3px 0; }
+    .hr-d { border-top: 1.5px solid #000; margin: 2px 0; }
     .logo { width: 38mm; height: auto; display: block; margin: 0 auto; }
-    .h-info { font-size: 7.5px; }
-    .doc-title { font-size: 11px; font-weight: bold; letter-spacing: 1px; }
-    .field     { display: flex; gap: 3px; margin: 1.5px 0; font-size: 8.5px; }
-    .field-lbl { font-weight: bold; min-width: 50px; flex-shrink: 0; }
-    .tbl-hdr  { display: flex; justify-content: space-between; font-weight: bold; font-size: 8.5px; }
-    .item-row { display: flex; align-items: flex-start; gap: 2px; font-size: 8.5px; margin: 2px 0; }
-    .item-num  { flex: 0 0 auto; font-weight: bold; }
+    .h-info { font-size: 8.5px; }
+    .doc-title { font-size: 12.5px; font-weight: 700; letter-spacing: 1px; }
+    .field     { display: flex; gap: 3px; margin: 2px 0; font-size: 9.5px; }
+    .field-lbl { font-weight: 700; min-width: 52px; flex-shrink: 0; }
+    .tbl-hdr  { display: flex; justify-content: space-between; font-weight: 700; font-size: 9.5px; }
+    .item-row { display: flex; align-items: flex-start; gap: 2px; font-size: 9.5px; margin: 2.5px 0; }
+    .item-num  { flex: 0 0 auto; font-weight: 700; }
     .item-desc { flex: 1; word-break: break-word; }
-    .item-val  { flex: 0 0 auto; font-weight: bold; min-width: 42px; text-align: right; }
-    .total-row { display: flex; justify-content: space-between; font-size: 9px; margin: 1.5px 0; }
-    .total-saldo { font-size: 10.5px; font-weight: bold; }
-    .footer { font-size: 8.5px; font-weight: bold; text-align: center; margin-top: 3px; line-height: 1.35; }
+    .item-val  { flex: 0 0 auto; font-weight: 700; min-width: 46px; text-align: right; }
+    .total-row { display: flex; justify-content: space-between; font-size: 10px; margin: 2px 0; }
+    .total-saldo { font-size: 12px; font-weight: 700; }
+    .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
     @media print {
       @page { margin: 0; size: 58mm auto; }
       body  { width: 58mm; }
@@ -151,16 +161,73 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray (ESC/POS).
+   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray.
+   * Se renderiza el recibo completo como una sola imagen ya convertida a
+   * blanco/negro puro (igual que el logo): el texto en modo ESC/POS de esta
+   * impresora sale gris/débil sin importar negrita o los parámetros de
+   * calentamiento del cabezal (ESC 7) — no responde a esos ajustes. La
+   * plantilla usa letra en negrita más grande (ver generarHtmlTermico) para
+   * que los trazos sobrevivan la reducción a la resolución real del cabezal.
    * Si QZ Tray no está instalado/corriendo, cae al diálogo de impresión del
    * navegador (requiere que Windows tenga un driver de impresora configurado).
    */
   async imprimir(data: ReciboData): Promise<void> {
     try {
-      await this.qzPrint.imprimirRecibo(data);
+      const imagenDataUrl = await this.generarImagenTermica(data);
+      await this.qzPrint.imprimirImagen(imagenDataUrl);
     } catch (err) {
       console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
       this.imprimirNavegador(data);
+    }
+  }
+
+  /** Renderiza generarHtmlTermico() a una imagen con umbral duro a blanco/negro puro (sin gris). */
+  private async generarImagenTermica(data: ReciboData): Promise<string> {
+    const html = this.generarHtmlTermico(data);
+
+    const wrapper = document.createElement('div');
+    // width:58mm duplicado a propósito: el CSS de generarHtmlTermico() trae
+    // "body { width: 58mm; ... }", pero ese selector no aplica a este <div>
+    // envoltorio (no es un <body> real) — sin este ancho explícito el
+    // contenido no se restringe a 58mm y el recibo sale con proporciones
+    // incorrectas. Mismo patrón ya usado en generarPDFBlob/generarImagenCredencial.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:58mm;background:#fff;box-sizing:border-box;';
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    document.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    try {
+      const html2canvasModule = await import('html2canvas');
+      const canvas = await html2canvasModule.default(wrapper, {
+        scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
+      });
+      document.body.removeChild(wrapper);
+
+      const ctx = canvas.getContext('2d')!;
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const px = imgData.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const luminancia = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+        // Umbral generoso (190 de 255): clasifica como negro cualquier pixel
+        // que no sea casi blanco puro, para que los bordes suavizados
+        // (antialiasing) de la letra en negrita queden negros en vez de
+        // aclararse a gris — trazos más gruesos sobreviven mejor la
+        // reducción a la resolución real del cabezal térmico.
+        const valor = luminancia < 190 ? 0 : 255;
+        px[i] = px[i + 1] = px[i + 2] = valor;
+        px[i + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      throw err;
     }
   }
 

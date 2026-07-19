@@ -152,88 +152,33 @@ export class QzPrintService {
 
   // ── Recibo / orden de pedido ─────────────────────────────────────────────
 
-  async imprimirRecibo(data: {
-    idPedido: number;
-    nombreCliente: string;
-    telefonoCliente?: string;
-    valorTotalPedido: number;
-    valorAbono: number;
-    totalPagadoPedido: number;
-    metodoPago?: string;
-    fechaEntrega?: string;
-    items?: { descripcion: string; valor: number }[];
-  }): Promise<void> {
+  /**
+   * Imprime el recibo/orden completo a partir de una imagen ya renderizada y
+   * convertida a blanco/negro puro, con letra en negrita más grande (ver
+   * ReciboService.imprimir()/generarImagenTermica()). Se dejó de mandar el
+   * cuerpo como texto ESC/POS línea por línea: esta impresora imprimía el
+   * texto con muy poca densidad de tinta térmica (se veía gris/débil) sin
+   * importar negrita ni el ajuste de calentamiento del cabezal (ESC 7, ver
+   * AJUSTE_CALOR) — no responde a esos ajustes en modo texto. Las imágenes sí
+   * salen sólidas, así que ahora todo el recibo se manda como una sola imagen.
+   */
+  async imprimirImagen(dataUrl: string): Promise<void> {
     await this.asegurarConexion();
     const impresora = await this.obtenerImpresora();
 
-    const esOrden = Array.isArray(data.items);
-    const titulo = esOrden ? 'ORDEN DE PEDIDO' : 'RECIBO DE PAGO';
-    const noOrden = String(data.idPedido).padStart(4, '0');
-    const saldo = data.valorTotalPedido - data.totalPagadoPedido;
-
-    const cmds: number[] = [
-      ESC, 0x40, // init
-      ...AJUSTE_CALOR,
-      ESC, 0x74, CODEPAGE_TABLA, // seleccionar codepage
-      ...this.linea('CONFECCIÓN DE PRENDAS A LA MEDIDA', { align: 'C' }),
-      ...this.linea('ARREGLOS EN GENERAL', { align: 'C' }),
-      ...this.linea('CEL: 311 380 1749', { align: 'C' }),
-      ...this.linea('CALLE 15 NO. 13-47 - ARMENIA', { align: 'C' }),
-      ...this.separador('='),
-      ...this.linea(titulo, { align: 'C' }),
-      ...this.separador('='),
-      ...this.linea(`NO.: ${noOrden}`),
-      ...this.linea(`FECHA ENTREGA: ${data.fechaEntrega ?? ''}`),
-      ...this.linea(`CLIENTE: ${data.nombreCliente.toUpperCase()}`),
-      ...(data.telefonoCliente ? this.linea(`TEL: ${data.telefonoCliente}`) : []),
-      ...this.separador(),
-    ];
-
-    if (esOrden && data.items && data.items.length > 0) {
-      data.items.forEach((it, i) => {
-        cmds.push(...this.linea(`${i + 1}. ${it.descripcion.toUpperCase()}`));
-        cmds.push(...this.linea(this.columnas('', this.formatCOP(it.valor)), { align: 'R' }));
-      });
-    } else if (esOrden) {
-      cmds.push(...this.linea('SIN ÍTEMS REGISTRADOS', { align: 'C' }));
-    } else {
-      cmds.push(
-        ...this.linea(`ABONO${data.metodoPago ? ' - ' + data.metodoPago.toUpperCase() : ''}`),
-        ...this.linea(this.columnas('', this.formatCOP(data.valorAbono)), { align: 'R' }),
-      );
-    }
-
-    cmds.push(
-      ...this.separador(),
-      ...this.linea(this.columnas('TOTAL:', this.formatCOP(data.valorTotalPedido))),
-      ...this.linea(this.columnas('ABONO:', `(-${this.formatCOP(data.totalPagadoPedido)})`)),
-      ...this.separador(),
-      ...this.linea(this.columnas('SALDO:', this.formatCOP(saldo)), { doble: true }),
-      ...this.separador('='),
-      ...this.linea('DESPUÉS DE 7 DÍAS, NO SE RESPONDE POR GARANTÍA.', { align: 'C' }),
-      ...this.linea('NO SE RESPONDE POR PRENDA NI SE HACE DEVOLUCIÓN', { align: 'C' }),
-      ...this.linea('DE DINERO DESPUÉS DE 30 DÍAS.', { align: 'C' }),
-      0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
-      GS, 0x56, 0x01, // corte parcial
-    );
-
     await qz.print(qz.configs.create(impresora), [
-      // Init + centrado ANTES de la imagen: si no, el logo hereda la
-      // alineación que haya quedado de una impresión anterior (por eso a
-      // veces salía sin centrar).
       { type: 'raw', format: 'base64', data: this.bytesToBase64([ESC, 0x40, ...AJUSTE_CALOR, ESC, 0x61, 1]) },
       {
-        // Logo pre-convertido a blanco/negro puro (sin gris ni rojo, ver
-        // logo-sastreria-termico.png): la impresora térmica es 1-bit, así que
-        // cualquier imagen con tonos intermedios se tramaría en puntos grises.
-        // quantization:'black' además evita que QZ Tray use su umbral por
-        // canal alfa por defecto (que ya no aplica, esta imagen no tiene alfa).
         type: 'raw',
         format: 'image',
-        data: `${window.location.origin}/assets/logo-sastreria-termico.png`,
+        data: dataUrl,
         options: { language: 'ESCPOS', dotDensity: 'double', quantization: 'black', threshold: 128 },
       },
-      { type: 'raw', format: 'base64', data: this.bytesToBase64(cmds) },
+      {
+        type: 'raw',
+        format: 'base64',
+        data: this.bytesToBase64([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, GS, 0x56, 0x01]),
+      },
     ]);
   }
 
