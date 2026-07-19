@@ -280,22 +280,34 @@ export class ReciboService {
       font-family: 'Segoe UI', Arial, sans-serif;
       width: 100mm;
       height: 50mm;
-      padding: 2.5mm 3.5mm;
       color: #000;
       background: #fff;
       display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
-    .top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 3mm; line-height: 1; }
-    .negocio { font-size: 11px; font-weight: 700; line-height: 1.15; max-width: 65mm; }
-    .logo-mini { width: 11mm; height: auto; flex-shrink: 0; }
-    .cliente-lbl { font-size: 8px; margin-top: 1.5mm; line-height: 1; }
-    .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.3mm; }
-    .fila { font-size: 9.5px; margin-top: 1mm; line-height: 1; }
-    .bottom-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 3mm; margin-top: 1.5mm; line-height: 1; }
-    .total-abono { font-size: 9.5px; font-weight: 700; }
-    .saldo { font-size: 9.5px; font-weight: 700; text-align: right; white-space: nowrap; }
+    .left-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3mm 2mm 3mm 3.5mm;
+    }
+    .cliente-lbl { font-size: 8px; line-height: 1; }
+    .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
+    .fila { font-size: 9.5px; margin-top: 1.5mm; line-height: 1; }
+    .bottom-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1mm; margin-top: 1.5mm; line-height: 1.15; }
+    .total-abono { font-size: 8px; font-weight: 700; }
+    .saldo { font-size: 8px; font-weight: 700; text-align: right; white-space: nowrap; }
+    .right-col {
+      width: 48mm;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2mm;
+    }
+    .logo-big { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
     @media print {
       @page { margin: 0; size: 100mm 50mm; }
       body { width: 100mm; height: 50mm; }
@@ -303,19 +315,20 @@ export class ReciboService {
   </style>
 </head>
 <body>
-  <div class="top-row">
-    <div class="negocio">SASTRERÍA ANDRÉS CHIMUNJA</div>
-    <img class="logo-mini" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
+  <div class="left-col">
+    <div>
+      <div class="cliente-lbl">CLIENTE:</div>
+      <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
+      ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+      <div class="fila">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+    </div>
+    <div class="bottom-row">
+      <div class="total-abono">TOTAL: ${this.formatCOP(data.valorTotalPedido)}&nbsp; ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
+      <div class="saldo">SALDO: ${this.formatCOP(saldo)}</div>
+    </div>
   </div>
-
-  <div class="cliente-lbl">CLIENTE:</div>
-  <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
-  ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
-  <div class="fila">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
-
-  <div class="bottom-row">
-    <div class="total-abono">TOTAL: ${this.formatCOP(data.valorTotalPedido)}&nbsp;&nbsp;&nbsp;ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
-    <div class="saldo">SALDO: ${this.formatCOP(saldo)}</div>
+  <div class="right-col">
+    <img class="logo-big" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
   </div>
 </body>
 </html>`;
