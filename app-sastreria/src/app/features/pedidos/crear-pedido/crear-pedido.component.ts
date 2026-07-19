@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import Swal from 'sweetalert2';
 
 import { PedidoService } from '../../../core/services/pedido.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
@@ -506,14 +507,19 @@ export class CrearPedidoComponent implements OnInit {
     const yaProgramado = Number(programadoResp?.valorProgramado ?? 0);
     const totalDia = yaProgramado + Number(fv.valorTotal ?? 0);
     if (totalDia > limite) {
-      this.snackBar.open(
-        `Se supera el límite diario de entregas para el ${fechaEntregaStr} ` +
-        `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados). ` +
-        `Cambia la fecha de entrega.`,
-        'Cerrar',
-        { duration: 8000, panelClass: ['snack-error'] },
-      );
-      return;
+      const confirmacion = await Swal.fire({
+        icon: 'warning',
+        title: 'Límite diario superado',
+        html:
+          `Se supera el límite diario de entregas para el <b>${fechaEntregaStr}</b> ` +
+          `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados).<br><br>` +
+          `¿Deseas crear el pedido de todas formas?`,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, crear de todas formas',
+        cancelButtonText: 'Cambiar fecha',
+        confirmButtonColor: '#d32f2f',
+      });
+      if (!confirmacion.isConfirmed) return;
     }
 
     this.guardando = true;
