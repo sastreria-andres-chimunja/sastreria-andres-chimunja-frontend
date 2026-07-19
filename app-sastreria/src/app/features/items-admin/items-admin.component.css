@@ -83,7 +83,29 @@
   max-height: calc(100vh - 120px);
 }
 
-/* ── RESUMEN ── */
+/* ── RESUMEN (acordeón) ── */
+.resumen-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary, #757575);
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 8px;
+}
+
+.resumen-toggle:hover {
+  color: var(--text, #212121);
+}
+
+.resumen-toggle mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 .resumen-row {
   display: flex;
   gap: 12px;

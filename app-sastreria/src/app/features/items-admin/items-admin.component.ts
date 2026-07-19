@@ -33,6 +33,9 @@ export class ItemsAdminComponent implements OnInit {
   filtroEmpleado: string = '';
   filtroFecha = '';
 
+  resumenVisible = true;
+  toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
+
   constructor(
     private itemPedidoService: ItemPedidoService,
     private empleadoService: EmpleadoService,

@@ -56,6 +56,9 @@ export class PedidosListComponent implements OnInit {
   metodosPago: any[] = [];
   empleados: Empleado[] = [];
 
+  resumenVisible = true;
+  toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
+
   constructor(
     private pedidoService: PedidoService,
     private router: Router,

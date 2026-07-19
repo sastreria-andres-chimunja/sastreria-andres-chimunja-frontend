@@ -65,7 +65,11 @@
   </div>
 
   <!-- RESUMEN -->
-  <div class="resumen-row">
+  <div class="resumen-toggle" (click)="toggleResumen()">
+    <mat-icon>{{ resumenVisible ? 'expand_less' : 'expand_more' }}</mat-icon>
+    <span>Resumen</span>
+  </div>
+  <div class="resumen-row" *ngIf="resumenVisible">
 
     <div class="resumen-card" [class.activa]="filtroEstado === null"
       (click)="setFiltro(null)" matTooltip="Mostrar todos">
