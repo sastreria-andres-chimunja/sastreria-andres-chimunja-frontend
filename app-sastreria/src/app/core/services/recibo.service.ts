@@ -297,9 +297,9 @@ export class ReciboService {
     .cliente-lbl { font-size: 9px; line-height: 1; }
     .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
     .fila { font-size: 10px; margin-top: 1.5mm; line-height: 1; }
-    .bottom-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1mm; margin-top: 1.5mm; line-height: 1.15; }
-    .total-abono { font-size: 8px; font-weight: 700; }
-    .saldo { font-size: 8px; font-weight: 700; text-align: right; white-space: nowrap; }
+    .totales { margin-top: 2mm; }
+    .fila-total { font-size: 10px; font-weight: 700; line-height: 1.4; }
+    .fila-saldo { font-size: 11.5px; font-weight: 700; line-height: 1.4; margin-top: 0.5mm; }
     .right-col {
       width: 48mm;
       flex-shrink: 0;
@@ -323,9 +323,10 @@ export class ReciboService {
       ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
       <div class="fila">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
     </div>
-    <div class="bottom-row">
-      <div class="total-abono">TOTAL: ${this.formatCOP(data.valorTotalPedido)}&nbsp; ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
-      <div class="saldo">SALDO: ${this.formatCOP(saldo)}</div>
+    <div class="totales">
+      <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
+      <div class="fila-total">ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
+      <div class="fila-saldo">SALDO: ${this.formatCOP(saldo)}</div>
     </div>
   </div>
   <div class="right-col">
@@ -335,8 +336,107 @@ export class ReciboService {
 </html>`;
   }
 
-  /** Imprime el ticket adhesivo vía el diálogo de impresión del navegador. */
-  imprimirTicket(data: ReciboData): void {
+  /**
+   * Imprime el ticket adhesivo vía el diálogo de impresión del navegador.
+   * Igual que se hizo con el recibo térmico, el ticket se renderiza primero
+   * a una imagen con umbral duro a blanco/negro puro (ver
+   * generarImagenTicket()) y se imprime esa imagen en vez del HTML en vivo:
+   * el texto normal salía claro/débil en la impresora física. Esta impresora
+   * no tiene ruta QZ Tray todavía (protocolo sin confirmar), así que la
+   * imagen se manda igual por el diálogo de impresión del navegador/Windows.
+   * Si algo falla generando la imagen, cae a imprimir el HTML en vivo.
+   */
+  async imprimirTicket(data: ReciboData): Promise<void> {
+    try {
+      const imagenDataUrl = await this.generarImagenTicket(data);
+      this.imprimirImagenTicketNavegador(imagenDataUrl);
+    } catch (err) {
+      console.error('No se pudo generar la imagen del ticket, imprimiendo el HTML directo:', err);
+      this.imprimirTicketHtmlNavegador(data);
+    }
+  }
+
+  /** Renderiza generarHtmlTicketAdhesivo() a una imagen con umbral duro a blanco/negro puro (sin gris). */
+  private async generarImagenTicket(data: ReciboData): Promise<string> {
+    const html = this.generarHtmlTicketAdhesivo(data);
+
+    const wrapper = document.createElement('div');
+    // width/height/display duplicados a propósito (mismo motivo que en
+    // generarImagenTermica()): el CSS de generarHtmlTicketAdhesivo() trae
+    // "body { width:100mm; height:50mm; display:flex; ... }", que no aplica
+    // a este <div> envoltorio por no ser un <body> real — sin duplicar
+    // display:flex aquí, el logo se cae debajo del texto en vez de quedar
+    // al lado (columna derecha).
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;overflow:hidden;background:#fff;box-sizing:border-box;';
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    document.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    try {
+      const html2canvasModule = await import('html2canvas');
+      const canvas = await html2canvasModule.default(wrapper, {
+        scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
+      });
+      document.body.removeChild(wrapper);
+
+      const ctx = canvas.getContext('2d')!;
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const px = imgData.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const luminancia = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+        const valor = luminancia < 190 ? 0 : 255;
+        px[i] = px[i + 1] = px[i + 2] = valor;
+        px[i + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      throw err;
+    }
+  }
+
+  /** Imprime una imagen ya renderizada del ticket, ocupando exactamente 100mm x 50mm. */
+  private imprimirImagenTicketNavegador(dataUrl: string): void {
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"/><style>
+  * { margin: 0; padding: 0; }
+  body { width: 100mm; height: 50mm; }
+  img { width: 100mm; height: 50mm; display: block; }
+  @media print { @page { margin: 0; size: 100mm 50mm; } }
+</style></head><body><img src="${dataUrl}"/></body></html>`;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument!.open();
+    iframe.contentDocument!.write(html);
+    iframe.contentDocument!.close();
+
+    const ejecutarImpresion = () => {
+      iframe.contentWindow!.focus();
+      iframe.contentWindow!.print();
+      setTimeout(() => document.body.removeChild(iframe), 1500);
+    };
+
+    const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
+    if (img && !img.complete) {
+      img.onload  = ejecutarImpresion;
+      img.onerror = ejecutarImpresion;
+      setTimeout(ejecutarImpresion, 3000);
+    } else {
+      setTimeout(ejecutarImpresion, 300);
+    }
+  }
+
+  /** Respaldo: imprime el HTML del ticket directo (sin pasar por imagen), por si falla el render a imagen. */
+  private imprimirTicketHtmlNavegador(data: ReciboData): void {
     const html = this.generarHtmlTicketAdhesivo(data);
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
