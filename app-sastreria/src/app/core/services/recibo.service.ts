@@ -380,7 +380,10 @@ export class ReciboService {
     try {
       const html2canvasModule = await import('html2canvas');
       const canvas = await html2canvasModule.default(wrapper, {
-        scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
+        // scale más alto que en el recibo térmico (6 en vez de 3): la
+        // etiqueta se veía pixelada/dentada al imprimir, la resolución de
+        // origen se quedaba corta para lo que necesita esta impresora.
+        scale: 6, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
       document.body.removeChild(wrapper);
 
