@@ -277,7 +277,8 @@ export class ReciboService {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-weight: 700;
       width: 100mm;
       height: 50mm;
       color: #000;
@@ -293,9 +294,9 @@ export class ReciboService {
       justify-content: space-between;
       padding: 3mm 2mm 3mm 3.5mm;
     }
-    .cliente-lbl { font-size: 8px; line-height: 1; }
+    .cliente-lbl { font-size: 9px; line-height: 1; }
     .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
-    .fila { font-size: 9.5px; margin-top: 1.5mm; line-height: 1; }
+    .fila { font-size: 10px; margin-top: 1.5mm; line-height: 1; }
     .bottom-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1mm; margin-top: 1.5mm; line-height: 1.15; }
     .total-abono { font-size: 8px; font-weight: 700; }
     .saldo { font-size: 8px; font-weight: 700; text-align: right; white-space: nowrap; }
