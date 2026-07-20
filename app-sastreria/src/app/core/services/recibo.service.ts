@@ -294,12 +294,12 @@ export class ReciboService {
       justify-content: space-between;
       padding: 3mm 2mm 3mm 3.5mm;
     }
-    .cliente-lbl { font-size: 9px; line-height: 1; }
-    .cliente-nombre { font-size: 13px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
-    .fila { font-size: 10px; margin-top: 1.5mm; line-height: 1; }
+    .cliente-lbl { font-size: 10px; font-weight: 700; line-height: 1; }
+    .cliente-nombre { font-size: 15px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
+    .fila { font-size: 11.5px; font-weight: 700; margin-top: 1.5mm; line-height: 1; }
     .totales { margin-top: 2mm; }
-    .fila-total { font-size: 10px; font-weight: 700; line-height: 1.4; }
-    .fila-saldo { font-size: 11.5px; font-weight: 700; line-height: 1.4; margin-top: 0.5mm; }
+    .fila-total { font-size: 12px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
+    .fila-saldo { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .right-col {
       width: 48mm;
       flex-shrink: 0;
