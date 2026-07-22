@@ -6,11 +6,6 @@ import {
   NavigationEnd,
   RouterModule,
 } from '@angular/router';
-import {
-  BreakpointObserver,
-  Breakpoints,
-  LayoutModule,
-} from '@angular/cdk/layout';
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -33,7 +28,6 @@ import { AuthService } from '../../core/services/auth.service';
     MatIconModule,
     RouterModule,
     MatSidenav,
-    LayoutModule,
     MatButtonModule,
     MatTooltipModule,
     CommonModule,
@@ -45,8 +39,6 @@ export class MainLayoutComponent implements OnInit {
   pageTitle = 'Sistema de Gestión';
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  expanded = false;
-  isMobile = false;
   isDarkMode = false;
 
   private routeTitles: Record<string, string> = {
@@ -66,7 +58,6 @@ export class MainLayoutComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private breakpointObserver: BreakpointObserver,
     public authService: AuthService,
   ) {}
 
@@ -88,15 +79,6 @@ export class MainLayoutComponent implements OnInit {
           this.pageTitle = 'Medidas';
         } else {
           this.pageTitle = 'Sistema de Gestión';
-        }
-      });
-
-    this.breakpointObserver
-      .observe([Breakpoints.Handset])
-      .subscribe((result) => {
-        this.isMobile = result.matches;
-        if (this.isMobile && this.sidenav) {
-          this.sidenav.close();
         }
       });
   }

@@ -1,20 +1,12 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
     #sidenav
-    [mode]="isMobile ? 'over' : 'side'"
-    [opened]="!isMobile"
+    mode="over"
     class="sidenav"
-    [class.expanded]="expanded || isMobile"
-    (mouseenter)="!isMobile && (expanded = true)"
-    (mouseleave)="!isMobile && (expanded = false)"
   >
     <!-- LOGO -->
     <div class="logo-area">
       <img src="assets/logo-sastreria-transparente.png" class="logo-icon" />
-      <img
-        src="assets/logo-sastreria-transparente.png"
-        class="logo-collapsed"
-      />
     </div>
 
     <!-- Usuario actual -->
@@ -27,7 +19,7 @@
     </div>
 
     <!-- Hoja de trabajo (admin y asistente) -->
-    <mat-nav-list class="nav-section" *ngIf="!authService.esOperario()">
+    <mat-nav-list class="nav-section" (click)="sidenav.close()" *ngIf="!authService.esOperario()">
       <a mat-list-item routerLink="/app/pedidos" routerLinkActive="active">
         <mat-icon matListItemIcon>content_cut</mat-icon>
         <span matListItemTitle class="nav-label">Hoja de trabajo</span>
@@ -35,7 +27,7 @@
     </mat-nav-list>
 
     <!-- Mis ítems (operarios y asistentes) -->
-    <mat-nav-list class="nav-section" *ngIf="authService.esOperario() || authService.esAsistente()">
+    <mat-nav-list class="nav-section" (click)="sidenav.close()" *ngIf="authService.esOperario() || authService.esAsistente()">
       <a mat-list-item routerLink="/app/mis-items" routerLinkActive="active">
         <mat-icon matListItemIcon>assignment_turned_in</mat-icon>
         <span matListItemTitle class="nav-label">Mis ítems</span>
@@ -43,7 +35,7 @@
     </mat-nav-list>
 
     <!-- Ítems (solo admin): todos los ítems y quién los está trabajando -->
-    <mat-nav-list class="nav-section" *ngIf="authService.esAdmin()">
+    <mat-nav-list class="nav-section" (click)="sidenav.close()" *ngIf="authService.esAdmin()">
       <a mat-list-item routerLink="/app/items" routerLinkActive="active">
         <mat-icon matListItemIcon>checklist</mat-icon>
         <span matListItemTitle class="nav-label">Ítems</span>
@@ -53,7 +45,7 @@
     <!-- Usuarios (solo admin y asistente) -->
     <ng-container *ngIf="!authService.esOperario()">
       <div class="nav-title nav-label">Usuarios</div>
-      <mat-nav-list class="nav-section">
+      <mat-nav-list class="nav-section" (click)="sidenav.close()">
         <a mat-list-item routerLink="/app/clientes" routerLinkActive="active">
           <mat-icon matListItemIcon>person</mat-icon>
           <span matListItemTitle class="nav-label">Clientes</span>
@@ -67,7 +59,7 @@
 
     <!-- Balance (admin y asistente ven nómina; solo admin ve movimientos) -->
     <div class="nav-title nav-label">Balance</div>
-    <mat-nav-list class="nav-section">
+    <mat-nav-list class="nav-section" (click)="sidenav.close()">
       <a mat-list-item routerLink="/app/nomina" routerLinkActive="active">
         <mat-icon matListItemIcon>engineering</mat-icon>
         <span matListItemTitle class="nav-label">Nómina</span>
@@ -86,7 +78,7 @@
     <!-- Administración (solo admin) -->
     <ng-container *ngIf="authService.esAdmin()">
       <div class="nav-title nav-label">Administración</div>
-      <mat-nav-list class="nav-section">
+      <mat-nav-list class="nav-section" (click)="sidenav.close()">
         <a mat-list-item routerLink="/app/roles" routerLinkActive="active">
           <mat-icon matListItemIcon>badge</mat-icon>
           <span matListItemTitle class="nav-label">Roles</span>
@@ -115,14 +107,10 @@
     </ng-container>
   </mat-sidenav>
 
-  <mat-sidenav-content
-    class="main-content"
-    [style.margin-left]="isMobile ? '0' : expanded ? '210px' : '56px'"
-  >
+  <mat-sidenav-content class="main-content">
     <mat-toolbar class="topbar">
       <div class="left-section">
         <button
-          *ngIf="isMobile"
           mat-icon-button
           (click)="sidenav.toggle()"
           class="menu-btn"

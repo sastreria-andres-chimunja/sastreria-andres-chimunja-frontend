@@ -148,18 +148,14 @@
   height: 100vh;
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar: siempre oculto por defecto, se despliega con el botón
+   hamburguesa (mode="over"), sin estado intermedio "colapsado" ── */
 .sidenav {
-  width: 56px;
+  width: 210px;
   background: linear-gradient(to bottom, #23282B, #000000);
   border-right: none;
   overflow: hidden;
-  transition: width 0.25s ease;
   border-top-right-radius: 0 !important;
-}
-
-.sidenav.expanded {
-  width: 210px;
 }
 
 /* ── Logo area ── */
@@ -175,37 +171,17 @@
   flex-shrink: 0;
 }
 
-.logo-collapsed {
-  width: 36px;
-  height: 52px;
-  min-width: 36px;
-  object-fit: contain;
-  filter: invert(1) hue-rotate(180deg) saturate(6);
-  transition: opacity 0.2s ease;
-}
-
 .logo-icon {
   width: 120px;
   height: 80px;
   min-width: 120px;
   object-fit: contain;
   filter: invert(1) hue-rotate(180deg) saturate(6);
-  opacity: 0;
-  transition: opacity 0.2s ease 0.1s;
-  position: absolute;
 }
 
-.sidenav.expanded .logo-collapsed { opacity: 0; }
-.sidenav.expanded .logo-icon      { opacity: 1; }
-
-/* ── Labels: ocultos por defecto ── */
 .nav-label {
-  opacity: 0;
-  transition: opacity 0.15s ease;
   white-space: nowrap;
 }
-
-.sidenav.expanded .nav-label { opacity: 1; }
 
 /* ── Título de sección ── */
 .nav-title {
@@ -263,7 +239,6 @@
 */
 .main-content {
   background: var(--bg, #F5F2EE);
-  transition: margin-left 0.25s ease;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -298,10 +273,6 @@
 
 /* ── Responsive móvil ── */
 @media (max-width: 600px) {
-  .mat-drawer-content {
-    margin-left: 0 !important;
-  }
-
   .content-wrapper {
     width: 100%;
     margin: 12px auto;
