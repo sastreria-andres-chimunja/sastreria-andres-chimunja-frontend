@@ -345,10 +345,17 @@ export class ReciboService {
    * no tiene ruta QZ Tray todavía (protocolo sin confirmar), así que la
    * imagen se manda igual por el diálogo de impresión del navegador/Windows.
    * Si algo falla generando la imagen, cae a imprimir el HTML en vivo.
+   *
+   * @param imagenPrecargada Si ya se generó la imagen de antemano (ver
+   * generarImagenTicket()), pásala aquí para que el diálogo de impresión
+   * aparezca casi al instante del clic. Generarla en el momento (sin este
+   * parámetro) toma lo suficiente como para que el navegador considere que
+   * ya pasó "demasiado tiempo" desde el clic del usuario y bloquee
+   * silenciosamente window.print() — sin error, sin diálogo, no pasa nada.
    */
-  async imprimirTicket(data: ReciboData): Promise<void> {
+  async imprimirTicket(data: ReciboData, imagenPrecargada?: string | null): Promise<void> {
     try {
-      const imagenDataUrl = await this.generarImagenTicket(data);
+      const imagenDataUrl = imagenPrecargada ?? await this.generarImagenTicket(data);
       this.imprimirImagenTicketNavegador(imagenDataUrl);
     } catch (err) {
       console.error('No se pudo generar la imagen del ticket, imprimiendo el HTML directo:', err);
@@ -357,7 +364,7 @@ export class ReciboService {
   }
 
   /** Renderiza generarHtmlTicketAdhesivo() a una imagen con umbral duro a blanco/negro puro (sin gris). */
-  private async generarImagenTicket(data: ReciboData): Promise<string> {
+  async generarImagenTicket(data: ReciboData): Promise<string> {
     const html = this.generarHtmlTicketAdhesivo(data);
 
     const wrapper = document.createElement('div');
