@@ -96,7 +96,7 @@ export class ReciboService {
       font-weight: 700;
       font-size: 10.5px;
       width: 58mm;
-      padding: 2mm 3mm 4mm;
+      padding: 2mm 0.5mm 4mm;
       color: #000;
       background: #fff;
     }
@@ -625,12 +625,12 @@ export class ReciboService {
       { lbl: 'Cliente',          val: data.nombreCliente },
       ...(data.telefonoCliente  ? [{ lbl: 'Teléfono',        val: data.telefonoCliente }] : []),
       ...(!esAbono              ? [{ lbl: 'Fecha de emisión', val: this.formatFechaLarga(data.fechaPago) }] : []),
-      ...(data.fechaEntrega     ? [{ lbl: 'Fecha de entrega', val: this.formatFechaLarga(data.fechaEntrega) }] : []),
+      ...(data.fechaEntrega     ? [{ lbl: 'Fecha de entrega', val: this.formatFechaLarga(data.fechaEntrega), destacar: true }] : []),
       ...(data.metodoPago && esAbono ? [{ lbl: 'Método de pago', val: data.metodoPago }] : []),
     ].map(c => `
       <div class="info-cell">
         <div class="info-lbl">${c.lbl}</div>
-        <div class="info-val">${c.val}</div>
+        <div class="info-val${c.destacar ? ' info-val-entrega' : ''}">${c.val}</div>
       </div>`).join('');
 
     const pagoCompleto = saldo <= 0;
@@ -675,6 +675,7 @@ export class ReciboService {
   .info-cell { flex:1 1 200px; }
   .info-lbl { font-size:9px; font-weight:700; letter-spacing:1.5px; color:#7a8cb0; text-transform:uppercase; margin-bottom:3px; }
   .info-val { font-size:14px; font-weight:600; color:#1a2744; }
+  .info-val-entrega { font-size:19px; font-weight:800; color:#d32f2f; }
 
   /* TABLE */
   table.items { width:100%; border-collapse:collapse; margin-bottom:20px; }
