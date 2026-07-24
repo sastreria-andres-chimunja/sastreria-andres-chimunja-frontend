@@ -566,8 +566,12 @@ export class CrearPedidoComponent implements OnInit {
           descripcion: String(it.descripcion ?? ''),
           valor: Number(it.valor ?? 0),
         }));
+        // totalAbonado ya está cargado (cargarAbonos() en cargarPedido()) con
+        // el total real de abonos previos del pedido — antes se mandaba 0 fijo
+        // aquí, así que los documentos impresos/enviados desde "Editar pedido"
+        // mostraban saldo completo aunque ya hubiera abonos registrados.
         this.abrirDialogoGuardado(
-          idPed!, 0, 0, '',
+          idPed!, 0, this.totalAbonado, '',
           dateToString(fv.fechaEntrega),
           itemsResumenEdit,
         );
