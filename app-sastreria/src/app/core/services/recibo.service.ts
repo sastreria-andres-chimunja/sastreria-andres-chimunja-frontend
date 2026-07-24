@@ -350,18 +350,20 @@ export class ReciboService {
    * Si QZ Tray falla (no instalado, impresora no encontrada, protocolo
    * distinto), cae al diálogo de impresión del navegador como respaldo.
    *
-   * @param imagenPrecargada Si ya se generó la imagen de antemano (ver
-   * generarImagenTicket()), pásala aquí para que la impresión sea casi
-   * instantánea. Generarla en el momento (sin este parámetro) toma lo
-   * suficiente como para que, SI se termina cayendo al respaldo del
-   * navegador, éste considere que ya pasó "demasiado tiempo" desde el clic
-   * del usuario y bloquee silenciosamente window.print() — sin error, sin
-   * diálogo, no pasa nada.
+   * La imagen se genera al momento del clic (no de antemano): con QZ Tray
+   * como camino principal ya no hace falta pre-generarla en segundo plano
+   * apenas se abre el diálogo — eso generaba una espera en CADA guardado de
+   * pedido aunque el usuario no fuera a imprimir el ticket. El único riesgo
+   * es que, si QZ Tray llega a fallar y cae al respaldo del navegador, la
+   * demora de generar la imagen en ese momento podría hacer que el navegador
+   * bloquee window.print() en silencio por considerar "vencido" el clic del
+   * usuario — un caso ya menos probable ahora que QZ Tray es el camino
+   * principal, y aceptable a cambio de no demorar cada guardado de pedido.
    */
-  async imprimirTicket(data: ReciboData, imagenPrecargada?: string | null): Promise<void> {
+  async imprimirTicket(data: ReciboData): Promise<void> {
     let imagenDataUrl: string;
     try {
-      imagenDataUrl = imagenPrecargada ?? await this.generarImagenTicket(data);
+      imagenDataUrl = await this.generarImagenTicket(data);
     } catch (err) {
       console.error('No se pudo generar la imagen del ticket, imprimiendo el HTML directo:', err);
       this.imprimirTicketHtmlNavegador(data);
@@ -384,7 +386,7 @@ export class ReciboService {
   }
 
   /** Renderiza generarHtmlTicketAdhesivo() a una imagen con umbral duro a blanco/negro puro (sin gris). */
-  async generarImagenTicket(data: ReciboData): Promise<string> {
+  private async generarImagenTicket(data: ReciboData): Promise<string> {
     const html = this.generarHtmlTicketAdhesivo(data);
 
     const wrapper = document.createElement('div');

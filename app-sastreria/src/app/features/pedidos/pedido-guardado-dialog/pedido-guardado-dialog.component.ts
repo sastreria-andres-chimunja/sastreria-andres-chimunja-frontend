@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,39 +25,17 @@ export interface PedidoGuardadoDialogData {
   templateUrl: './pedido-guardado-dialog.component.html',
   styleUrl: './pedido-guardado-dialog.component.css',
 })
-export class PedidoGuardadoDialogComponent implements OnInit {
+export class PedidoGuardadoDialogComponent {
   generandoPDF = false;
   enviandoWhatsApp = false;
   urlFallback: string | null = null;
   avisoPegarImagen = false;
-  /**
-   * true mientras se pre-genera la imagen del ticket en segundo plano. El
-   * botón "Imprimir ticket" queda deshabilitado hasta que esto sea false:
-   * html2canvas puede tardar varios segundos en renderizar, y si el clic
-   * ocurre antes de tenerla lista, el navegador considera "vencido" el
-   * permiso de imprimir del clic y bloquea window.print() en silencio (sin
-   * error, sin diálogo). Deshabilitando el botón garantizamos que el clic
-   * real del usuario siempre llega DESPUÉS de que la imagen ya esté lista.
-   */
-  generandoTicket = true;
-  private ticketImagenCache: string | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<PedidoGuardadoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: PedidoGuardadoDialogData,
     private reciboService: ReciboService,
   ) {}
-
-  ngOnInit(): void {
-    if (this.data.items !== undefined) {
-      this.reciboService.generarImagenTicket(this.reciboData)
-        .then((url) => { this.ticketImagenCache = url; })
-        .catch((err) => console.error('No se pudo pre-generar la imagen del ticket:', err))
-        .finally(() => { this.generandoTicket = false; });
-    } else {
-      this.generandoTicket = false;
-    }
-  }
 
   private get reciboData() {
     return {
@@ -80,7 +58,7 @@ export class PedidoGuardadoDialogComponent implements OnInit {
   }
 
   imprimirTicket(): void {
-    this.reciboService.imprimirTicket(this.reciboData, this.ticketImagenCache);
+    this.reciboService.imprimirTicket(this.reciboData);
   }
 
   /** Genera el PDF y lo descarga directo, para quien quiera guardarlo/imprimirlo aparte. */
