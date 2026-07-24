@@ -401,7 +401,13 @@ export class ReciboService {
       const px = imgData.data;
       for (let i = 0; i < px.length; i += 4) {
         const luminancia = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
-        const valor = luminancia < 190 ? 0 : 255;
+        // Oscurecer agresivamente SIN binarizar a blanco/negro puro (a
+        // diferencia del recibo térmico): un corte duro (0 o 255) se veía
+        // "dentado"/pixelado al imprimir esta etiqueta, porque pierde el
+        // suavizado (antialiasing) de los bordes de la letra. Esta curva
+        // empuja los grises hacia negro con fuerza (factor 2.2) pero deja
+        // un pequeño degradado en el borde, que se imprime más liso.
+        const valor = Math.max(0, Math.min(255, 255 - (255 - luminancia) * 2.2));
         px[i] = px[i + 1] = px[i + 2] = valor;
         px[i + 3] = 255;
       }
