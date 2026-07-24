@@ -337,29 +337,49 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el ticket adhesivo vía el diálogo de impresión del navegador.
-   * Igual que se hizo con el recibo térmico, el ticket se renderiza primero
-   * a una imagen con umbral duro a blanco/negro puro (ver
-   * generarImagenTicket()) y se imprime esa imagen en vez del HTML en vivo:
-   * el texto normal salía claro/débil en la impresora física. Esta impresora
-   * no tiene ruta QZ Tray todavía (protocolo sin confirmar), así que la
-   * imagen se manda igual por el diálogo de impresión del navegador/Windows.
-   * Si algo falla generando la imagen, cae a imprimir el HTML en vivo.
+   * Imprime el ticket adhesivo. El ticket se renderiza primero a una imagen
+   * (ver generarImagenTicket()): el texto normal salía claro/débil en la
+   * impresora física. Esa imagen se intenta mandar PRIMERO directo por QZ
+   * Tray (misma impresora de marca SAT que el recibo térmico): probamos 3
+   * variantes distintas de la imagen (blanco/negro puro, doble resolución,
+   * curva suavizada) por el diálogo de impresión del navegador y las 3
+   * salieron igual de pixeladas — el driver de Windows reescala a una
+   * resolución fija baja sin importar la imagen de origen, así que mandar
+   * los bytes directo por QZ Tray (bypaseando ese driver) es la única forma
+   * real de controlar la calidad final, igual que se resolvió con el recibo.
+   * Si QZ Tray falla (no instalado, impresora no encontrada, protocolo
+   * distinto), cae al diálogo de impresión del navegador como respaldo.
    *
    * @param imagenPrecargada Si ya se generó la imagen de antemano (ver
-   * generarImagenTicket()), pásala aquí para que el diálogo de impresión
-   * aparezca casi al instante del clic. Generarla en el momento (sin este
-   * parámetro) toma lo suficiente como para que el navegador considere que
-   * ya pasó "demasiado tiempo" desde el clic del usuario y bloquee
-   * silenciosamente window.print() — sin error, sin diálogo, no pasa nada.
+   * generarImagenTicket()), pásala aquí para que la impresión sea casi
+   * instantánea. Generarla en el momento (sin este parámetro) toma lo
+   * suficiente como para que, SI se termina cayendo al respaldo del
+   * navegador, éste considere que ya pasó "demasiado tiempo" desde el clic
+   * del usuario y bloquee silenciosamente window.print() — sin error, sin
+   * diálogo, no pasa nada.
    */
   async imprimirTicket(data: ReciboData, imagenPrecargada?: string | null): Promise<void> {
+    let imagenDataUrl: string;
     try {
-      const imagenDataUrl = imagenPrecargada ?? await this.generarImagenTicket(data);
-      this.imprimirImagenTicketNavegador(imagenDataUrl);
+      imagenDataUrl = imagenPrecargada ?? await this.generarImagenTicket(data);
     } catch (err) {
       console.error('No se pudo generar la imagen del ticket, imprimiendo el HTML directo:', err);
       this.imprimirTicketHtmlNavegador(data);
+      return;
+    }
+
+    try {
+      // Timeout de seguridad: si QZ Tray no responde (p. ej. la conexión se
+      // queda intentando en vez de fallar rápido), no dejar al usuario
+      // esperando indefinidamente — a los 5s se da por fallido y cae al
+      // respaldo del navegador igual que si QZ Tray hubiera fallado.
+      await Promise.race([
+        this.qzPrint.imprimirImagenTicket(imagenDataUrl),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado con QZ Tray')), 5000)),
+      ]);
+    } catch (err) {
+      console.error('No se pudo imprimir el ticket vía QZ Tray, usando el diálogo del navegador:', err);
+      this.imprimirImagenTicketNavegador(imagenDataUrl);
     }
   }
 
@@ -387,11 +407,7 @@ export class ReciboService {
     try {
       const html2canvasModule = await import('html2canvas');
       const canvas = await html2canvasModule.default(wrapper, {
-        // Misma escala que el recibo térmico (generarImagenTermica): subirla
-        // a 6 no resolvió el pixelado real (la impresión de esta etiqueta
-        // pasa por el driver de Windows/navegador, no por QZ Tray como el
-        // recibo, así que una resolución de origen muy alta puede generar
-        // artefactos de reescalado en vez de mejorarlo).
+        // Misma escala que el recibo térmico (generarImagenTermica).
         scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
       document.body.removeChild(wrapper);
@@ -401,13 +417,13 @@ export class ReciboService {
       const px = imgData.data;
       for (let i = 0; i < px.length; i += 4) {
         const luminancia = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
-        // Oscurecer agresivamente SIN binarizar a blanco/negro puro (a
-        // diferencia del recibo térmico): un corte duro (0 o 255) se veía
-        // "dentado"/pixelado al imprimir esta etiqueta, porque pierde el
-        // suavizado (antialiasing) de los bordes de la letra. Esta curva
-        // empuja los grises hacia negro con fuerza (factor 2.2) pero deja
-        // un pequeño degradado en el borde, que se imprime más liso.
-        const valor = Math.max(0, Math.min(255, 255 - (255 - luminancia) * 2.2));
+        // Umbral duro a blanco/negro puro, igual que el recibo térmico —
+        // ahora que este ticket también se manda directo por QZ Tray (ver
+        // imprimirTicket()), el mismo tratamiento que ya funcionó bien ahí
+        // debería funcionar igual aquí. La curva suavizada que se probó
+        // antes era específicamente para compensar el reescalado del driver
+        // de Windows, que ya no es el camino principal de impresión.
+        const valor = luminancia < 190 ? 0 : 255;
         px[i] = px[i + 1] = px[i + 2] = valor;
         px[i + 3] = 255;
       }

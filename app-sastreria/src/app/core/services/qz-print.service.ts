@@ -12,6 +12,13 @@ import * as qz from 'qz-tray';
 
 const NOMBRE_IMPRESORA_KEY = 'qz_impresora_nombre';
 const NOMBRE_IMPRESORA_DEFAULT = 'SAT TICKETS';
+// Impresora de etiquetas adhesivas (ticket, 10cm x 5cm) — equipo distinto de
+// la térmica de recibos, misma marca (SAT) según confirmó el cliente. Nombre
+// exacto en Windows aún sin confirmar, así que probablemente no encuentre
+// coincidencia la primera vez y le pida al usuario elegirla de la lista
+// (se guarda para las siguientes impresiones, igual que con la térmica).
+const NOMBRE_IMPRESORA_TICKET_KEY = 'qz_impresora_ticket_nombre';
+const NOMBRE_IMPRESORA_TICKET_DEFAULT = 'SAT';
 const ANCHO_COLUMNAS = 48; // papel de 58mm — valor confirmado contra la impresora física (no cambiar sin volver a probar en el equipo real)
 
 const ESC = 0x1b;
@@ -70,12 +77,20 @@ export class QzPrintService {
   }
 
   private async obtenerImpresora(): Promise<string> {
-    const guardada = localStorage.getItem(NOMBRE_IMPRESORA_KEY);
+    return this.obtenerImpresoraConClave(NOMBRE_IMPRESORA_KEY, NOMBRE_IMPRESORA_DEFAULT);
+  }
+
+  private async obtenerImpresoraTicket(): Promise<string> {
+    return this.obtenerImpresoraConClave(NOMBRE_IMPRESORA_TICKET_KEY, NOMBRE_IMPRESORA_TICKET_DEFAULT);
+  }
+
+  private async obtenerImpresoraConClave(clave: string, nombreDefault: string): Promise<string> {
+    const guardada = localStorage.getItem(clave);
     if (guardada) return guardada;
 
     try {
-      const encontrada: string = await qz.printers.find(NOMBRE_IMPRESORA_DEFAULT);
-      localStorage.setItem(NOMBRE_IMPRESORA_KEY, encontrada);
+      const encontrada: string = await qz.printers.find(nombreDefault);
+      localStorage.setItem(clave, encontrada);
       return encontrada;
     } catch {
       const todas: string[] = await qz.printers.find();
@@ -84,14 +99,14 @@ export class QzPrintService {
       }
       const listado = todas.map((n, i) => `${i + 1}. ${n}`).join('\n');
       const elegida = window.prompt(
-        `No se encontró la impresora "${NOMBRE_IMPRESORA_DEFAULT}".\n` +
+        `No se encontró la impresora "${nombreDefault}".\n` +
           `Impresoras disponibles:\n${listado}\n\nEscribe el nombre exacto a usar:`,
         todas[0],
       );
       if (!elegida || !todas.includes(elegida)) {
         throw new Error('No se seleccionó una impresora válida.');
       }
-      localStorage.setItem(NOMBRE_IMPRESORA_KEY, elegida);
+      localStorage.setItem(clave, elegida);
       return elegida;
     }
   }
@@ -99,6 +114,11 @@ export class QzPrintService {
   /** Permite forzar manualmente qué impresora usar (por si cambia de equipo o de impresora). */
   configurarImpresora(nombre: string): void {
     localStorage.setItem(NOMBRE_IMPRESORA_KEY, nombre);
+  }
+
+  /** Igual que configurarImpresora() pero para la impresora de etiquetas adhesivas (ticket). */
+  configurarImpresoraTicket(nombre: string): void {
+    localStorage.setItem(NOMBRE_IMPRESORA_TICKET_KEY, nombre);
   }
 
   // ── Construcción de comandos ESC/POS ────────────────────────────────────
@@ -178,6 +198,36 @@ export class QzPrintService {
         type: 'raw',
         format: 'base64',
         data: this.bytesToBase64([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, GS, 0x56, 0x01]),
+      },
+    ]);
+  }
+
+  // ── Ticket adhesivo (10cm x 5cm) ──────────────────────────────────────────
+
+  /**
+   * Imprime el ticket adhesivo directo por QZ Tray, igual que el recibo
+   * térmico — el diálogo de impresión del navegador/Windows reescala la
+   * imagen a una resolución fija baja sin importar qué tan buena sea la
+   * imagen de origen (probado con 3 variantes distintas, mismo resultado
+   * pixelado siempre), así que la única forma de controlar la calidad real
+   * es mandar los bytes directo a la impresora, sin pasar por ese driver.
+   * Es la impresora de etiquetas, equipo distinto de la térmica de recibos
+   * pero misma marca (SAT) — se usa una clave de impresora separada
+   * (obtenerImpresoraTicket) porque son dos impresoras físicas distintas.
+   * No se manda comando de corte: a diferencia del rollo de recibos, no se
+   * sabe si esta impresora de etiquetas tiene cuchilla.
+   */
+  async imprimirImagenTicket(dataUrl: string): Promise<void> {
+    await this.asegurarConexion();
+    const impresora = await this.obtenerImpresoraTicket();
+
+    await qz.print(qz.configs.create(impresora), [
+      { type: 'raw', format: 'base64', data: this.bytesToBase64([ESC, 0x40, ESC, 0x61, 1]) },
+      {
+        type: 'raw',
+        format: 'image',
+        data: dataUrl,
+        options: { language: 'ESCPOS', dotDensity: 'double', quantization: 'black', threshold: 128 },
       },
     ]);
   }
