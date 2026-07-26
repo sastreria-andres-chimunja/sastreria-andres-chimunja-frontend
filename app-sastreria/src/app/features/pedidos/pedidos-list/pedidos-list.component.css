@@ -125,10 +125,14 @@
 
 .resumen-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 8px;
   margin-bottom: 20px;
 }
+
+/* Tarjeta informativa (no filtra al hacer clic) */
+.resumen-card.valor-card { cursor: default; }
+.resumen-card.valor-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.05); transform: none; }
 
 .resumen-card {
   background: var(--surface);
@@ -176,6 +180,7 @@
 .vencido-icon   { background: #fdecea; color: var(--danger); }
 .entregado-icon { background: #e8f5e9; color: var(--success); }
 .no-realizado-icon { background: #e5e7eb; color: #1f2937; }
+.valor-icon         { background: #e6f4e6; color: var(--success); }
 
 .resumen-info { display: flex; flex-direction: column; gap: 2px; }
 
@@ -195,6 +200,7 @@
 .vencido-valor   { color: var(--danger); }
 .entregado-valor { color: var(--success); }
 .no-realizado-valor { color: #1f2937; }
+.valor-valor         { color: var(--success); font-size: 16px; }
 
 /* ── Grid de tarjetas ────────────────────────────────────────── */
 .card-list {

@@ -299,6 +299,11 @@ export class PedidosListComponent implements OnInit {
     return this.pedidosDelTab.filter((p) => this.esEntregado(p)).length;
   }
 
+  /** Suma del valor total de los pedidos que están visibles con el filtro/búsqueda/tab actual. */
+  get valorTotalListado(): number {
+    return this.pedidosFiltrados.reduce((acc, p) => acc + Number(p.valorTotal ?? 0), 0);
+  }
+
   // ── Helpers ────────────────────────────────────────────────
   private esEntregado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('entrega');

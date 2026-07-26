@@ -71,6 +71,14 @@
   </div>
   <div class="resumen-row" *ngIf="resumenVisible">
 
+    <div class="resumen-card valor-card" matTooltip="Suma del valor total de los pedidos listados con el filtro/búsqueda actual">
+      <div class="resumen-icon-circle valor-icon"><mat-icon>payments</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Valor listado</div>
+        <div class="resumen-valor valor-valor">{{ formatCOP(valorTotalListado) }}</div>
+      </div>
+    </div>
+
     <div class="resumen-card" [class.activa]="filtroEstado === null"
       (click)="setFiltro(null)" matTooltip="Mostrar todos">
       <div class="resumen-icon-circle total-icon"><mat-icon>receipt_long</mat-icon></div>
