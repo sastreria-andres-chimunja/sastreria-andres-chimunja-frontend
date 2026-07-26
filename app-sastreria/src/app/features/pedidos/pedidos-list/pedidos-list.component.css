@@ -125,14 +125,24 @@
 
 .resumen-row {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   margin-bottom: 20px;
 }
 
-/* Tarjeta informativa (no filtra al hacer clic) */
-.resumen-card.valor-card { cursor: default; }
-.resumen-card.valor-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.05); transform: none; }
+/* Banner de valor total listado — entre el buscador y las tarjetas de resumen */
+.valor-listado-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  width: fit-content;
+  margin-bottom: 14px;
+}
 
 .resumen-card {
   background: var(--surface);
