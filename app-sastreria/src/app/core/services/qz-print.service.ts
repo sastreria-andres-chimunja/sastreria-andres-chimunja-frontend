@@ -238,7 +238,13 @@ export class QzPrintService {
         // maneja bien el modo de doble densidad del comando ESC/POS.
         options: { language: 'ESCPOS', dotDensity: 'single', quantization: 'black', threshold: 128 },
       },
-      { type: 'raw', format: 'base64', data: this.bytesToBase64([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]) },
+      // format:'command'+flavor:'base64' (no solo format:'base64'): esta
+      // combinación es la documentada por QZ Tray para bytes raw — usar solo
+      // format:'base64' aquí rompía con "No enum constant ...Format.BASE64".
+      {
+        type: 'raw', format: 'command', flavor: 'base64',
+        data: this.bytesToBase64([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]),
+      },
     ]);
   }
 
