@@ -240,7 +240,15 @@ export class ReciboService {
     iframe.contentDocument!.write(html);
     iframe.contentDocument!.close();
 
+    // Guard "impreso": onload/onerror y el setTimeout de respaldo (por si la
+    // imagen nunca dispara onload) pueden ambos terminar llamando esta
+    // función — sin este guard, una imagen que carga rápido (caso normal con
+    // data URLs) imprime por onload y OTRA VEZ 3s después por el setTimeout
+    // que nunca se canceló, abriendo el diálogo de impresión dos veces.
+    let impreso = false;
     const ejecutarImpresion = () => {
+      if (impreso) return;
+      impreso = true;
       iframe.contentWindow!.focus();
       iframe.contentWindow!.print();
       setTimeout(() => document.body.removeChild(iframe), 1500);
@@ -455,7 +463,15 @@ export class ReciboService {
     iframe.contentDocument!.write(html);
     iframe.contentDocument!.close();
 
+    // Guard "impreso": onload/onerror y el setTimeout de respaldo (por si la
+    // imagen nunca dispara onload) pueden ambos terminar llamando esta
+    // función — sin este guard, una imagen que carga rápido (caso normal con
+    // data URLs) imprime por onload y OTRA VEZ 3s después por el setTimeout
+    // que nunca se canceló, abriendo el diálogo de impresión dos veces.
+    let impreso = false;
     const ejecutarImpresion = () => {
+      if (impreso) return;
+      impreso = true;
       iframe.contentWindow!.focus();
       iframe.contentWindow!.print();
       setTimeout(() => document.body.removeChild(iframe), 1500);
@@ -481,7 +497,15 @@ export class ReciboService {
     iframe.contentDocument!.write(html);
     iframe.contentDocument!.close();
 
+    // Guard "impreso": onload/onerror y el setTimeout de respaldo (por si la
+    // imagen nunca dispara onload) pueden ambos terminar llamando esta
+    // función — sin este guard, una imagen que carga rápido (caso normal con
+    // data URLs) imprime por onload y OTRA VEZ 3s después por el setTimeout
+    // que nunca se canceló, abriendo el diálogo de impresión dos veces.
+    let impreso = false;
     const ejecutarImpresion = () => {
+      if (impreso) return;
+      impreso = true;
       iframe.contentWindow!.focus();
       iframe.contentWindow!.print();
       setTimeout(() => document.body.removeChild(iframe), 1500);
