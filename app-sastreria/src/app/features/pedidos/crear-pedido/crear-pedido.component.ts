@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -116,6 +116,7 @@ export class CrearPedidoComponent implements OnInit {
   abonoForm!: FormGroup;
 
   @ViewChild('formNuevoItem') formNuevoItemRef?: ItemInlineFormComponent;
+  @ViewChild('itemFormSection') itemFormSectionRef?: ElementRef<HTMLElement>;
 
   get totalConFormActual(): number {
     return this.totalCalculado + this.valorFormActual;
@@ -354,6 +355,15 @@ export class CrearPedidoComponent implements OnInit {
   get esAdmin(): boolean { return this.authService.esAdmin(); }
 
   // ── Modo CREAR: inline form ───────────────────────────────────
+  /** Botón "Agregar ítem" de arriba: el formulario suele quedar siempre abierto
+   *  (ver onItemAgregado), así que en vez de solo abrirlo, lo trae a la vista. */
+  irAFormularioItem(): void {
+    this.mostrarFormNuevoItem = true;
+    setTimeout(() => {
+      this.itemFormSectionRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
   onItemAgregado(result: ItemDialogResult): void {
     this.items.push({
       ...result.item,

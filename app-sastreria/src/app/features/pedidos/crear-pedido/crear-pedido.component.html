@@ -197,6 +197,11 @@
               </div>
 
               <div class="acordeon-list">
+                <div class="acordeon-top-add">
+                  <button class="btn-add-item" (click)="irAFormularioItem()">
+                    <mat-icon>add</mat-icon> Agregar ítem
+                  </button>
+                </div>
                 <div class="acordeon-item" *ngFor="let it of items; let i = index">
 
                   <div class="acordeon-header" (click)="togglePanel(i)"
@@ -255,7 +260,7 @@
             </div>
 
             <!-- 2. Formulario para nuevo ítem -->
-            <div class="card-section item-form-section">
+            <div class="card-section item-form-section" #itemFormSection>
               <div class="section-header">
                 <mat-icon class="section-icon">add_circle</mat-icon>
                 <span>Agregar ítem</span>
@@ -362,6 +367,7 @@
                 <div class="item-top">
                   <div class="item-icon"><mat-icon>checkroom</mat-icon></div>
                   <div class="item-info">
+                    <span class="ac-num">Ítem #{{ i + 1 }}</span>
                     <p class="item-desc">{{ it.descripcion }}</p>
                     <p class="item-meta">
                       <span *ngIf="it.nombreEmpleado || it.idEmpleado">
