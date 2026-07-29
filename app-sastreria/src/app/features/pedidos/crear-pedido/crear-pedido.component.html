@@ -336,6 +336,9 @@
                   </div>
                 </div>
                 <div class="guardar-actions">
+                  <button class="btn-add-item-bottom" (click)="irAFormularioItem()">
+                    <mat-icon>add</mat-icon> Agregar ítem
+                  </button>
                   <button class="btn-guardar-bottom" (click)="guardar()" [disabled]="guardando">
                     <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
                     <mat-icon *ngIf="!guardando">save</mat-icon>

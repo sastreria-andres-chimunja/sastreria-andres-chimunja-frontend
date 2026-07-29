@@ -306,6 +306,16 @@
   line-height: 1.3;
 }
 
+.btn-add-item-bottom {
+  background: #fff; color: var(--primary); border: 1.5px solid var(--primary);
+  padding: 0 18px; border-radius: 8px; height: 42px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 6px; transition: background 0.13s;
+  white-space: nowrap; flex-shrink: 0;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { background: #eaf2fb; }
+}
+
 .btn-guardar-bottom {
   background: var(--primary); color: #fff; border: none;
   padding: 0 24px; border-radius: 8px; height: 42px; font-size: 14px; font-weight: 600;
@@ -557,5 +567,6 @@
   .guardar-bottom-row { flex-direction: column; align-items: stretch; gap: 10px; }
   .guardar-actions    { margin-left: 0; flex-direction: column; }
   .btn-guardar-bottom { width: 100%; justify-content: center; }
+  .btn-add-item-bottom { width: 100%; justify-content: center; }
   .total-pedido-display { justify-content: center; }
 }
