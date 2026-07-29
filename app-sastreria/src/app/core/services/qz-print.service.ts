@@ -227,7 +227,12 @@ export class QzPrintService {
         type: 'raw',
         format: 'image',
         data: dataUrl,
-        options: { language: 'ESCPOS', dotDensity: 'double', quantization: 'black', threshold: 128 },
+        // dotDensity 'single' (a diferencia de 'double' en el recibo térmico):
+        // esta impresora de etiquetas es un equipo físico distinto al de
+        // recibos, y con 'double' salía igual de escalonada que por el
+        // diálogo de impresión de Windows — indicio de que este modelo no
+        // maneja bien el modo de doble densidad del comando ESC/POS.
+        options: { language: 'ESCPOS', dotDensity: 'single', quantization: 'black', threshold: 128 },
       },
     ]);
   }
