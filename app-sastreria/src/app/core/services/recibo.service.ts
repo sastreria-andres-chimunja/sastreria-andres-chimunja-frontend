@@ -379,14 +379,18 @@ export class ReciboService {
     }
 
     try {
-      // Sin timeout artificial: la primera vez que el sitio pide conectarse a
-      // QZ Tray, éste muestra un aviso de "Allow/Block" que requiere que el
-      // usuario lo lea y responda — un timeout corto aquí (se probó con 5s)
-      // corta esa espera antes de que la persona alcance a hacer clic, y cae
-      // al respaldo del navegador aunque QZ Tray sí esté disponible. Igual
-      // que imprimir() (recibo térmico), que nunca tuvo este problema por no
-      // tener timeout.
-      await this.qzPrint.imprimirImagenTicket(imagenDataUrl);
+      // Timeout largo (30s, no 5s): la primera vez que el sitio pide
+      // conectarse a QZ Tray, éste muestra un aviso de "Allow/Block" que
+      // requiere que el usuario lo lea y responda — un timeout corto (se
+      // probó con 5s) cortaba esa espera antes de que la persona alcanzara a
+      // hacer clic. Pero tampoco quitarlo del todo: ya vimos que qz.print()
+      // puede quedarse colgado sin resolver ni fallar (probado en el entorno
+      // de pruebas), así que sin ningún límite el usuario se queda esperando
+      // para siempre sin caer al respaldo del navegador.
+      await Promise.race([
+        this.qzPrint.imprimirImagenTicket(imagenDataUrl),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado con QZ Tray')), 30000)),
+      ]);
     } catch (err) {
       console.error('No se pudo imprimir el ticket vía QZ Tray, usando el diálogo del navegador:', err);
       this.imprimirImagenTicketNavegador(imagenDataUrl);
