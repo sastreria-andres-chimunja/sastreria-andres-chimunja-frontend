@@ -215,7 +215,11 @@ export class QzPrintService {
    * pero misma marca (SAT) — se usa una clave de impresora separada
    * (obtenerImpresoraTicket) porque son dos impresoras físicas distintas.
    * No se manda comando de corte: a diferencia del rollo de recibos, no se
-   * sabe si esta impresora de etiquetas tiene cuchilla.
+   * sabe si esta impresora de etiquetas tiene cuchilla. Sí se manda avance
+   * de papel al final (varios 0x0a): sin esto, el ticket se imprime bien
+   * pero se queda oculto bajo el cabezal sin salir — confirmado con el log
+   * de QZ Tray (mandaba y terminaba "Printing complete" sin error en cada
+   * intento) mientras el usuario reportaba que "no salía nada" físicamente.
    */
   async imprimirImagenTicket(dataUrl: string): Promise<void> {
     await this.asegurarConexion();
@@ -234,6 +238,7 @@ export class QzPrintService {
         // maneja bien el modo de doble densidad del comando ESC/POS.
         options: { language: 'ESCPOS', dotDensity: 'single', quantization: 'black', threshold: 128 },
       },
+      { type: 'raw', format: 'base64', data: this.bytesToBase64([0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a]) },
     ]);
   }
 
