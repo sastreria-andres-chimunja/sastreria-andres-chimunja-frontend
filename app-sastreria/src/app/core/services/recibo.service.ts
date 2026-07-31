@@ -303,7 +303,7 @@ export class ReciboService {
       letter-spacing: 4.3px;
       white-space: nowrap;
       line-height: 1;
-      padding: 1mm 1mm 0.6mm;
+      padding: 1mm 1mm 1.8mm;
     }
     .fila-row {
       flex: 1;
@@ -326,7 +326,7 @@ export class ReciboService {
     .fila-total { font-size: 12px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .fila-saldo { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .right-col {
-      width: 42mm;
+      width: 33.6mm;
       flex-shrink: 0;
       display: flex;
       align-items: center;
