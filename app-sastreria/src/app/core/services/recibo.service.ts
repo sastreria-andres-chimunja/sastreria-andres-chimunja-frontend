@@ -345,56 +345,22 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el ticket adhesivo. El ticket se renderiza primero a una imagen
-   * (ver generarImagenTicket()): el texto normal salía claro/débil en la
-   * impresora física. Esa imagen se intenta mandar PRIMERO directo por QZ
-   * Tray (misma impresora de marca SAT que el recibo térmico): probamos 3
-   * variantes distintas de la imagen (blanco/negro puro, doble resolución,
-   * curva suavizada) por el diálogo de impresión del navegador y las 3
-   * salieron igual de pixeladas — el driver de Windows reescala a una
-   * resolución fija baja sin importar la imagen de origen, así que mandar
-   * los bytes directo por QZ Tray (bypaseando ese driver) es la única forma
-   * real de controlar la calidad final, igual que se resolvió con el recibo.
-   * Si QZ Tray falla (no instalado, impresora no encontrada, protocolo
-   * distinto), cae al diálogo de impresión del navegador como respaldo.
-   *
-   * La imagen se genera al momento del clic (no de antemano): con QZ Tray
-   * como camino principal ya no hace falta pre-generarla en segundo plano
-   * apenas se abre el diálogo — eso generaba una espera en CADA guardado de
-   * pedido aunque el usuario no fuera a imprimir el ticket. El único riesgo
-   * es que, si QZ Tray llega a fallar y cae al respaldo del navegador, la
-   * demora de generar la imagen en ese momento podría hacer que el navegador
-   * bloquee window.print() en silencio por considerar "vencido" el clic del
-   * usuario — un caso ya menos probable ahora que QZ Tray es el camino
-   * principal, y aceptable a cambio de no demorar cada guardado de pedido.
+   * Imprime el ticket adhesivo directo por el diálogo de impresión del
+   * navegador/Windows — SIN pasar por QZ Tray. Se descubrió que esta
+   * impresora (SAT TT460, 203 dpi) usa protocolo ZPL, no ESC/POS: todo el
+   * intento anterior con QZ Tray le mandaba comandos en el protocolo
+   * equivocado. Además, Windows ya tiene instalado el driver real del
+   * fabricante (via BarTender) — a diferencia de las pruebas iniciales, que
+   * asumían un driver genérico "Generic/Text Only" sin soporte real de
+   * imágenes. Por eso ya no se pre-convierte la imagen a blanco/negro puro
+   * nosotros mismos (ver generarImagenTicket(), ahora sin uso aquí): ese
+   * umbral duro le quitaba al driver correcto toda la información de gris
+   * que necesita para tramar bien la imagen a la resolución real del
+   * cabezal — se imprime el HTML tal cual, dejando que el driver haga esa
+   * conversión (para lo que está diseñado).
    */
   async imprimirTicket(data: ReciboData): Promise<void> {
-    let imagenDataUrl: string;
-    try {
-      imagenDataUrl = await this.generarImagenTicket(data);
-    } catch (err) {
-      console.error('No se pudo generar la imagen del ticket, imprimiendo el HTML directo:', err);
-      this.imprimirTicketHtmlNavegador(data);
-      return;
-    }
-
-    try {
-      // Timeout largo (30s, no 5s): la primera vez que el sitio pide
-      // conectarse a QZ Tray, éste muestra un aviso de "Allow/Block" que
-      // requiere que el usuario lo lea y responda — un timeout corto (se
-      // probó con 5s) cortaba esa espera antes de que la persona alcanzara a
-      // hacer clic. Pero tampoco quitarlo del todo: ya vimos que qz.print()
-      // puede quedarse colgado sin resolver ni fallar (probado en el entorno
-      // de pruebas), así que sin ningún límite el usuario se queda esperando
-      // para siempre sin caer al respaldo del navegador.
-      await Promise.race([
-        this.qzPrint.imprimirImagenTicket(imagenDataUrl),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado con QZ Tray')), 30000)),
-      ]);
-    } catch (err) {
-      console.error('No se pudo imprimir el ticket vía QZ Tray, usando el diálogo del navegador:', err);
-      this.imprimirImagenTicketNavegador(imagenDataUrl);
-    }
+    this.imprimirTicketHtmlNavegador(data);
   }
 
   /** Renderiza generarHtmlTicketAdhesivo() a una imagen con umbral duro a blanco/negro puro (sin gris). */
