@@ -298,9 +298,10 @@ export class ReciboService {
     }
     .header-nombre {
       text-align: center;
-      font-size: 9px;
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.4px;
+      letter-spacing: 4.3px;
+      white-space: nowrap;
       line-height: 1;
       padding: 1mm 1mm 0.6mm;
     }
@@ -325,7 +326,7 @@ export class ReciboService {
     .fila-total { font-size: 12px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .fila-saldo { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .right-col {
-      width: 48mm;
+      width: 42mm;
       flex-shrink: 0;
       display: flex;
       align-items: center;
