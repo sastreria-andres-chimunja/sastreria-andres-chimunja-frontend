@@ -318,8 +318,7 @@ export class ReciboService {
       justify-content: space-between;
       padding: 1.5mm 2mm 2.5mm 3.5mm;
     }
-    .cliente-lbl { font-size: 10px; font-weight: 700; line-height: 1; }
-    .cliente-nombre { font-size: 15px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
+    .cliente-nombre { font-size: 15px; font-weight: 700; line-height: 1.15; word-break: break-word; }
     .fila { font-size: 11.5px; font-weight: 700; margin-top: 1.5mm; line-height: 1; }
     .fila-entrega { font-size: 15px; font-weight: 700; margin-top: 1mm; line-height: 1; }
     .totales { margin-top: 1.2mm; }
@@ -345,7 +344,6 @@ export class ReciboService {
   <div class="fila-row">
     <div class="left-col">
       <div>
-        <div class="cliente-lbl">CLIENTE:</div>
         <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
         ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
         <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
