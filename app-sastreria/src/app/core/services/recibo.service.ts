@@ -293,7 +293,21 @@ export class ReciboService {
       color: #000;
       background: #fff;
       display: flex;
+      flex-direction: column;
       overflow: hidden;
+    }
+    .header-nombre {
+      text-align: center;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      line-height: 1;
+      padding: 1mm 1mm 0.6mm;
+    }
+    .fila-row {
+      flex: 1;
+      min-height: 0;
+      display: flex;
     }
     .left-col {
       flex: 1;
@@ -301,7 +315,7 @@ export class ReciboService {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 3mm 2mm 3mm 3.5mm;
+      padding: 1.5mm 2mm 2.5mm 3.5mm;
     }
     .cliente-lbl { font-size: 10px; font-weight: 700; line-height: 1; }
     .cliente-nombre { font-size: 15px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
@@ -316,7 +330,7 @@ export class ReciboService {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2mm;
+      padding: 1mm 2mm 2mm;
     }
     .logo-big { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
     @media print {
@@ -326,21 +340,24 @@ export class ReciboService {
   </style>
 </head>
 <body>
-  <div class="left-col">
-    <div>
-      <div class="cliente-lbl">CLIENTE:</div>
-      <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
-      ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
-      <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+  <div class="header-nombre">SASTRERÍA ANDRÉS CHIMUNJA</div>
+  <div class="fila-row">
+    <div class="left-col">
+      <div>
+        <div class="cliente-lbl">CLIENTE:</div>
+        <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
+        ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+        <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+      </div>
+      <div class="totales">
+        <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
+        <div class="fila-total">ABONO: ${this.formatCOP(data.totalPagadoPedido)}</div>
+        <div class="fila-saldo">SALDO: ${this.formatCOP(saldo)}</div>
+      </div>
     </div>
-    <div class="totales">
-      <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
-      <div class="fila-total">ABONO: ${this.formatCOP(data.totalPagadoPedido)}</div>
-      <div class="fila-saldo">SALDO: ${this.formatCOP(saldo)}</div>
+    <div class="right-col">
+      <img class="logo-big" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
     </div>
-  </div>
-  <div class="right-col">
-    <img class="logo-big" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
   </div>
 </body>
 </html>`;
