@@ -268,16 +268,15 @@ export class ReciboService {
    * Ticket adhesivo (10cm x 5cm) para pegar en la prenda — cliente, celular,
    * fecha de entrega, total/abono y saldo. Se imprime directo por el
    * diálogo de impresión del navegador/Windows, sin QZ Tray: la impresora
-   * física (SAT TT460, 203 dpi, ZPL) ya tiene su driver real instalado, que
-   * se encarga de tramar bien la imagen a blanco/negro. Por eso usa el
-   * logo a color con transparencia (logoUrl), no el pre-convertido a
-   * blanco/negro puro (logoUrlTermico, pensado para impresión 1-bit cruda
-   * por QZ Tray) — un logo con gradiente/antialiasing real le da al driver
-   * mejor información para tramar que uno ya binarizado.
+   * física (SAT TT460, 203 dpi, ZPL) ya tiene su driver real instalado.
+   * Usa el logo pre-convertido a blanco/negro puro (logoUrlTermico): se
+   * probó con el logo a color (logoUrl) y el driver lo tramaba en puntos
+   * grises visibles (dithering) — un logo ya binarizado no necesita
+   * tramarse, sale negro sólido directo, que se ve mejor con este driver.
    */
   generarHtmlTicketAdhesivo(data: ReciboData, logoSrc?: string): string {
     const saldo  = data.valorTotalPedido - data.totalPagadoPedido;
-    const imgSrc = logoSrc ?? this.logoUrl;
+    const imgSrc = logoSrc ?? this.logoUrlTermico;
 
     return `<!DOCTYPE html>
 <html lang="es">
