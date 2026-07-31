@@ -306,7 +306,8 @@ export class ReciboService {
     .cliente-lbl { font-size: 10px; font-weight: 700; line-height: 1; }
     .cliente-nombre { font-size: 15px; font-weight: 700; line-height: 1.15; margin-top: 0.5mm; word-break: break-word; }
     .fila { font-size: 11.5px; font-weight: 700; margin-top: 1.5mm; line-height: 1; }
-    .totales { margin-top: 2mm; }
+    .fila-entrega { font-size: 15px; font-weight: 700; margin-top: 1mm; line-height: 1; }
+    .totales { margin-top: 1.2mm; }
     .fila-total { font-size: 12px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .fila-saldo { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
     .right-col {
@@ -330,7 +331,7 @@ export class ReciboService {
       <div class="cliente-lbl">CLIENTE:</div>
       <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
       ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
-      <div class="fila">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+      <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
     </div>
     <div class="totales">
       <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
