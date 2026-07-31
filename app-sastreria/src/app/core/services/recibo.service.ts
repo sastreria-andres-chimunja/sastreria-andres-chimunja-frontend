@@ -266,16 +266,18 @@ export class ReciboService {
 
   /**
    * Ticket adhesivo (10cm x 5cm) para pegar en la prenda — cliente, celular,
-   * fecha de entrega, total/abono y saldo. Va a una impresora de etiquetas
-   * distinta de la térmica de recibos, así que se imprime siempre vía el
-   * diálogo de impresión del navegador/Windows (no hay ruta QZ Tray para
-   * esta impresora todavía; se puede agregar más adelante en
-   * qz-print.service.ts una vez se confirme el modelo/protocolo del
-   * segundo equipo).
+   * fecha de entrega, total/abono y saldo. Se imprime directo por el
+   * diálogo de impresión del navegador/Windows, sin QZ Tray: la impresora
+   * física (SAT TT460, 203 dpi, ZPL) ya tiene su driver real instalado, que
+   * se encarga de tramar bien la imagen a blanco/negro. Por eso usa el
+   * logo a color con transparencia (logoUrl), no el pre-convertido a
+   * blanco/negro puro (logoUrlTermico, pensado para impresión 1-bit cruda
+   * por QZ Tray) — un logo con gradiente/antialiasing real le da al driver
+   * mejor información para tramar que uno ya binarizado.
    */
   generarHtmlTicketAdhesivo(data: ReciboData, logoSrc?: string): string {
     const saldo  = data.valorTotalPedido - data.totalPagadoPedido;
-    const imgSrc = logoSrc ?? this.logoUrlTermico;
+    const imgSrc = logoSrc ?? this.logoUrl;
 
     return `<!DOCTYPE html>
 <html lang="es">
@@ -333,7 +335,7 @@ export class ReciboService {
     </div>
     <div class="totales">
       <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
-      <div class="fila-total">ABONO${data.totalPagadoPedido > 0 ? ': ' + this.formatCOP(data.totalPagadoPedido) : ''}</div>
+      <div class="fila-total">ABONO: ${this.formatCOP(data.totalPagadoPedido)}</div>
       <div class="fila-saldo">SALDO: ${this.formatCOP(saldo)}</div>
     </div>
   </div>
