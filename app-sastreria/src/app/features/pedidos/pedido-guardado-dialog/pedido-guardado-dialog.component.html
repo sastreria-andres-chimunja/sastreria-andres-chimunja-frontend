@@ -56,9 +56,9 @@
       </p>
     </ng-container>
 
-    <!-- Fallback PC: la imagen quedó copiada al portapapeles y WhatsApp Web ya se abrió -->
+    <!-- Fallback: la imagen quedó copiada al portapapeles y el chat del cliente ya se abrió -->
     <p *ngIf="avisoPegarImagen" style="font-size:10px;color:#777;margin:2px 0 0;text-align:center;">
-      📋 Se abrió WhatsApp Web — pega la imagen (Ctrl+V) y envíala
+      📋 Se abrió el chat del cliente en WhatsApp — pega la imagen y envíala
     </p>
 
     <button class="btn-print" (click)="imprimir()" *ngIf="data.items !== undefined">

@@ -835,28 +835,22 @@ export class ReciboService {
     telefono: string,
     texto: string,
   ): Promise<string | null> {
-    const tel      = telefono.replace(/\D/g, '');
-    const waWebUrl = tel
-      ? `https://web.whatsapp.com/send?phone=57${tel}`
-      : `https://web.whatsapp.com/`;
-    const waUrl = tel
-      ? `https://wa.me/57${tel}?text=${encodeURIComponent(texto)}`
-      : `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    const tel        = telefono.replace(/\D/g, '');
+    const textoParam = encodeURIComponent(texto);
+    const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    // En PC, WhatsApp Web (si hay una cuenta logueada en el navegador); en
+    // celular, el link wa.me abre directo la app nativa con esa cuenta.
+    const urlChat = esMobil
+      ? (tel ? `https://wa.me/57${tel}?text=${textoParam}` : `https://wa.me/?text=${textoParam}`)
+      : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
 
-    // ── Móvil: Web Share API ────────────────────────────────────────────────
-    const esMobil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const nav     = navigator as any;
-    if (esMobil && typeof nav.canShare === 'function' && nav.canShare({ files: [archivo] })) {
-      try {
-        await nav.share({ files: [archivo], text: texto });
-        return null;
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return null;
-        // Otro error → continuar con opciones de PC
-      }
-    }
-
-    // ── PC + imagen PNG: portapapeles → WhatsApp Web ────────────────────────
+    // ── Portapapeles + chat del cliente ya abierto ──────────────────────────
+    // Se prioriza sobre "compartir" nativo (Web Share) porque este sí abre el
+    // chat exacto del cliente en la cuenta de WhatsApp activa en ese
+    // navegador/dispositivo; "compartir" deja que el usuario busque y elija
+    // el destinatario a mano, lo cual no sirve cuando el negocio maneja una
+    // línea de WhatsApp distinta a la personal del admin. Funciona igual en
+    // PC y en la mayoría de navegadores móviles modernos.
     if (archivo.type === 'image/png'
       && typeof ClipboardItem !== 'undefined'
       && typeof navigator.clipboard?.write === 'function') {
@@ -864,16 +858,28 @@ export class ReciboService {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': archivo }),
         ]);
-        window.open(waWebUrl, '_blank');
+        window.open(urlChat, '_blank');
         return '_clipboard_';
       } catch {
         // Portapapeles no disponible → fallback
       }
     }
 
-    // ── Fallback: descargar + wa.me ─────────────────────────────────────────
+    // ── Móvil (si no hay portapapeles disponible): compartir nativo ─────────
+    const nav = navigator as any;
+    if (esMobil && typeof nav.canShare === 'function' && nav.canShare({ files: [archivo] })) {
+      try {
+        await nav.share({ files: [archivo], text: texto });
+        return null;
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return null;
+        // Otro error → continuar al último recurso
+      }
+    }
+
+    // ── Último recurso: descargar + abrir el chat con el texto listo ────────
     this.descargarBlob(archivo, archivo.name);
-    return waUrl;
+    return urlChat;
   }
 
   // ─── CREDENCIALES DE ACCESO ───────────────────────────────────────────────────
