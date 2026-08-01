@@ -180,7 +180,7 @@ export class PagarItemDialogComponent implements OnInit {
   }
 
   abrirWhatsAppFallback(): void {
-    if (this.urlFallback) window.open(this.urlFallback, '_blank');
+    if (this.urlFallback) this.reciboService.abrirChatWhatsApp(this.urlFallback);
   }
 
   cerrar(): void { this.dialogRef.close({ totalAbonado: this.totalAbonado }); }

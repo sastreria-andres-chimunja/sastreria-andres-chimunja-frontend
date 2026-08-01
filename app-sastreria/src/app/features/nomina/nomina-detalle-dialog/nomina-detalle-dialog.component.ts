@@ -147,7 +147,7 @@ export class NominaDetalleDialogComponent implements OnInit {
   }
 
   abrirWhatsAppFallbackNomina(): void {
-    if (this.urlFallbackNomina) window.open(this.urlFallbackNomina, '_blank');
+    if (this.urlFallbackNomina) this.reciboService.abrirChatWhatsApp(this.urlFallbackNomina);
   }
 
   pagarTodo(): void {

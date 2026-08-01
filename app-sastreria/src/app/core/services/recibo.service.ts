@@ -838,10 +838,15 @@ export class ReciboService {
     const tel        = telefono.replace(/\D/g, '');
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    // En PC, WhatsApp Web (si hay una cuenta logueada en el navegador); en
-    // celular, el link wa.me abre directo la app nativa con esa cuenta.
+    // En PC, WhatsApp Web (si hay una cuenta logueada en el navegador). En
+    // celular se usa el esquema nativo whatsapp:// en vez de wa.me: wa.me es
+    // una página web de Meta que primero verifica si detecta la app normal
+    // de WhatsApp instalada, y con WhatsApp Business (paquete distinto) esa
+    // detección a veces falla y termina mostrando la página de descarga en
+    // vez de abrir el chat. whatsapp://send lo abre directo sin ese chequeo,
+    // funciona igual con la app normal o con Business.
     const urlChat = esMobil
-      ? (tel ? `https://wa.me/57${tel}?text=${textoParam}` : `https://wa.me/?text=${textoParam}`)
+      ? (tel ? `whatsapp://send?phone=57${tel}&text=${textoParam}` : `whatsapp://send?text=${textoParam}`)
       : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
 
     // ── Portapapeles + chat del cliente ya abierto ──────────────────────────
@@ -858,7 +863,7 @@ export class ReciboService {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': archivo }),
         ]);
-        window.open(urlChat, '_blank');
+        this.abrirChatWhatsApp(urlChat);
         return '_clipboard_';
       } catch {
         // Portapapeles no disponible → fallback
@@ -880,6 +885,18 @@ export class ReciboService {
     // ── Último recurso: descargar + abrir el chat con el texto listo ────────
     this.descargarBlob(archivo, archivo.name);
     return urlChat;
+  }
+
+  /**
+   * Abre el chat de WhatsApp de la URL/URI dada. Los esquemas nativos
+   * (`whatsapp://...`, usados en celular) hay que navegarlos con
+   * `location.href` — `window.open` a veces los abre en una pestaña nueva en
+   * blanco sin disparar la app en algunos navegadores móviles. Los links
+   * `https://` (WhatsApp Web en PC) sí se abren en pestaña nueva.
+   */
+  abrirChatWhatsApp(url: string): void {
+    if (url.startsWith('whatsapp://')) window.location.href = url;
+    else window.open(url, '_blank');
   }
 
   // ─── CREDENCIALES DE ACCESO ───────────────────────────────────────────────────

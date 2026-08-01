@@ -98,9 +98,9 @@ export class PedidoGuardadoDialogComponent {
     }
   }
 
-  /** Solo en PC (fallback): abre WhatsApp Web tras haber descargado el PDF. */
+  /** Fallback: abre el chat del cliente tras haber descargado la imagen. */
   abrirWhatsAppFallback(): void {
-    if (this.urlFallback) window.open(this.urlFallback, '_blank');
+    if (this.urlFallback) this.reciboService.abrirChatWhatsApp(this.urlFallback);
   }
 
   aceptar(): void { this.dialogRef.close(true); }
