@@ -8,7 +8,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
-import Swal from 'sweetalert2';
 
 export interface NominaDetalleDialogData {
   idEmpleado: number;
@@ -122,10 +121,13 @@ export class NominaDetalleDialogComponent implements OnInit {
   }
 
   /**
-   * Genera una imagen del comprobante y la envía por WhatsApp (se ve grande
-   * de inmediato en el chat, como un comprobante bancario). Primero intenta
-   * el envío automático vía backend (Meta Cloud API); si falla, cae al
-   * método manual (Web Share en móvil, o copiar al portapapeles + WhatsApp Web en PC).
+   * Genera una imagen del comprobante y la deja lista para enviar por
+   * WhatsApp (se ve grande de inmediato en el chat, como un comprobante
+   * bancario). Siempre usa el método manual (copiar al portapapeles + abrir
+   * el chat del empleado, o compartir nativo en celular si el portapapeles
+   * no está disponible) — el envío automático vía backend (Meta Cloud API)
+   * se desactivó a propósito: ese envío sale desde el número nuevo
+   * registrado en la API, no desde el número que ya conocen los empleados.
    */
   async enviarWhatsAppNomina(): Promise<void> {
     if (!this.data.telefono) return;
@@ -136,15 +138,9 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.avisoPegarImagenNomina = false;
     try {
       const imagen = await this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
-      try {
-        await this.reciboService.enviarViaBackend(imagen, this.data.telefono, texto);
-        Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
-      } catch (err) {
-        console.error('Envío automático por WhatsApp falló, usando método manual:', err);
-        const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefono, texto);
-        if (resultado === '_clipboard_') this.avisoPegarImagenNomina = true;
-        else if (resultado) this.urlFallbackNomina = resultado;
-      }
+      const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefono, texto);
+      if (resultado === '_clipboard_') this.avisoPegarImagenNomina = true;
+      else if (resultado) this.urlFallbackNomina = resultado;
     } finally {
       this.enviandoWhatsAppNomina = false;
     }

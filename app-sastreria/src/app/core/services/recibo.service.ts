@@ -1493,9 +1493,17 @@ export class ReciboService {
   // ─── ENVÍO AUTOMÁTICO VÍA BACKEND (META CLOUD API) ───────────────────────────
 
   /**
-   * Envía una imagen al número de WhatsApp indicado usando el backend
-   * con Meta Cloud API. 100% automático, sin intervención del usuario.
+   * Envía una imagen al número de WhatsApp indicado usando el backend con
+   * Meta Cloud API. 100% automático, sin intervención del usuario.
    * Lanza error si el backend no está configurado o el envío falla.
+   *
+   * Sin uso actualmente (2026-07-31): los diálogos que mandan recibos dejaron
+   * de llamar este método a propósito — el envío automático sale desde el
+   * número nuevo registrado en la Cloud API (3135704804), no desde el número
+   * que ya conocen los clientes (3113801749), así que se optó por dejar
+   * siempre el flujo manual (compartirConWhatsApp). No se borró por si se
+   * retoma más adelante (p. ej. una vez los clientes reconozcan el número
+   * nuevo, o usando una plantilla de bienvenida).
    */
   async enviarViaBackend(archivo: File, telefono: string, caption: string): Promise<void> {
     const base64 = await new Promise<string>((resolve, reject) => {

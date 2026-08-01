@@ -4,7 +4,6 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ReciboService } from '../../../core/services/recibo.service';
-import Swal from 'sweetalert2';
 
 export interface PedidoGuardadoDialogData {
   idPedido: number;
@@ -73,12 +72,14 @@ export class PedidoGuardadoDialogComponent {
   }
 
   /**
-   * Genera una imagen del recibo y la envía por WhatsApp (se ve grande de
-   * inmediato en el chat, como un comprobante bancario, sin abrir un PDF).
-   * Primero intenta el envío 100% automático vía backend (Meta Cloud API,
-   * sin abrir nada ni pedir adjuntar el archivo). Si el backend no está
-   * configurado o falla, cae al método manual (Web Share en móvil, o
-   * copiar al portapapeles + abrir WhatsApp Web en PC).
+   * Genera una imagen del recibo y la deja lista para enviar por WhatsApp
+   * (se ve grande de inmediato en el chat, como un comprobante bancario, sin
+   * abrir un PDF). Siempre usa el método manual (copiar al portapapeles +
+   * abrir el chat del cliente, o compartir nativo en celular si el
+   * portapapeles no está disponible) — el envío 100% automático vía backend
+   * (Meta Cloud API) se desactivó a propósito: ese envío sale desde el
+   * número nuevo registrado en la API, no desde el número que ya conocen
+   * los clientes.
    */
   async enviarWhatsApp(): Promise<void> {
     if (!this.data.telefonoCliente) return;
@@ -89,15 +90,9 @@ export class PedidoGuardadoDialogComponent {
     this.avisoPegarImagen = false;
     try {
       const imagen = await this.reciboService.generarImagenBlob(this.reciboData);
-      try {
-        await this.reciboService.enviarViaBackend(imagen, this.data.telefonoCliente, texto);
-        Swal.fire({ title: '¡Enviado por WhatsApp!', icon: 'success', timer: 1800, showConfirmButton: false });
-      } catch (err) {
-        console.error('Envío automático por WhatsApp falló, usando método manual:', err);
-        const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
-        if (resultado === '_clipboard_') this.avisoPegarImagen = true;
-        else if (resultado) this.urlFallback = resultado;
-      }
+      const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
+      if (resultado === '_clipboard_') this.avisoPegarImagen = true;
+      else if (resultado) this.urlFallback = resultado;
     } finally {
       this.enviandoWhatsApp = false;
     }
