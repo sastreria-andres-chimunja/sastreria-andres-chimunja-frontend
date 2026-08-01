@@ -267,8 +267,8 @@ export class PedidosListComponent implements OnInit {
     if (!p.telefonoCliente) return;
     const noPedido = String(p.idPedido).padStart(4, '0');
     const texto =
-      `SASTRERÍA ANDRÉS CHIMUNJA\n` +
-      `Le recuerda que su pedido #${noPedido} se encuentra terminado y listo para ser entregado`;
+      `*SASTRERÍA ANDRÉS CHIMUNJA*\n` +
+      `Le recuerda que su pedido *#${noPedido}* se encuentra *terminado* y listo para ser *entregado*`;
     this.reciboService.abrirChatWhatsAppTexto(p.telefonoCliente, texto);
   }
 
