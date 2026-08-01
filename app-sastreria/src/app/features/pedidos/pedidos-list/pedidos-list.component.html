@@ -43,20 +43,27 @@
     <button class="btn-primary" (click)="irACrear()">
       <mat-icon>add</mat-icon> Nuevo pedido
     </button>
+
+    <!-- VALOR TOTAL LISTADO — el wrapper vive en el mismo contenedor flex que
+         el buscador y el filtro de fecha para poder reordenarlo por
+         breakpoint (ver CSS): en desktop ocupa su propia fila debajo; en
+         celular queda justo después del botón de filtro de fecha. El
+         wrapper fuerza el salto de línea (flex-basis:100%) sin estirar la
+         tarjeta interna, que mantiene su ancho ajustado al contenido. -->
+    <div class="valor-listado-row">
+      <div class="valor-listado-banner" matTooltip="Suma del valor total de los pedidos listados con el filtro/búsqueda actual">
+        <div class="resumen-icon-circle valor-icon"><mat-icon>payments</mat-icon></div>
+        <div class="resumen-info">
+          <div class="resumen-label">Valor listado</div>
+          <div class="resumen-valor valor-valor">{{ formatCOP(valorTotalListado) }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- SCROLL AREA -->
 <div class="scroll-area">
-
-  <!-- VALOR TOTAL LISTADO -->
-  <div class="valor-listado-banner" matTooltip="Suma del valor total de los pedidos listados con el filtro/búsqueda actual">
-    <div class="resumen-icon-circle valor-icon"><mat-icon>payments</mat-icon></div>
-    <div class="resumen-info">
-      <div class="resumen-label">Valor listado</div>
-      <div class="resumen-valor valor-valor">{{ formatCOP(valorTotalListado) }}</div>
-    </div>
-  </div>
 
   <!-- TABS TIPO DE PEDIDO -->
   <div class="tabs-row">

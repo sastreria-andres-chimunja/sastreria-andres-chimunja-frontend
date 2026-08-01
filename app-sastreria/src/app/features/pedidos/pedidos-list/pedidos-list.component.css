@@ -130,7 +130,18 @@
   margin-bottom: 20px;
 }
 
-/* Banner de valor total listado — entre el buscador y las tarjetas de resumen */
+/* Wrapper del banner de valor listado — vive dentro de .top-actions (junto
+   al buscador y el filtro de fecha) para poder reordenarlo por breakpoint.
+   flex-basis:100% lo fuerza a su propia fila en desktop (order:4, último)
+   sin afectar la fila de arriba; en móvil el media query lo reordena para
+   que quede justo después del botón de filtro de fecha. El wrapper solo
+   controla el salto de línea — no estira la tarjeta interna. */
+.valor-listado-row {
+  order: 4;
+  flex-basis: 100%;
+  margin-top: 8px;
+}
+
 .valor-listado-banner {
   display: flex;
   align-items: center;
@@ -141,7 +152,6 @@
   border: 1px solid var(--border);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   width: fit-content;
-  margin-bottom: 14px;
 }
 
 .resumen-card {
@@ -490,5 +500,7 @@
 @media (max-width: 600px) {
   .resumen-row { grid-template-columns: repeat(2, 1fr); }
   .top-actions { flex-direction: column; align-items: stretch; }
-  .btn-primary { width: 100%; justify-content: center; }
+  .btn-primary { width: 100%; justify-content: center; order: 4; }
+  /* Valor listado queda justo después del filtro de fecha, antes de "Nuevo pedido" */
+  .valor-listado-row { order: 3; margin-top: 0; }
 }
