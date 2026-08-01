@@ -17,6 +17,8 @@ interface PedidoPublico {
   valorTotal: number;
   totalAbonado: number;
   estadoCliente: EstadoCliente;
+  totalItems: number;
+  itemsTerminados: number;
 }
 
 /**
@@ -90,6 +92,13 @@ export class EstadoPedidoPublicoComponent implements OnInit {
       case 'asignado':  return 'Tu pedido está en proceso de confección/arreglo.';
       default:            return 'Tu pedido está pendiente de iniciar.';
     }
+  }
+
+  get mensajeItems(): string | null {
+    if (!this.pedido || this.pedido.totalItems <= 0) return null;
+    const { itemsTerminados, totalItems } = this.pedido;
+    const prenda = totalItems === 1 ? 'prenda' : 'prendas';
+    return `Tu pedido tiene ${itemsTerminados} ${prenda} de ${totalItems} terminadas.`;
   }
 
   formatCOP(v: number): string {
