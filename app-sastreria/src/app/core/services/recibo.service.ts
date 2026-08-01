@@ -319,10 +319,10 @@ export class ReciboService {
       padding: 1.5mm 2mm 2.5mm 3.5mm;
     }
     .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.15; word-break: break-word; }
-    .fila { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; margin-top: 1.5mm; line-height: 1; }
-    .fila-entrega { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; margin-top: 1mm; line-height: 1; }
+    .fila { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 1.5mm; line-height: 1; }
+    .fila-entrega { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 1mm; line-height: 1; }
     .totales { margin-top: 1.2mm; }
-    .fila-linea { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; line-height: 1.3; margin-top: 1.8mm; }
+    .fila-linea { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; line-height: 1.3; margin-top: 1.8mm; }
     .fila-linea .valor { font-family: 'Arial Black', Arial, sans-serif; font-size: 13px; }
     .right-col {
       width: 33.6mm;
