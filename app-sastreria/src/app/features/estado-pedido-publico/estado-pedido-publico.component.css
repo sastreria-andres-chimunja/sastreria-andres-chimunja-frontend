@@ -1,0 +1,273 @@
+/* ─── Layout principal (igual que login) ──────────────────────── */
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* ─── Panel izquierdo ─────────────────────────────────── */
+.left-panel {
+  position: relative;
+  flex: 1.1;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.left-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px),
+    repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+  pointer-events: none;
+}
+
+.left-panel::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, #C9A96E 30%, #C9A96E 70%, transparent 100%);
+}
+
+.brand-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(201, 169, 110, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.left-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.logo-img {
+  width: clamp(180px, 22vw, 280px);
+  height: auto;
+  filter: invert(1) sepia(0.6) saturate(0.8) hue-rotate(5deg) brightness(1.05);
+  transition: filter 0.3s ease;
+}
+
+.tagline {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #C9A96E;
+  opacity: 0.75;
+}
+
+.decorative-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #C9A96E, transparent);
+}
+
+.brand-quote {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  line-height: 1.8;
+  max-width: 280px;
+}
+
+/* ─── Panel derecho ───────────────────────────────────── */
+.right-panel {
+  flex: 0.9;
+  background: #FAFAF8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2.5rem;
+}
+
+/* ─── Card ────────────────────────────────────────────── */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06) !important;
+}
+
+.login-card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(to right, #8B6B3E, #C9A96E, #E8D5A3, #C9A96E);
+  border-radius: 2px 2px 0 0;
+  margin: -1px -1px 0;
+}
+
+.login-card mat-card-header {
+  padding: 2rem 2rem 0.5rem;
+}
+
+.login-card mat-card-content {
+  padding: 1rem 2rem;
+}
+
+.login-card mat-card-footer {
+  padding: 0 2rem 1.5rem;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+.card-eyebrow {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #8B6B3E;
+  margin-bottom: 0.5rem;
+}
+
+mat-card-title {
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+  font-size: 1.8rem !important;
+  font-weight: 600 !important;
+  color: #1A1A1A !important;
+}
+
+mat-card-subtitle {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 0.75rem !important;
+  color: #6B6B6B !important;
+}
+
+.card-footer-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  color: #8a8a8a;
+}
+
+.footer-icon { font-size: 16px; width: 16px; height: 16px; color: #C9A96E; }
+
+/* ─── Estado: cargando / vacío ─────────────────────────── */
+.estado-loading, .estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 2rem 0;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  color: #6B6B6B;
+  font-size: 0.85rem;
+}
+
+.estado-vacio mat-icon { font-size: 40px; width: 40px; height: 40px; color: #C9A96E; }
+
+/* ─── Estado: info del pedido ──────────────────────────── */
+.estado-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 0.5rem;
+}
+
+.estado-badge {
+  align-self: flex-start;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.badge-pendiente     { background: #e3f0fb; color: #1a3580; }
+.badge-asignado      { background: #ede9fe; color: #6d28d9; }
+.badge-terminado     { background: #fef3c7; color: #92400e; }
+.badge-entregado     { background: #e8f5e9; color: #1b5e20; }
+.badge-cancelado     { background: #eee; color: #555; }
+.badge-no-realizado  { background: #e5e7eb; color: #1f2937; }
+
+.mensaje-estado {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  color: #3a3a3a;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+.dato-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 7px 0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #f0ede6;
+}
+
+.dato-label { color: #8a8a8a; }
+.dato-valor { color: #1A1A1A; font-weight: 600; text-align: right; }
+.dato-verde { color: #1b5e20; }
+.dato-rojo  { color: #b91c1c; }
+
+.dato-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #C9A96E, transparent);
+  margin: 10px 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    min-height: 180px;
+  }
+
+  .left-panel::after {
+    left: 0;
+    top: unset;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #C9A96E, transparent);
+  }
+
+  .logo-img {
+    width: 140px;
+  }
+
+  .brand-quote {
+    display: none;
+  }
+
+  .right-panel {
+    padding: 2rem 1.25rem;
+  }
+}

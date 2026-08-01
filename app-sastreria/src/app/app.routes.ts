@@ -18,6 +18,7 @@ import { RecuperarClaveComponent } from './features/recuperar-clave/recuperar-cl
 import { MisItemsComponent } from './features/mis-items/mis-items.component';
 import { ItemsAdminComponent } from './features/items-admin/items-admin.component';
 import { LimiteDiarioComponent } from './features/limite-diario/limite-diario.component';
+import { EstadoPedidoPublicoComponent } from './features/estado-pedido-publico/estado-pedido-publico.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -25,6 +26,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'recuperar', component: RecuperarClaveComponent },
   { path: 'cambiar-clave', component: CambiarClaveComponent, canActivate: [authGuard] },
+  // Pública, sin login — el link va en el WhatsApp que se le manda al cliente
+  { path: 'estado-pedido/:id', component: EstadoPedidoPublicoComponent },
 
   {
     path: 'app',

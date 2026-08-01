@@ -1,0 +1,97 @@
+<div class="login-wrapper">
+  <div class="left-panel">
+    <div class="brand-overlay"></div>
+    <div class="left-content">
+      <div class="logo-container">
+        <img
+          src="assets/logo-sastreria.png"
+          alt="Sastrería SAC - Andrés Chimunja"
+          class="logo-img"
+        />
+        <div class="tagline">Alta Costura · Armenia, Quindío</div>
+      </div>
+      <div class="decorative-line"></div>
+      <p class="brand-quote">
+        "La elegancia no es ser notado,<br />es ser recordado."
+      </p>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <mat-card class="login-card" appearance="outlined">
+      <mat-card-header>
+        <div class="card-header-content">
+          <span class="card-eyebrow">Consulta de pedido</span>
+          <mat-card-title>Estado de tu pedido</mat-card-title>
+          <mat-card-subtitle *ngIf="pedido">Pedido #{{ (pedido.idPedido ?? 0).toString().padStart(4, '0') }}</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <!-- CARGANDO -->
+        <div class="estado-loading" *ngIf="cargando">
+          <mat-spinner diameter="34"></mat-spinner>
+          <p>Consultando tu pedido...</p>
+        </div>
+
+        <!-- NO ENCONTRADO -->
+        <div class="estado-vacio" *ngIf="!cargando && noEncontrado">
+          <mat-icon>search_off</mat-icon>
+          <p>No encontramos ese pedido. Verifica el enlace o contáctanos.</p>
+        </div>
+
+        <!-- ESTADO DEL PEDIDO -->
+        <div class="estado-info" *ngIf="!cargando && !noEncontrado && pedido">
+          <span class="estado-badge" [ngClass]="'badge-' + estadoClase">
+            {{ pedido.nombreEstado || 'Sin estado' }}
+          </span>
+
+          <p class="mensaje-estado">{{ mensajeEstado }}</p>
+
+          <div class="dato-fila">
+            <span class="dato-label">Cliente</span>
+            <span class="dato-valor">{{ pedido.nombreCliente }}</span>
+          </div>
+          <div class="dato-fila" *ngIf="pedido.nombreTipoPedido">
+            <span class="dato-label">Tipo</span>
+            <span class="dato-valor">{{ pedido.nombreTipoPedido }}</span>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-label">Fecha recibido</span>
+            <span class="dato-valor">{{ pedido.fechaRecibido || '—' }}</span>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-label">Fecha de entrega</span>
+            <span class="dato-valor">{{ pedido.fechaEntrega || '—' }}</span>
+          </div>
+
+          <div class="dato-divider"></div>
+
+          <div class="dato-fila">
+            <span class="dato-label">Total</span>
+            <span class="dato-valor">{{ formatCOP(pedido.valorTotal) }}</span>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-label">Abonado</span>
+            <span class="dato-valor dato-verde">{{ formatCOP(pedido.totalAbonado ?? 0) }}</span>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-label">Saldo</span>
+            <span class="dato-valor" [ngClass]="saldo > 0 ? 'dato-rojo' : 'dato-verde'">
+              {{ formatCOP(saldo) }}
+            </span>
+          </div>
+        </div>
+
+      </mat-card-content>
+
+      <mat-card-footer>
+        <div class="card-footer-content">
+          <mat-icon class="footer-icon">checkroom</mat-icon>
+          <span>Sastrería Andrés Chimunja</span>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+</div>

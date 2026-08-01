@@ -1218,13 +1218,18 @@ export class ReciboService {
       aguja: String.fromCodePoint(0x1F9F5), // 🧵
       clip:  String.fromCodePoint(0x1F4CB), // 📋
       fecha: String.fromCodePoint(0x1F4C5), // 📅
+      link:  String.fromCodePoint(0x1F517), // 🔗
     };
+
+    const urlEstado = `${window.location.origin}/estado-pedido/${data.idPedido}`;
 
     const lineas: string[] = [
       `${em.aguja} *SASTRERÍA ANDRÉS CHIMUNJA*`,
       ``,
       `${em.clip} *${titulo} #${noOrden}*`,
       `${em.fecha} Fecha de entrega: ${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}`,
+      ``,
+      `${em.link} Para saber el estado de su pedido haga click aquí: ${urlEstado}`,
     ];
     return lineas.join('\n');
   }
