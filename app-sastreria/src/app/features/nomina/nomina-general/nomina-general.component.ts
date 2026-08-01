@@ -76,6 +76,14 @@ export class NominaGeneralComponent implements OnInit {
     this.traerBalance();
   }
 
+  /** Atajo: filtra por la fecha de hoy (desde y hasta = hoy). */
+  filtrarHoy(): void {
+    const hoy = new Date();
+    this.fechaInicioCtrl.setValue(hoy);
+    this.fechaFinCtrl.setValue(hoy);
+    this.aplicarFiltroFecha();
+  }
+
   limpiarFiltroFecha(): void {
     this.fechaInicioCtrl.reset();
     this.fechaFinCtrl.reset();

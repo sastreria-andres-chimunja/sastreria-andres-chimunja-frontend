@@ -480,6 +480,20 @@
   margin-top: 8px;
 }
 
+.btn-hoy {
+  background: none;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  margin-right: auto;
+  &:hover { background: var(--primary); color: #fff; }
+}
+
 .btn-limpiar {
   background: none;
   border: 1px solid var(--border);
