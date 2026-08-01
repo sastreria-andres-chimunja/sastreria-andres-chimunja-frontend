@@ -299,8 +299,8 @@ export class ReciboService {
     .header-nombre {
       text-align: center;
       font-family: 'Arial Black', Arial, sans-serif;
-      font-size: 13px;
-      letter-spacing: 4.7px;
+      font-size: 17px;
+      letter-spacing: 2px;
       white-space: nowrap;
       line-height: 1;
       padding: 1mm 1mm 1.8mm;
@@ -318,7 +318,7 @@ export class ReciboService {
       justify-content: space-between;
       padding: 1.5mm 2mm 2.5mm 3.5mm;
     }
-    .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 12px; line-height: 1.15; word-break: break-word; }
+    .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.15; word-break: break-word; }
     .fila { font-size: 11.5px; font-weight: 700; margin-top: 1.5mm; line-height: 1; }
     .fila-entrega { font-size: 15px; font-weight: 700; margin-top: 1mm; line-height: 1; }
     .totales { margin-top: 1.2mm; }
