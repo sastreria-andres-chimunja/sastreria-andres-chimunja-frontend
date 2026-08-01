@@ -12,6 +12,7 @@ import { PedidoService } from '../../../core/services/pedido.service';
 import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
+import { ReciboService } from '../../../core/services/recibo.service';
 import { Pedido } from '../../../shared/models/Pedido';
 import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString } from '../../../utils/date.utils';
@@ -67,6 +68,7 @@ export class PedidosListComponent implements OnInit {
     private metodoPagoService: MetodoPagoService,
     private itemPedidoService: ItemPedidoService,
     private empleadoService: EmpleadoService,
+    private reciboService: ReciboService,
   ) {}
 
   ngOnInit(): void {
@@ -149,6 +151,7 @@ export class PedidosListComponent implements OnInit {
           case 'pendiente':  return nombre.includes('pendiente');
           case 'asignado':   return nombre.includes('asignad');
           case 'terminado':  return nombre.includes('terminad');
+          case 'terminado-vencido': return this.esTerminadoVencido(p);
           case 'entregado':  return this.esEntregado(p);
           case 'no-realizado': return this.esNoRealizado(p);
           case 'por-vencer': {
@@ -258,6 +261,17 @@ export class PedidosListComponent implements OnInit {
     });
   }
 
+  /** Recordatorio por WhatsApp para pedidos terminados y nunca entregados. */
+  enviarRecordatorio(p: Pedido, event: Event): void {
+    event.stopPropagation();
+    if (!p.telefonoCliente) return;
+    const noPedido = String(p.idPedido).padStart(4, '0');
+    const texto =
+      `SASTRERÍA ANDRÉS CHIMUNJA\n` +
+      `Le recuerda que su pedido #${noPedido} se encuentra terminado y listo para ser entregado`;
+    this.reciboService.abrirChatWhatsAppTexto(p.telefonoCliente, texto);
+  }
+
   // ── Resumen (dentro del tab activo) ─────────────────────────
   get total(): number {
     return this.pedidosDelTab.filter((p) => !this.esNoRealizado(p)).length;
@@ -307,6 +321,11 @@ export class PedidosListComponent implements OnInit {
     return this.pedidosDelTab.filter((p) => this.esEntregado(p)).length;
   }
 
+  /** Terminados cuya fecha de entrega quedó más de 30 días atrás — nunca se entregaron. */
+  get terminadosVencidos(): number {
+    return this.pedidosDelTab.filter((p) => this.esTerminadoVencido(p)).length;
+  }
+
   /** Suma del valor total de los pedidos que están visibles con el filtro/búsqueda/tab actual. */
   get valorTotalListado(): number {
     return this.pedidosFiltrados.reduce((acc, p) => acc + Number(p.valorTotal ?? 0), 0);
@@ -321,6 +340,9 @@ export class PedidosListComponent implements OnInit {
   }
   private esTerminado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('terminad');
+  }
+  esTerminadoVencido(p: Pedido): boolean {
+    return this.esTerminado(p) && this.diasRestantes(p.fechaEntrega) < -30;
   }
   private esNoRealizado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase() === 'no realizado';

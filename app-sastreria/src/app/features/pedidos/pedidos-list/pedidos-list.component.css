@@ -183,6 +183,7 @@
 .resumen-card:has(.terminado-icon).activa  { border-color: var(--accent); }
 .resumen-card:has(.pv-icon).activa         { border-color: #d97706; }
 .resumen-card:has(.vencido-icon).activa    { border-color: var(--danger); }
+.resumen-card:has(.terminado-vencido-icon).activa { border-color: #b91c1c; }
 .resumen-card:has(.entregado-icon).activa  { border-color: var(--success); }
 .resumen-card:has(.no-realizado-icon).activa { border-color: #1f2937; }
 
@@ -198,6 +199,7 @@
 .terminado-icon { background: #fef3c7; color: var(--accent); }
 .pv-icon        { background: #fff3e0; color: #d97706; }
 .vencido-icon   { background: #fdecea; color: var(--danger); }
+.terminado-vencido-icon { background: #fee2e2; color: #b91c1c; }
 .entregado-icon { background: #e8f5e9; color: var(--success); }
 .no-realizado-icon { background: #e5e7eb; color: #1f2937; }
 .valor-icon         { background: #e6f4e6; color: var(--success); }
@@ -218,6 +220,7 @@
 .terminado-valor { color: var(--accent); }
 .pv-valor        { color: #d97706; }
 .vencido-valor   { color: var(--danger); }
+.terminado-vencido-valor { color: #b91c1c; }
 .entregado-valor { color: var(--success); }
 .no-realizado-valor { color: #1f2937; }
 .valor-valor         { color: var(--success); font-size: 16px; }
@@ -399,6 +402,15 @@
   font-family: 'DM Sans', sans-serif; transition: background 0.13s;
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
   &:hover { background: var(--primary-hover, #b07820); }
+}
+
+.btn-recordatorio {
+  background: #b91c1c; color: #fff; border: none;
+  border-radius: 8px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Sans', sans-serif; transition: background 0.13s;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: #991515; }
 }
 
 .btn-asignar {

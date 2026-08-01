@@ -124,6 +124,15 @@
       </div>
     </div>
 
+    <div class="resumen-card" [class.activa]="filtroEstado === 'terminado-vencido'"
+      (click)="setFiltro('terminado-vencido')" matTooltip="Terminados hace más de 30 días, sin entregar">
+      <div class="resumen-icon-circle terminado-vencido-icon"><mat-icon>report_problem</mat-icon></div>
+      <div class="resumen-info">
+        <div class="resumen-label">Terminados vencidos</div>
+        <div class="resumen-valor terminado-vencido-valor">{{ terminadosVencidos }}</div>
+      </div>
+    </div>
+
     <div class="resumen-card" [class.activa]="filtroEstado === 'por-vencer'"
       (click)="setFiltro('por-vencer')" matTooltip="Filtrar por vencer (7 días)">
       <div class="resumen-icon-circle pv-icon"><mat-icon>schedule</mat-icon></div>
@@ -239,6 +248,10 @@
           <mat-icon>phone</mat-icon> {{ p.telefonoCliente }}
         </span>
         <div class="card-footer-actions">
+          <button class="btn-recordatorio" (click)="enviarRecordatorio(p, $event)"
+            matTooltip="Enviar recordatorio por WhatsApp" *ngIf="esTerminadoVencido(p) && p.telefonoCliente">
+            <mat-icon>notifications_active</mat-icon> Recordatorio
+          </button>
           <button class="btn-asignar" (click)="abrirDialogoAsignar(p, $event)"
             matTooltip="Asignar empleado" *ngIf="puedeCrearPedido">
             <mat-icon>engineering</mat-icon> Asignar

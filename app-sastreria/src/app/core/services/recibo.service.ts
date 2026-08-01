@@ -899,6 +899,20 @@ export class ReciboService {
     else window.open(url, '_blank');
   }
 
+  /**
+   * Abre el chat de WhatsApp del número dado con un texto prellenado, sin
+   * imagen adjunta — para avisos/recordatorios rápidos (no un recibo).
+   */
+  abrirChatWhatsAppTexto(telefono: string, texto: string): void {
+    const tel        = telefono.replace(/\D/g, '');
+    const textoParam = encodeURIComponent(texto);
+    const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const url = esMobil
+      ? (tel ? `whatsapp://send?phone=57${tel}&text=${textoParam}` : `whatsapp://send?text=${textoParam}`)
+      : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
+    this.abrirChatWhatsApp(url);
+  }
+
   // ─── CREDENCIALES DE ACCESO ───────────────────────────────────────────────────
 
   generarHtmlCredencial(data: CredencialData): string {
