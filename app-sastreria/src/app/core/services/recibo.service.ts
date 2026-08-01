@@ -319,11 +319,11 @@ export class ReciboService {
       padding: 1.5mm 2mm 2.5mm 3.5mm;
     }
     .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.15; word-break: break-word; }
-    .fila { font-size: 11.5px; font-weight: 700; margin-top: 1.5mm; line-height: 1; }
-    .fila-entrega { font-size: 15px; font-weight: 700; margin-top: 1mm; line-height: 1; }
+    .fila { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; margin-top: 1.5mm; line-height: 1; }
+    .fila-entrega { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; margin-top: 1mm; line-height: 1; }
     .totales { margin-top: 1.2mm; }
-    .fila-total { font-size: 12px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
-    .fila-saldo { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1.8mm; }
+    .fila-linea { font-family: Arial, Helvetica, sans-serif; font-weight: 400; font-size: 13px; line-height: 1.3; margin-top: 1.8mm; }
+    .fila-linea .valor { font-family: 'Arial Black', Arial, sans-serif; font-size: 13px; }
     .right-col {
       width: 33.6mm;
       flex-shrink: 0;
@@ -349,9 +349,9 @@ export class ReciboService {
         <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
       </div>
       <div class="totales">
-        <div class="fila-total">TOTAL: ${this.formatCOP(data.valorTotalPedido)}</div>
-        <div class="fila-total">ABONO: ${this.formatCOP(data.totalPagadoPedido)}</div>
-        <div class="fila-saldo">SALDO: ${this.formatCOP(saldo)}</div>
+        <div class="fila-linea">TOTAL: <span class="valor">${this.formatCOP(data.valorTotalPedido)}</span></div>
+        <div class="fila-linea">ABONO: <span class="valor">${this.formatCOP(data.totalPagadoPedido)}</span></div>
+        <div class="fila-linea">SALDO: <span class="valor">${this.formatCOP(saldo)}</span></div>
       </div>
     </div>
     <div class="right-col">
