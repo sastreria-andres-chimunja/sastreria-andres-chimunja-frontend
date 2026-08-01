@@ -23,7 +23,7 @@
         <div class="card-header-content">
           <span class="card-eyebrow">Consulta de pedido</span>
           <mat-card-title>Estado de tu pedido</mat-card-title>
-          <mat-card-subtitle *ngIf="pedido">Pedido #{{ (pedido.idPedido ?? 0).toString().padStart(4, '0') }}</mat-card-subtitle>
+          <mat-card-subtitle *ngIf="pedido">Pedido #{{ pedido.idPedido.toString().padStart(4, '0') }}</mat-card-subtitle>
         </div>
       </mat-card-header>
 
@@ -35,16 +35,26 @@
           <p>Consultando tu pedido...</p>
         </div>
 
-        <!-- NO ENCONTRADO -->
+        <!-- ENLACE INVÁLIDO / PEDIDO NO ENCONTRADO -->
         <div class="estado-vacio" *ngIf="!cargando && noEncontrado">
           <mat-icon>search_off</mat-icon>
           <p>No encontramos ese pedido. Verifica el enlace o contáctanos.</p>
         </div>
 
-        <!-- ESTADO DEL PEDIDO -->
-        <div class="estado-info" *ngIf="!cargando && !noEncontrado && pedido">
-          <span class="estado-badge" [ngClass]="'badge-' + estadoClase">
-            {{ pedido.nombreEstado || 'Sin estado' }}
+        <!-- AVISO SIMPLE: entregado / no realizado (sin más detalle) -->
+        <div class="estado-vacio" *ngIf="!cargando && avisoSimple === 'entregado'">
+          <mat-icon>check_circle</mat-icon>
+          <p>Tu pedido ya fue entregado.</p>
+        </div>
+        <div class="estado-vacio" *ngIf="!cargando && avisoSimple === 'no-realizado'">
+          <mat-icon>block</mat-icon>
+          <p>Tu pedido no fue realizado.</p>
+        </div>
+
+        <!-- ESTADO DEL PEDIDO (pendiente / en proceso / terminado) -->
+        <div class="estado-info" *ngIf="!cargando && pedido">
+          <span class="estado-badge" [ngClass]="'badge-' + pedido.estadoCliente">
+            {{ etiquetaEstado }}
           </span>
 
           <p class="mensaje-estado">{{ mensajeEstado }}</p>

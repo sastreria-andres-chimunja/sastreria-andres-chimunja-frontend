@@ -207,9 +207,6 @@ mat-card-subtitle {
 .badge-pendiente     { background: #e3f0fb; color: #1a3580; }
 .badge-asignado      { background: #ede9fe; color: #6d28d9; }
 .badge-terminado     { background: #fef3c7; color: #92400e; }
-.badge-entregado     { background: #e8f5e9; color: #1b5e20; }
-.badge-cancelado     { background: #eee; color: #555; }
-.badge-no-realizado  { background: #e5e7eb; color: #1f2937; }
 
 .mensaje-estado {
   font-family: 'Montserrat', sans-serif;

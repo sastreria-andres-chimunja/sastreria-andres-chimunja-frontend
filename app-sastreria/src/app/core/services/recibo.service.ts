@@ -17,6 +17,7 @@ export interface ReciboData {
   fechaEntrega?: string;
   items?: { descripcion: string; valor: number }[];
   negocio?: string;
+  tokenPublico?: string;
 }
 
 export interface CredencialData {
@@ -1221,16 +1222,20 @@ export class ReciboService {
       link:  String.fromCodePoint(0x1F517), // 🔗
     };
 
-    const urlEstado = `${window.location.origin}/estado-pedido/${data.idPedido}`;
-
     const lineas: string[] = [
       `${em.aguja} *SASTRERÍA ANDRÉS CHIMUNJA*`,
       ``,
       `${em.clip} *${titulo} #${noOrden}*`,
       `${em.fecha} Fecha de entrega: ${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}`,
-      ``,
-      `${em.link} Para saber el estado de su pedido haga click aquí: ${urlEstado}`,
     ];
+
+    // El link usa el token firmado del pedido, no el id plano (no se puede
+    // adivinar el estado de otro pedido probando números consecutivos).
+    if (data.tokenPublico) {
+      const urlEstado = `${window.location.origin}/estado-pedido/${data.tokenPublico}`;
+      lineas.push(``, `${em.link} Para saber el estado de su pedido haga click aquí: ${urlEstado}`);
+    }
+
     return lineas.join('\n');
   }
 

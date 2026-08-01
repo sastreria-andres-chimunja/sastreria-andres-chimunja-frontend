@@ -225,6 +225,7 @@ export class PedidosListComponent implements OnInit {
         metodosPago:      this.metodosPago,
         items,
         fechaEntrega:     p.fechaEntrega ?? undefined,
+        tokenPublico:     p.tokenPublico,
       };
       this.dialog.open(PagarItemDialogComponent, {
         data,

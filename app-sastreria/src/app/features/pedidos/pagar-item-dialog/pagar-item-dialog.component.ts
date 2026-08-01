@@ -19,6 +19,7 @@ export interface PagarItemDialogData {
   metodosPago: any[];
   items?: { descripcion: string; valor: number }[];
   fechaEntrega?: string;
+  tokenPublico?: string;
 }
 
 @Component({
@@ -139,6 +140,7 @@ export class PagarItemDialogComponent implements OnInit {
       fechaPago:         new Date().toLocaleDateString('es-CO'),
       fechaEntrega:      this.data.fechaEntrega,
       items:             this.data.items,
+      tokenPublico:      this.data.tokenPublico,
     };
   }
 

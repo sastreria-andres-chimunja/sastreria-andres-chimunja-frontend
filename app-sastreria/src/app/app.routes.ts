@@ -27,7 +27,7 @@ export const routes: Routes = [
   { path: 'recuperar', component: RecuperarClaveComponent },
   { path: 'cambiar-clave', component: CambiarClaveComponent, canActivate: [authGuard] },
   // Pública, sin login — el link va en el WhatsApp que se le manda al cliente
-  { path: 'estado-pedido/:id', component: EstadoPedidoPublicoComponent },
+  { path: 'estado-pedido/:token', component: EstadoPedidoPublicoComponent },
 
   {
     path: 'app',

@@ -5,13 +5,30 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PedidoService } from '../../core/services/pedido.service';
-import { Pedido } from '../../shared/models/Pedido';
+
+type EstadoCliente = 'pendiente' | 'asignado' | 'terminado';
+
+interface PedidoPublico {
+  idPedido: number;
+  nombreCliente: string;
+  nombreTipoPedido?: string;
+  fechaRecibido: string;
+  fechaEntrega: string;
+  valorTotal: number;
+  totalAbonado: number;
+  estadoCliente: EstadoCliente;
+}
 
 /**
  * Vista pública (sin login) de estado de pedido — el link va pegado en el
- * mensaje de WhatsApp que se manda al cliente. Reutiliza GET /pedidos/:id
- * (ya sin autenticación, igual que el resto de la API — ver hallazgo de
- * seguridad conocido en el backend) en vez de crear un endpoint nuevo.
+ * mensaje de WhatsApp que se manda al cliente. Usa el token firmado del
+ * pedido (no el id plano) vía GET /pedidos/publico/:token, para que no se
+ * pueda ver el estado de otro pedido adivinando números en la URL.
+ *
+ * Al cliente solo se le muestran 3 estados posibles: pendiente, en proceso
+ * (interno "asignado") y terminado. Si el pedido ya está Entregado o
+ * marcado No realizado, el backend no manda ningún detalle — solo un
+ * indicador — y esta vista muestra un aviso simple sin más información.
  */
 @Component({
   selector: 'app-estado-pedido-publico',
@@ -23,7 +40,9 @@ import { Pedido } from '../../shared/models/Pedido';
 export class EstadoPedidoPublicoComponent implements OnInit {
   cargando = true;
   noEncontrado = false;
-  pedido: Pedido | null = null;
+  pedido: PedidoPublico | null = null;
+  /** 'entregado' | 'no-realizado' cuando el backend bloquea el detalle. */
+  avisoSimple: 'entregado' | 'no-realizado' | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -31,13 +50,18 @@ export class EstadoPedidoPublicoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) { this.cargando = false; this.noEncontrado = true; return; }
+    const token = this.route.snapshot.paramMap.get('token');
+    if (!token) { this.cargando = false; this.noEncontrado = true; return; }
 
-    this.pedidoService.buscarPorId(id).subscribe({
+    this.pedidoService.buscarEstadoPublico(token).subscribe({
       next: (r: any) => {
-        this.pedido = r.pedido ?? null;
-        this.noEncontrado = !this.pedido;
+        if (r.estadoPublico === 'entregado' || r.estadoPublico === 'no-realizado') {
+          this.avisoSimple = r.estadoPublico;
+        } else if (r.estadoPublico === 'ok' && r.pedido) {
+          this.pedido = r.pedido;
+        } else {
+          this.noEncontrado = true;
+        }
         this.cargando = false;
       },
       error: () => {
@@ -52,24 +76,19 @@ export class EstadoPedidoPublicoComponent implements OnInit {
     return Number(this.pedido.valorTotal ?? 0) - Number(this.pedido.totalAbonado ?? 0);
   }
 
-  get estadoClase(): string {
-    const nombre = (this.pedido?.nombreEstado ?? '').toLowerCase();
-    if (nombre.includes('entrega')) return 'entregado';
-    if (nombre.includes('cancel')) return 'cancelado';
-    if (nombre === 'no realizado') return 'no-realizado';
-    if (nombre.includes('terminad')) return 'terminado';
-    if (nombre.includes('asignad')) return 'asignado';
-    return 'pendiente';
+  get etiquetaEstado(): string {
+    switch (this.pedido?.estadoCliente) {
+      case 'asignado':  return 'En proceso';
+      case 'terminado': return 'Terminado';
+      default:            return 'Pendiente';
+    }
   }
 
   get mensajeEstado(): string {
-    switch (this.estadoClase) {
-      case 'entregado':     return 'Este pedido ya fue entregado. ¡Gracias por confiar en nosotros!';
-      case 'terminado':     return '¡Tu pedido está listo! Ya lo puedes recoger en el local.';
-      case 'asignado':      return 'Tu pedido está en proceso de confección/arreglo.';
-      case 'no-realizado':  return 'Este pedido fue marcado como no realizado.';
-      case 'cancelado':     return 'Este pedido fue cancelado.';
-      default:               return 'Tu pedido está pendiente de iniciar.';
+    switch (this.pedido?.estadoCliente) {
+      case 'terminado': return '¡Tu pedido está listo! Ya lo puedes recoger en el local.';
+      case 'asignado':  return 'Tu pedido está en proceso de confección/arreglo.';
+      default:            return 'Tu pedido está pendiente de iniciar.';
     }
   }
 

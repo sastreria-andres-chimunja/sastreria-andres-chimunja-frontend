@@ -15,6 +15,7 @@ export interface PedidoGuardadoDialogData {
   nombreMetodoPago?: string;
   fechaEntrega?: string;
   items?: { descripcion: string; valor: number }[];
+  tokenPublico?: string;
 }
 
 @Component({
@@ -49,6 +50,7 @@ export class PedidoGuardadoDialogComponent {
       fechaPago:         new Date().toLocaleDateString('es-CO'),
       fechaEntrega:      this.data.fechaEntrega,
       items:             this.data.items,
+      tokenPublico:      this.data.tokenPublico,
     };
   }
 

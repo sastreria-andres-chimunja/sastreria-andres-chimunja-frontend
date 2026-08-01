@@ -75,6 +75,7 @@ export class CrearPedidoComponent implements OnInit {
   form!: FormGroup;
   isEdit = false;
   idPedido?: number;
+  private tokenPublicoActual?: string;
   guardando = false;
 
   // Snapshot al cargar en modo edición: el límite diario solo se evalúa si
@@ -279,6 +280,7 @@ export class CrearPedidoComponent implements OnInit {
       });
       this.fechaEntregaOriginal = p.fechaEntrega;
       this.valorTotalOriginal   = Number(p.valorTotal ?? 0);
+      this.tokenPublicoActual   = p.tokenPublico;
       this.clienteQuery = p.nombreCliente ?? '';
       this.clienteSeleccionado = {
         idCliente: p.idCliente,
@@ -431,6 +433,7 @@ export class CrearPedidoComponent implements OnInit {
       metodosPago:     this.metodosPago,
       items:           this.items.map((it: any) => ({ descripcion: it.descripcion, valor: Number(it.valor) })),
       fechaEntrega:    dateToString(fechaEntregaPedido) || undefined,
+      tokenPublico:    this.tokenPublicoActual,
     };
 
     const ref = this.dialog.open(PagarItemDialogComponent, {
@@ -588,6 +591,7 @@ export class CrearPedidoComponent implements OnInit {
       } else {
         const resp: any = await this.pedidoService.crear(pedidoData).toPromise();
         idPed = resp.pedido.idPedido;
+        this.tokenPublicoActual = resp.pedido.tokenPublico;
 
         for (const it of this.items) {
           let idMedida: number | null = null;
@@ -668,6 +672,7 @@ export class CrearPedidoComponent implements OnInit {
       nombreMetodoPago: nombreMetodoPago || undefined,
       fechaEntrega,
       items,
+      tokenPublico: this.tokenPublicoActual,
     };
     const ref = this.dialog.open(PedidoGuardadoDialogComponent, {
       data,

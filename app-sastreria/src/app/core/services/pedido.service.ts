@@ -19,6 +19,11 @@ export class PedidoService {
     return this.http.get<any>(`${this.api}/${id}`);
   }
 
+  /** Vista pública sin login — recibe el tokenPublico del pedido, no el id. */
+  buscarEstadoPublico(token: string) {
+    return this.http.get<any>(`${this.api}/publico/${token}`);
+  }
+
   crear(pedido: any) {
     return this.http.post<any>(this.api, pedido);
   }
