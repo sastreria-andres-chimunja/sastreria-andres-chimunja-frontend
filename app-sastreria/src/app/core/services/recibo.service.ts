@@ -1216,14 +1216,13 @@ export class ReciboService {
 
     // String.fromCodePoint garantiza encoding correcto sin depender del charset del archivo
     const em = {
-      aguja: String.fromCodePoint(0x1F9F5), // 🧵
       clip:  String.fromCodePoint(0x1F4CB), // 📋
       fecha: String.fromCodePoint(0x1F4C5), // 📅
       link:  String.fromCodePoint(0x1F517), // 🔗
     };
 
     const lineas: string[] = [
-      `${em.aguja} *SASTRERÍA ANDRÉS CHIMUNJA*`,
+      `*SASTRERÍA ANDRÉS CHIMUNJA*`,
       ``,
       `${em.clip} *${titulo} #${noOrden}*`,
       `${em.fecha} Fecha de entrega: ${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}`,
