@@ -299,8 +299,8 @@ export class ReciboService {
     .header-nombre {
       text-align: center;
       font-family: 'Arial Black', Arial, sans-serif;
-      font-size: 12px;
-      letter-spacing: 5.5px;
+      font-size: 13px;
+      letter-spacing: 4.7px;
       white-space: nowrap;
       line-height: 1;
       padding: 1mm 1mm 1.8mm;
