@@ -145,7 +145,16 @@
 } */
  /* ── Contenedor global ── */
 .sidenav-container {
+  /* 100vh en móvil se calcula sobre el viewport más grande posible (barra
+     de direcciones oculta), más alto que el área realmente visible cuando
+     la barra está mostrada — eso dejaba contenido "atrapado" por debajo del
+     borde visible sin ninguna forma de alcanzarlo con scroll, ya que ni
+     html/body ni .main-content tienen su propio overflow para revelarlo.
+     100dvh (dynamic viewport height) sí seteados igual al alto visible
+     real en cada momento. Se deja 100vh antes como respaldo para
+     navegadores viejos que no soportan dvh. */
   height: 100vh;
+  height: 100dvh;
 }
 
 /* ── Sidebar: siempre oculto por defecto, se despliega con el botón
@@ -242,6 +251,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
