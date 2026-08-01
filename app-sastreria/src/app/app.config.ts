@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MAT_DATE_LOCALE, MAT_DATE_FORMATS, provideNativeDateAdapter } from '@angular/material/core';
+import { MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
 
 import { routes } from './app.routes';
 
@@ -27,5 +28,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideNativeDateAdapter(APP_DATE_FORMATS),
     { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
+    // Los tooltips no deben reaccionar a gestos táctiles: en tarjetas
+    // clicables (ej. resumen de Hoja de trabajo), el manejo de touch del
+    // tooltip (long-press) interfería con el scroll normal de la página en
+    // celular — el swipe que empezaba encima de esas tarjetas no scrolleaba.
+    { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: { touchGestures: 'off' } },
   ],
 };
