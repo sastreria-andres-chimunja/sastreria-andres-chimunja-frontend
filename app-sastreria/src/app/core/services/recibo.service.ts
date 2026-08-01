@@ -1195,50 +1195,22 @@ export class ReciboService {
   }
 
   generarTextoWhatsApp(data: ReciboData): string {
-    const saldo   = data.valorTotalPedido - data.totalPagadoPedido;
     const esOrden = Array.isArray(data.items);
     const titulo  = esOrden ? 'Orden de Pedido' : 'Recibo de Pago';
     const noOrden = String(data.idPedido).padStart(4, '0');
 
     // String.fromCodePoint garantiza encoding correcto sin depender del charset del archivo
     const em = {
-      aguja:    String.fromCodePoint(0x1F9F5),         // 🧵
-      telefono: String.fromCodePoint(0x1F4DE),         // 📞
-      clip:     String.fromCodePoint(0x1F4CB),         // 📋
-      fecha:    String.fromCodePoint(0x1F4C5),         // 📅
-      persona:  String.fromCodePoint(0x1F464),         // 👤
-      movil:    String.fromCodePoint(0x1F4F1),         // 📱
-      lapiz:    String.fromCodePoint(0x1F4DD),         // 📝
-      total:    String.fromCodePoint(0x1F4B0),         // 💰
-      dinero:   String.fromCodePoint(0x1F4B5),         // 💵
-      tarjeta:  String.fromCodePoint(0x1F4B3),         // 💳
-      alerta:   String.fromCodePoint(0x26A0, 0xFE0F),  // ⚠️
-      check:    String.fromCodePoint(0x2705),          // ✅
+      aguja: String.fromCodePoint(0x1F9F5), // 🧵
+      clip:  String.fromCodePoint(0x1F4CB), // 📋
+      fecha: String.fromCodePoint(0x1F4C5), // 📅
     };
-
-    const itemsLineas = esOrden && data.items!.length > 0
-      ? data.items!.map((it, i) => `   ${i + 1}. ${it.descripcion} — ${this.formatCOP(it.valor)}`)
-      : [];
 
     const lineas: string[] = [
       `${em.aguja} *SASTRERÍA ANDRÉS CHIMUNJA*`,
-      `_CONFECCIÓN DE PRENDAS A LA MEDIDA_`,
-      `${em.telefono} CEL: 311 380 1749`,
       ``,
       `${em.clip} *${titulo} #${noOrden}*`,
       `${em.fecha} Fecha de entrega: ${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}`,
-      `${em.persona} Cliente: ${data.nombreCliente}`,
-      ...(data.telefonoCliente ? [`${em.movil} Tel: ${data.telefonoCliente}`] : []),
-      ...(itemsLineas.length   ? [``, `${em.lapiz} *Descripción:*`, ...itemsLineas] : []),
-      ``,
-      `${em.total} Total:  ${this.formatCOP(data.valorTotalPedido)}`,
-      `${em.dinero} Abono:  ${this.formatCOP(data.totalPagadoPedido)}`,
-      saldo > 0
-        ? `${em.alerta} Saldo:  ${this.formatCOP(saldo)}`
-        : `${em.check} *¡PEDIDO PAGADO COMPLETAMENTE!*`,
-      ...(data.metodoPago ? [`${em.tarjeta} Método: ${data.metodoPago}`] : []),
-      ``,
-      `_Después de 30 días no se responde por ninguna prenda, y para efectos de garantía, 7 días después de la entrega. Tiempo para recoger prendas: 30 días. No nos hacemos responsables._`,
     ];
     return lineas.join('\n');
   }
