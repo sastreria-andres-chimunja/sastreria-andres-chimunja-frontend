@@ -231,7 +231,11 @@ export class QzPrintService {
         type: 'raw',
         format: 'image',
         data: dataUrl,
-        options: { language: 'ESCPOS', dotDensity: 'double', quantization: 'black', threshold: 128 },
+        // dotDensity:'double' achicaba la imagen dentro del ancho físico del
+        // papel (dejaba una franja en blanco a la derecha) — mismo síntoma ya
+        // encontrado y corregido en el ticket adhesivo (misma marca SAT, otro
+        // equipo), donde 'single' sí ocupó el ancho completo.
+        options: { language: 'ESCPOS', dotDensity: 'single', quantization: 'black', threshold: 128 },
       },
       {
         type: 'raw',
