@@ -97,7 +97,7 @@ export class ReciboService {
       font-weight: 700;
       font-size: 10.5px;
       width: 58mm;
-      padding: 2mm 0.5mm 4mm;
+      padding: 2mm 5mm 4mm;
       color: #000;
       background: #fff;
     }
@@ -187,12 +187,14 @@ export class ReciboService {
     const html = this.generarHtmlTermico(data);
 
     const wrapper = document.createElement('div');
-    // width:58mm duplicado a propósito: el CSS de generarHtmlTermico() trae
-    // "body { width: 58mm; ... }", pero ese selector no aplica a este <div>
-    // envoltorio (no es un <body> real) — sin este ancho explícito el
-    // contenido no se restringe a 58mm y el recibo sale con proporciones
-    // incorrectas. Mismo patrón ya usado en generarPDFBlob/generarImagenCredencial.
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:58mm;background:#fff;box-sizing:border-box;';
+    // width/padding duplicados a propósito: el CSS de generarHtmlTermico()
+    // trae "body { width: 58mm; padding: ...; }", pero ese selector no
+    // aplica a este <div> envoltorio (no es un <body> real) — sin esto
+    // explícito acá el contenido no se restringe a 58mm ni respeta el
+    // margen lateral (por eso el margen de 5mm no se veía en la impresión
+    // real por QZ Tray, aunque sí estuviera en el <body> del HTML). Mismo
+    // patrón ya usado en generarPDFBlob/generarImagenCredencial.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:58mm;padding:2mm 5mm 4mm;background:#fff;box-sizing:border-box;';
 
     const parser  = new DOMParser();
     const docHtml = parser.parseFromString(html, 'text/html');
