@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import * as qz from 'qz-tray';
+import { API } from '../../utils/constants';
 
 /**
  * Impresión térmica directa vía QZ Tray (ESC/POS), sin pasar por el driver de
@@ -61,9 +64,45 @@ type Align = 'L' | 'C' | 'R';
 @Injectable({ providedIn: 'root' })
 export class QzPrintService {
   private conectando: Promise<void> | null = null;
+  private seguridadConfigurada = false;
+
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Firma digital de las peticiones a QZ Tray — para que confíe en este
+   * sitio automáticamente en vez de mostrar el diálogo "Allow/Block" en
+   * cada conexión. El certificado público se sirve como asset estático; la
+   * firma real la hace el backend (POST /qz/firmar), que es el único lugar
+   * donde vive la llave privada — el navegador nunca la ve.
+   *
+   * Esto NO habilita nada solo — QZ Tray, en cada PC donde se use, también
+   * tiene que tener este mismo certificado instalado como "override" (ver
+   * pending-work.md) para reconocerlo como confiable sin preguntar. Sin
+   * ese paso en la PC, el diálogo sigue apareciendo igual (la firma es
+   * necesaria pero no suficiente).
+   */
+  private configurarSeguridad(): void {
+    if (this.seguridadConfigurada) return;
+    this.seguridadConfigurada = true;
+
+    qz.security.setCertificatePromise((resolve: (v: string) => void, reject: (e: any) => void) => {
+      fetch('assets/qz-certificate.pem')
+        .then((r) => r.text())
+        .then(resolve)
+        .catch(reject);
+    });
+
+    qz.security.setSignatureAlgorithm('SHA512');
+    qz.security.setSignaturePromise((toSign: string) => (resolve: (v: string) => void, reject: (e: any) => void) => {
+      firstValueFrom(this.http.post<any>(`${API.BASE_URL}/qz/firmar`, { toSign }))
+        .then((r) => resolve(r.firma))
+        .catch(reject);
+    });
+  }
 
   private async asegurarConexion(): Promise<void> {
     if (qz.websocket.isActive()) return;
+    this.configurarSeguridad();
     if (!this.conectando) {
       this.conectando = qz.websocket.connect().catch((err: any) => {
         this.conectando = null;
