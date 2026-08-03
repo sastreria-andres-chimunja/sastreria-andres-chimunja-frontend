@@ -96,7 +96,7 @@ export class ReciboService {
       font-family: 'Arial', 'Helvetica', sans-serif;
       font-weight: 700;
       font-size: 10.5px;
-      width: 58mm;
+      width: 68mm;
       padding: 2mm 5mm 4mm;
       color: #000;
       background: #fff;
@@ -119,8 +119,8 @@ export class ReciboService {
     .total-saldo { font-size: 12px; font-weight: 700; }
     .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
     @media print {
-      @page { margin: 0; size: 58mm auto; }
-      body  { width: 58mm; }
+      @page { margin: 0; size: 68mm auto; }
+      body  { width: 68mm; }
     }
   </style>
 </head>
@@ -188,13 +188,16 @@ export class ReciboService {
 
     const wrapper = document.createElement('div');
     // width/padding duplicados a propósito: el CSS de generarHtmlTermico()
-    // trae "body { width: 58mm; padding: ...; }", pero ese selector no
+    // trae "body { width: 68mm; padding: ...; }", pero ese selector no
     // aplica a este <div> envoltorio (no es un <body> real) — sin esto
-    // explícito acá el contenido no se restringe a 58mm ni respeta el
+    // explícito acá el contenido no se restringe al ancho real ni respeta el
     // margen lateral (por eso el margen de 5mm no se veía en la impresión
     // real por QZ Tray, aunque sí estuviera en el <body> del HTML). Mismo
     // patrón ya usado en generarPDFBlob/generarImagenCredencial.
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:58mm;padding:2mm 5mm 4mm;background:#fff;box-sizing:border-box;';
+    // Ancho subido de 58mm a 68mm (confirmado con impresión real: el papel
+    // tenía espacio de sobra a la derecha) — el margen izquierdo (5mm) se
+    // deja intacto, el cm extra se agrega solo hacia la derecha.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:68mm;padding:2mm 5mm 4mm;background:#fff;box-sizing:border-box;';
 
     const parser  = new DOMParser();
     const docHtml = parser.parseFromString(html, 'text/html');
