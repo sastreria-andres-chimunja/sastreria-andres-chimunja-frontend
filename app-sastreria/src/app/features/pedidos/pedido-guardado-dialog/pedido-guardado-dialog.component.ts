@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,17 +25,30 @@ export interface PedidoGuardadoDialogData {
   templateUrl: './pedido-guardado-dialog.component.html',
   styleUrl: './pedido-guardado-dialog.component.css',
 })
-export class PedidoGuardadoDialogComponent {
+export class PedidoGuardadoDialogComponent implements OnInit {
   generandoPDF = false;
   enviandoWhatsApp = false;
   urlFallback: string | null = null;
   avisoPegarImagen = false;
+
+  // Se genera apenas se abre el diálogo (no al hacer clic en "Enviar a
+  // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
+  // navegador todavía considera "reciente" el clic del usuario, y generar
+  // la imagen (más al usar el <iframe> para aislar el layout) puede tardar
+  // lo suficiente como para perder esa ventana. Precalculándola desde el
+  // inicio, para cuando el usuario haga clic la imagen casi siempre ya
+  // está lista y el compartir/copiar dispara de inmediato.
+  private imagenPromise?: Promise<File>;
 
   constructor(
     public dialogRef: MatDialogRef<PedidoGuardadoDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: PedidoGuardadoDialogData,
     private reciboService: ReciboService,
   ) {}
+
+  ngOnInit(): void {
+    this.imagenPromise = this.reciboService.generarImagenBlob(this.reciboData);
+  }
 
   private get reciboData() {
     return {
@@ -91,7 +104,9 @@ export class PedidoGuardadoDialogComponent {
     this.urlFallback = null;
     this.avisoPegarImagen = false;
     try {
-      const imagen = await this.reciboService.generarImagenBlob(this.reciboData);
+      // Si por algo no se alcanzó a precalcular en ngOnInit (o falló),
+      // se genera aquí como respaldo — más lento, pero mejor que fallar.
+      const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlob(this.reciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagen = true;
       else if (resultado) this.urlFallback = resultado;

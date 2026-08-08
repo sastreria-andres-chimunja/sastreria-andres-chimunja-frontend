@@ -51,6 +51,14 @@ export class PagarItemDialogComponent implements OnInit {
   totalAbonado  = 0;
   ultimoAbono: any = null;
 
+  // Se genera apenas se registra el abono (no al hacer clic en "Enviar a
+  // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
+  // navegador todavía considera "reciente" el clic del usuario, y generar
+  // la imagen puede tardar lo suficiente como para perder esa ventana.
+  // Precalculándola apenas se conocen los datos del recibo, para cuando el
+  // usuario haga clic la imagen casi siempre ya está lista.
+  private imagenPromise?: Promise<File>;
+
   constructor(
     public dialogRef: MatDialogRef<PagarItemDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: PagarItemDialogData,
@@ -107,6 +115,7 @@ export class PagarItemDialogComponent implements OnInit {
         };
         this.guardando = false;
         this.form.reset();
+        this.imagenPromise = this.reciboService.generarImagenBlob(this.reciboData);
       },
       error: () => { this.guardando = false; },
     });
@@ -172,7 +181,10 @@ export class PagarItemDialogComponent implements OnInit {
     this.urlFallback = null;
     this.avisoPegarImagen = false;
     try {
-      const imagen = await this.reciboService.generarImagenBlob(this.reciboData);
+      // Si por algo no se alcanzó a precalcular al registrar el abono (o
+      // falló), se genera aquí como respaldo — más lento, pero mejor que
+      // fallar.
+      const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlob(this.reciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagen = true;
       else if (resultado) this.urlFallback = resultado;

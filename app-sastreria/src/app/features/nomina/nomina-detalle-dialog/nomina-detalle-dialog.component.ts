@@ -45,6 +45,14 @@ export class NominaDetalleDialogComponent implements OnInit {
   urlFallbackNomina: string | null = null;
   avisoPegarImagenNomina = false;
 
+  // Se genera apenas se marca el pago (no al hacer clic en "Enviar a
+  // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
+  // navegador todavía considera "reciente" el clic del usuario, y generar
+  // la imagen puede tardar lo suficiente como para perder esa ventana.
+  // Precalculándola apenas se conoce el item pagado, para cuando el usuario
+  // haga clic la imagen casi siempre ya está lista.
+  private imagenPromise?: Promise<File>;
+
   constructor(
     public dialogRef: MatDialogRef<NominaDetalleDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: NominaDetalleDialogData,
@@ -79,10 +87,12 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.ultimoItemPagado   = null;
     this.urlFallbackNomina  = null;
     this.avisoPegarImagenNomina = false;
+    this.imagenPromise = undefined;
     this.itemPedidoService.pagar(item.idItemPedido).subscribe({
       next: (resp: any) => {
         this.pagandoId = null;
         this.ultimoItemPagado = resp.item ?? item;
+        this.imagenPromise = this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
         this.cargarDetalle();
       },
       error: () => { this.pagandoId = null; },
@@ -137,7 +147,9 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.urlFallbackNomina = null;
     this.avisoPegarImagenNomina = false;
     try {
-      const imagen = await this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
+      // Si por algo no se alcanzó a precalcular al marcar el pago (o falló),
+      // se genera aquí como respaldo — más lento, pero mejor que fallar.
+      const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlobNomina(this.nominaReciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefono, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagenNomina = true;
       else if (resultado) this.urlFallbackNomina = resultado;
@@ -157,6 +169,7 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.ultimoItemPagado  = null;
     this.urlFallbackNomina = null;
     this.avisoPegarImagenNomina = false;
+    this.imagenPromise = undefined;
 
     this.nominaService.liquidar(this.data.idEmpleado).subscribe({
       next: () => {
