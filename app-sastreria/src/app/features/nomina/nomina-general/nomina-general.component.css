@@ -311,4 +311,17 @@
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .nomina-lista { grid-template-columns: 1fr; }
+
+  /* El panel se abría con right:0 anclado al botón de filtro — en celular
+     podía extenderse fuera de la pantalla (min-width:280px) tapando las
+     etiquetas "Desde"/"Hasta". position:fixed con left/right explícitos
+     lo ancla a la pantalla completa en vez del botón. */
+  .fecha-panel {
+    position: fixed;
+    top: 110px;
+    left: 12px;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+  }
 }

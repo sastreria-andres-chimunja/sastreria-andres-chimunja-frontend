@@ -517,4 +517,20 @@
   .valor-listado-row { order: 3; flex-basis: auto; margin-top: 0; }
   /* "Nuevo pedido" en su propia línea al final */
   .btn-primary { width: 100%; flex-basis: 100%; justify-content: center; order: 4; }
+
+  /* El panel se abría con right:0 anclado al botón de filtro, que en
+     celular queda cerca del borde izquierdo — el panel (min-width:280px)
+     terminaba extendiéndose fuera de la pantalla por la izquierda,
+     tapando las etiquetas "Desde"/"Hasta" (solo se veían los íconos del
+     calendario, que caen del lado derecho de cada campo). Con position:
+     fixed y left/right explícitos se ancla a la pantalla completa en vez
+     del botón, así siempre cabe sin importar dónde esté el botón. */
+  .fecha-panel {
+    position: fixed;
+    top: 110px;
+    left: 12px;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+  }
 }
