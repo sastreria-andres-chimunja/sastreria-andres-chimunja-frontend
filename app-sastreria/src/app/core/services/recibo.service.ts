@@ -805,14 +805,17 @@ export class ReciboService {
   /**
    * Comparte un archivo por WhatsApp de la forma más directa posible según el dispositivo.
    *
-   * - Móvil (Android/iOS): Web Share API → el archivo va adjunto directo a WhatsApp.
-   * - PC + imagen PNG:      Copia la imagen al portapapeles y abre WhatsApp Web
-   *                         en el contacto → solo pegar Ctrl+V y enviar.
-   * - PC + PDF / fallback:  Descarga el archivo y abre wa.me con texto prefijado.
+   * - Imagen PNG (móvil o PC): copia la imagen al portapapeles y abre el
+   *   chat del cliente directo (WhatsApp Web en PC, api.whatsapp.com en
+   *   móvil) → solo pegar y enviar.
+   * - Móvil, si el portapapeles no está disponible en ese navegador: Web
+   *   Share API (el archivo va adjunto, pero el usuario debe elegir el
+   *   contacto a mano — el sistema operativo no permite preseleccionarlo).
+   * - PDF / último recurso: descarga el archivo y abre el chat con texto prefijado.
    *
    * Valores de retorno:
    *   null            → Web Share usada con éxito (nada más que hacer)
-   *   '_clipboard_'   → Imagen copiada; WhatsApp Web abierto (mostrar aviso Ctrl+V)
+   *   '_clipboard_'   → Imagen copiada; chat del cliente abierto (mostrar aviso de pegar)
    *   string (URL)    → Fallback: mostrar botón "Abrir WhatsApp"
    */
   async compartirConWhatsApp(
@@ -823,40 +826,21 @@ export class ReciboService {
     const tel        = telefono.replace(/\D/g, '');
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    // En PC, WhatsApp Web (si hay una cuenta logueada en el navegador). En
-    // celular, whatsapp://send (en vez de wa.me, que es una página web de
-    // Meta con su propio chequeo de "¿está instalada la app?" poco fiable).
+    // En PC, WhatsApp Web. En celular, api.whatsapp.com/send — el mismo
+    // link "click to chat" oficial que usan los botones de WhatsApp en
+    // páginas web, reconocido por Android/iOS como enlace nativo de
+    // CUALQUIER WhatsApp instalada (normal o Business). Antes se usaba el
+    // esquema whatsapp://send, pero ese esquema en la práctica solo lo
+    // registra la app normal — con WhatsApp Business instalado (sin la
+    // normal) el enlace fallaba en vez de abrir Business.
     const urlChat = esMobil
-      ? (tel ? `whatsapp://send?phone=57${tel}&text=${textoParam}` : `whatsapp://send?text=${textoParam}`)
+      ? (tel ? `https://api.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
       : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
 
-    // ── Móvil: compartir nativo primero ──────────────────────────────────
-    // Se probó primero con whatsapp://send (abre directo el chat), pero en
-    // la práctica no es confiable con WhatsApp Business: el enlace intenta
-    // abrir la app normal de WhatsApp aunque el celular solo tenga Business
-    // instalada, y falla en vez de abrir Business. El selector nativo de
-    // "compartir" del sistema operativo sí detecta correctamente cualquier
-    // WhatsApp instalada (normal o Business, cada una aparece como su
-    // propio ícono en la lista) — se sacrifica el que abra el chat
-    // automático (el usuario tiene que buscar el contacto a mano una vez
-    // elegida la app), a cambio de que sí funcione sin importar cuál
-    // WhatsApp tenga cada quien.
-    const nav = navigator as any;
-    if (esMobil && typeof nav.canShare === 'function' && nav.canShare({ files: [archivo] })) {
-      try {
-        await nav.share({ files: [archivo], text: texto });
-        return null;
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return null;
-        // Otro error → continuar a los siguientes métodos
-      }
-    }
-
     // ── Portapapeles + chat del cliente ya abierto ──────────────────────────
-    // Método principal en PC (WhatsApp Web no tiene el problema de "cuál
-    // app" — es la misma web sin importar si la cuenta vinculada es normal
-    // o Business) y respaldo en móvil si "compartir" nativo no está
-    // disponible en ese navegador.
+    // Método principal, en PC y en celular: es el único que abre
+    // automáticamente el chat del cliente correcto (en vez de un selector
+    // genérico donde hay que buscarlo a mano).
     if (archivo.type === 'image/png'
       && typeof ClipboardItem !== 'undefined'
       && typeof navigator.clipboard?.write === 'function') {
@@ -867,7 +851,22 @@ export class ReciboService {
         this.abrirChatWhatsApp(urlChat);
         return '_clipboard_';
       } catch {
-        // Portapapeles no disponible → fallback
+        // Portapapeles no disponible en este navegador → siguientes métodos
+      }
+    }
+
+    // ── Móvil, respaldo: compartir nativo ────────────────────────────────
+    // Solo si el portapapeles no funcionó arriba. El archivo va adjunto de
+    // una vez, pero el usuario tiene que elegir el contacto a mano (el
+    // selector nativo del sistema no permite preseleccionar un chat).
+    const nav = navigator as any;
+    if (esMobil && typeof nav.canShare === 'function' && nav.canShare({ files: [archivo] })) {
+      try {
+        await nav.share({ files: [archivo], text: texto });
+        return null;
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return null;
+        // Otro error → último recurso
       }
     }
 
@@ -897,7 +896,7 @@ export class ReciboService {
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const url = esMobil
-      ? (tel ? `whatsapp://send?phone=57${tel}&text=${textoParam}` : `whatsapp://send?text=${textoParam}`)
+      ? (tel ? `https://api.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
       : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
     this.abrirChatWhatsApp(url);
   }
