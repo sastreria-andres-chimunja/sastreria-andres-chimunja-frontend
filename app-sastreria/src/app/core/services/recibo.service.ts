@@ -96,7 +96,7 @@ export class ReciboService {
       font-family: 'Arial', 'Helvetica', sans-serif;
       font-weight: 700;
       font-size: 10.5px;
-      width: 78mm;
+      width: 58mm;
       padding: 2mm 5mm 4mm;
       color: #000;
       background: #fff;
@@ -119,8 +119,8 @@ export class ReciboService {
     .total-saldo { font-size: 12px; font-weight: 700; }
     .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
     @media print {
-      @page { margin: 0; size: 78mm auto; }
-      body  { width: 78mm; }
+      @page { margin: 0; size: 58mm auto; }
+      body  { width: 58mm; }
     }
   </style>
 </head>
@@ -162,24 +162,23 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el recibo/orden directo a la impresora térmica vía QZ Tray.
-   * Se renderiza el recibo completo como una sola imagen ya convertida a
-   * blanco/negro puro (igual que el logo): el texto en modo ESC/POS de esta
-   * impresora sale gris/débil sin importar negrita o los parámetros de
-   * calentamiento del cabezal (ESC 7) — no responde a esos ajustes. La
-   * plantilla usa letra en negrita más grande (ver generarHtmlTermico) para
-   * que los trazos sobrevivan la reducción a la resolución real del cabezal.
-   * Si QZ Tray no está instalado/corriendo, cae al diálogo de impresión del
-   * navegador (requiere que Windows tenga un driver de impresora configurado).
+   * Imprime el recibo/orden directo por el diálogo de impresión del
+   * navegador/Windows — SIN pasar por QZ Tray. Se descubrió (revisando el
+   * driver real de la impresora, "TIRILLA" en Windows) que tiene instalado
+   * un driver real de fabricante ("SAT 22TUE"), igual que pasó con el
+   * ticket adhesivo (ver imprimirTicket()) — no el driver genérico que
+   * originalmente motivó pasar por QZ Tray (corrompía tildes, texto débil
+   * en modo ESC/POS). Se abandonó QZ Tray a propósito: el diálogo de
+   * permiso "acceder a impresoras conectadas" no se puede suprimir de forma
+   * confiable con un certificado autofirmado gratuito (limitación conocida
+   * y sin resolver de QZ Tray, ver pending-work.md) — con el driver real
+   * instalado ya no hace falta QZ Tray para que las tildes y la calidad de
+   * impresión salgan bien.
+   * generarImagenTermica()/qzPrint.imprimirImagen() quedan sin uso (no se
+   * borraron por si hace falta revertir).
    */
   async imprimir(data: ReciboData): Promise<void> {
-    try {
-      const imagenDataUrl = await this.generarImagenTermica(data);
-      await this.qzPrint.imprimirImagen(imagenDataUrl);
-    } catch (err) {
-      console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
-      this.imprimirNavegador(data);
-    }
+    this.imprimirNavegador(data);
   }
 
   /** Renderiza generarHtmlTermico() a una imagen con umbral duro a blanco/negro puro (sin gris). */
