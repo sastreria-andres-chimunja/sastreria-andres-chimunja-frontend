@@ -520,17 +520,7 @@ export class ReciboService {
     const noOrden = String(data.idPedido).padStart(4, '0');
     const nombre  = `${(data.valorAbono ?? 0) > 0 ? 'recibo' : 'orden'}-pedido-${noOrden}.pdf`;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
+    const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);
 
     try {
       const [{ jsPDF }, html2canvasModule] = await Promise.all([
@@ -540,7 +530,7 @@ export class ReciboService {
       const canvas = await html2canvasModule.default(wrapper, {
         scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
-      document.body.removeChild(wrapper);
+      limpiar();
 
       const imgData   = canvas.toDataURL('image/jpeg', 0.92);
       const anchoMm   = 210;
@@ -565,7 +555,7 @@ export class ReciboService {
 
       return new File([pdf.output('blob')], nombre, { type: 'application/pdf' });
     } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      limpiar();
       throw err;
     }
   }
@@ -576,31 +566,21 @@ export class ReciboService {
     const noOrden = String(data.idPedido).padStart(4, '0');
     const nombre  = `${(data.valorAbono ?? 0) > 0 ? 'recibo' : 'orden'}-pedido-${noOrden}.png`;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
+    const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);
 
     try {
       const html2canvasModule = await import('html2canvas');
       const canvas = await html2canvasModule.default(wrapper, {
         scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
-      document.body.removeChild(wrapper);
+      limpiar();
 
       const blob = await new Promise<Blob>(res =>
         canvas.toBlob(b => res(b!), 'image/png'),
       );
       return new File([blob], nombre, { type: 'image/png' });
     } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      limpiar();
       throw err;
     }
   }
@@ -1109,30 +1089,21 @@ export class ReciboService {
     const html    = this.generarHtmlCredencial(data);
     const nombre  = `credenciales-${data.username}.png`;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:400px;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
+    const { wrapper, limpiar } = await this.renderizarEnIframe(html, 400);
 
     try {
       const html2canvasModule = await import('html2canvas');
       const canvas = await html2canvasModule.default(wrapper, {
         scale: 2, useCORS: true, logging: false, backgroundColor: '#eef1f6',
       });
-      document.body.removeChild(wrapper);
+      limpiar();
 
       const blob = await new Promise<Blob>(res =>
         canvas.toBlob(b => res(b!), 'image/png'),
       );
       return new File([blob], nombre, { type: 'image/png' });
     } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      limpiar();
       throw err;
     }
   }
@@ -1425,17 +1396,7 @@ export class ReciboService {
     const noOrden = String(data.idPedido).padStart(4, '0');
     const nombre  = `comprobante-nomina-${noOrden}.pdf`;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
+    const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);
 
     try {
       const [{ jsPDF }, html2canvasModule] = await Promise.all([
@@ -1445,7 +1406,7 @@ export class ReciboService {
       const canvas = await html2canvasModule.default(wrapper, {
         scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
-      document.body.removeChild(wrapper);
+      limpiar();
 
       const imgData   = canvas.toDataURL('image/jpeg', 0.92);
       const anchoMm   = 210;
@@ -1470,7 +1431,7 @@ export class ReciboService {
 
       return new File([pdf.output('blob')], nombre, { type: 'application/pdf' });
     } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      limpiar();
       throw err;
     }
   }
@@ -1481,31 +1442,21 @@ export class ReciboService {
     const noOrden = String(data.idPedido).padStart(4, '0');
     const nombre  = `comprobante-nomina-${noOrden}.png`;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText =
-      'position:fixed;top:-9999px;left:0;width:794px;background:#fff;box-sizing:border-box;';
-
-    const parser  = new DOMParser();
-    const docHtml = parser.parseFromString(html, 'text/html');
-    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
-      + docHtml.body.innerHTML;
-    document.body.appendChild(wrapper);
-
-    await this.esperarImagen(wrapper);
+    const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);
 
     try {
       const html2canvasModule = await import('html2canvas');
       const canvas = await html2canvasModule.default(wrapper, {
         scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
       });
-      document.body.removeChild(wrapper);
+      limpiar();
 
       const blob = await new Promise<Blob>(res =>
         canvas.toBlob(b => res(b!), 'image/png'),
       );
       return new File([blob], nombre, { type: 'image/png' });
     } catch (err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      limpiar();
       throw err;
     }
   }
@@ -1545,6 +1496,51 @@ export class ReciboService {
   }
 
   // ─── PRIVADOS ────────────────────────────────────────────────────────────────
+
+  /**
+   * Renderiza `html` dentro de un <iframe> propio (no directo en la página)
+   * para poder capturarlo con html2canvas a un ancho fijo (`anchoPx`, ej.
+   * 794px para A4) sin importar el tamaño de pantalla real. Un <div> ancho
+   * fuera de pantalla directo en la página (aunque sea position:fixed +
+   * overflow:hidden en un contenedor) igual terminaba ensanchando el
+   * viewport real del navegador en celular — bug conocido de navegadores
+   * móviles con elementos position:fixed más anchos que la pantalla: los
+   * diálogos de Material (también position:fixed) se desplazaban junto con
+   * ese ensanchamiento y se salían de la pantalla mientras se generaba la
+   * imagen/PDF. Un iframe tiene su propio viewport aislado — lo que pase
+   * adentro no afecta el layout de la página que lo contiene.
+   *
+   * Llamar a `limpiar()` cuando ya no se necesite el iframe (tanto en el
+   * camino feliz como en catch).
+   */
+  private async renderizarEnIframe(
+    html: string,
+    anchoPx: number,
+  ): Promise<{ wrapper: HTMLElement; limpiar: () => void }> {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:0;width:0;height:0;border:none;';
+    document.body.appendChild(iframe);
+    const idoc = iframe.contentDocument!;
+    idoc.open();
+    idoc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0"></body></html>');
+    idoc.close();
+
+    const wrapper = idoc.createElement('div');
+    wrapper.style.cssText = `width:${anchoPx}px;background:#fff;box-sizing:border-box;`;
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    idoc.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    return {
+      wrapper,
+      limpiar: () => { if (document.body.contains(iframe)) document.body.removeChild(iframe); },
+    };
+  }
 
   private esperarImagen(container: HTMLElement): Promise<void> {
     return new Promise<void>(resolve => {

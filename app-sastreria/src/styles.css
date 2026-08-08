@@ -1,4 +1,13 @@
 html, body { height: 100%; }
+/* overflow-x:hidden a nivel de página: varias funciones de generación de
+   PDF/imagen (recibo.service.ts) crean momentáneamente un <div> oculto
+   fuera de pantalla (position:fixed) de hasta 794px de ancho (tamaño A4)
+   para capturarlo con html2canvas. En celular (pantalla angosta) eso podía
+   dejar la página con scroll horizontal por un instante mientras se genera
+   la imagen — y como los diálogos de Material también son position:fixed,
+   se desplazaban junto con ese scroll, dejando el cuadro "Pedido guardado"
+   fuera de la pantalla justo mientras se preparaba la foto para WhatsApp. */
+html, body { overflow-x: hidden; }
 body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; }
 
 /* ── Design tokens — light (cenizo/ash) ──────────────────────── */
