@@ -85,10 +85,21 @@ body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; 
 }
 
 /* ── Nómina dialog panel ──────────────────────────────────────── */
+/* max-height + overflow-y:auto (en vez de overflow:hidden en ambos ejes):
+   este panel se usa para diálogos sin mat-dialog-content/mat-dialog-actions
+   (todo el contenido va directo en un <div>, ver pedido-guardado-dialog),
+   así que sin este límite el contenido podía crecer (ej. al aparecer el
+   spinner "Enviando..." o el aviso de portapapeles al mandar por WhatsApp)
+   más alto que la pantalla en celular — como el diálogo se centra
+   verticalmente y no tenía su propio scroll, la parte de abajo quedaba
+   fuera de la pantalla sin forma de alcanzarla. overflow-x se deja en
+   hidden para que las esquinas redondeadas sigan recortando bien. */
 .nomina-dialog-panel .mat-mdc-dialog-container {
   padding: 0 !important;
   border-radius: 14px !important;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
 .nomina-dialog-panel .mdc-dialog__surface {
