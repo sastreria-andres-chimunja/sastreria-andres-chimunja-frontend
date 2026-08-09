@@ -56,16 +56,16 @@
         {{ generandoPDFNomina ? 'Generando…' : 'Generar PDF' }}
       </button>
       <button class="btn-whatsapp-nomina" (click)="enviarWhatsAppNomina()"
-        *ngIf="!urlFallbackNomina" [disabled]="enviandoWhatsAppNomina">
+        [disabled]="enviandoWhatsAppNomina">
         <mat-spinner *ngIf="enviandoWhatsAppNomina" diameter="14"></mat-spinner>
         <mat-icon *ngIf="!enviandoWhatsAppNomina">send</mat-icon>
         {{ enviandoWhatsAppNomina ? 'Enviando…' : 'WhatsApp' }}
       </button>
-      <button *ngIf="urlFallbackNomina" class="btn-ticket" (click)="abrirWhatsAppFallbackNomina()">
-        <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
-      </button>
       <span *ngIf="avisoPegarImagenNomina" class="ticket-label">
         📋 Se abrió el chat del empleado en WhatsApp — pega la imagen y envíala
+      </span>
+      <span *ngIf="avisoAdjuntarImagenNomina" class="ticket-label">
+        📥 Se abrió el chat del empleado en WhatsApp — adjunta la imagen descargada y envíala
       </span>
     </div>
 

@@ -45,8 +45,8 @@ export class PagarItemDialogComponent implements OnInit {
   guardando    = false;
   generandoPDF = false;
   enviandoWhatsApp = false;
-  urlFallback: string | null = null;
   avisoPegarImagen = false;
+  avisoAdjuntarImagen = false;
   abonos: any[] = [];
   totalAbonado  = 0;
   ultimoAbono: any = null;
@@ -178,8 +178,8 @@ export class PagarItemDialogComponent implements OnInit {
     const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
 
     this.enviandoWhatsApp = true;
-    this.urlFallback = null;
     this.avisoPegarImagen = false;
+    this.avisoAdjuntarImagen = false;
     try {
       // Si por algo no se alcanzó a precalcular al registrar el abono (o
       // falló), se genera aquí como respaldo — más lento, pero mejor que
@@ -187,14 +187,10 @@ export class PagarItemDialogComponent implements OnInit {
       const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlob(this.reciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagen = true;
-      else if (resultado) this.urlFallback = resultado;
+      else this.avisoAdjuntarImagen = true;
     } finally {
       this.enviandoWhatsApp = false;
     }
-  }
-
-  abrirWhatsAppFallback(): void {
-    if (this.urlFallback) this.reciboService.abrirChatWhatsApp(this.urlFallback);
   }
 
   cerrar(): void { this.dialogRef.close({ totalAbonado: this.totalAbonado }); }

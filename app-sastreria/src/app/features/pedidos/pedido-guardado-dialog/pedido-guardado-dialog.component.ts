@@ -28,8 +28,8 @@ export interface PedidoGuardadoDialogData {
 export class PedidoGuardadoDialogComponent implements OnInit {
   generandoPDF = false;
   enviandoWhatsApp = false;
-  urlFallback: string | null = null;
   avisoPegarImagen = false;
+  avisoAdjuntarImagen = false;
 
   // Se genera apenas se abre el diálogo (no al hacer clic en "Enviar a
   // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
@@ -101,23 +101,18 @@ export class PedidoGuardadoDialogComponent implements OnInit {
     const texto = this.reciboService.generarTextoWhatsApp(this.reciboData);
 
     this.enviandoWhatsApp = true;
-    this.urlFallback = null;
     this.avisoPegarImagen = false;
+    this.avisoAdjuntarImagen = false;
     try {
       // Si por algo no se alcanzó a precalcular en ngOnInit (o falló),
       // se genera aquí como respaldo — más lento, pero mejor que fallar.
       const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlob(this.reciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefonoCliente, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagen = true;
-      else if (resultado) this.urlFallback = resultado;
+      else this.avisoAdjuntarImagen = true;
     } finally {
       this.enviandoWhatsApp = false;
     }
-  }
-
-  /** Fallback: abre el chat del cliente tras haber descargado la imagen. */
-  abrirWhatsAppFallback(): void {
-    if (this.urlFallback) this.reciboService.abrirChatWhatsApp(this.urlFallback);
   }
 
   aceptar(): void { this.dialogRef.close(true); }

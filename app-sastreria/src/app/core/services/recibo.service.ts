@@ -803,26 +803,33 @@ export class ReciboService {
   }
 
   /**
-   * Comparte un archivo por WhatsApp de la forma más directa posible según el dispositivo.
+   * Comparte un archivo por WhatsApp abriendo SIEMPRE el chat del cliente
+   * directo (nunca un selector genérico donde haya que buscarlo a mano) —
+   * es el requisito explícito del cliente, incluso a costa de que adjuntar
+   * la imagen no sea 100% automático en todos los celulares.
    *
-   * - Imagen PNG (móvil o PC): copia la imagen al portapapeles y abre el
-   *   chat del cliente directo (WhatsApp Web en PC, api.whatsapp.com en
-   *   móvil) → solo pegar y enviar.
-   * - Móvil, si el portapapeles no está disponible en ese navegador: Web
-   *   Share API (el archivo va adjunto, pero el usuario debe elegir el
-   *   contacto a mano — el sistema operativo no permite preseleccionarlo).
-   * - PDF / último recurso: descarga el archivo y abre el chat con texto prefijado.
+   * - Si el portapapeles del navegador soporta escribir imágenes: la copia
+   *   ahí y abre el chat → el usuario solo pega y envía. Es el mejor caso,
+   *   pero NO es confiable en todo Android — se probó con un celular real
+   *   (Xiaomi/MIUI) donde `navigator.clipboard.write` falla para imágenes,
+   *   así que nunca puede ser el único camino.
+   * - Si el portapapeles falla (o no existe): descarga la imagen Y abre el
+   *   chat de una — el usuario adjunta el archivo descargado a mano (desde
+   *   galería/archivos). Funciona siempre, sin depender de ninguna API del
+   *   navegador — por eso reemplaza al "compartir" nativo (Web Share), que
+   *   sí adjunta automático pero NUNCA permite preseleccionar el chat (es
+   *   una restricción del propio sistema operativo, no arreglable por
+   *   código) — se prefiere abrir el chat correcto sobre adjuntar automático.
    *
    * Valores de retorno:
-   *   null            → Web Share usada con éxito (nada más que hacer)
-   *   '_clipboard_'   → Imagen copiada; chat del cliente abierto (mostrar aviso de pegar)
-   *   string (URL)    → Fallback: mostrar botón "Abrir WhatsApp"
+   *   '_clipboard_' → Imagen copiada; chat del cliente abierto (aviso: pegar)
+   *   '_descarga_'  → Imagen descargada; chat del cliente abierto (aviso: adjuntar)
    */
   async compartirConWhatsApp(
     archivo: File,
     telefono: string,
     texto: string,
-  ): Promise<string | null> {
+  ): Promise<string> {
     const tel        = telefono.replace(/\D/g, '');
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -837,10 +844,6 @@ export class ReciboService {
       ? (tel ? `https://api.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
       : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
 
-    // ── Portapapeles + chat del cliente ya abierto ──────────────────────────
-    // Método principal, en PC y en celular: es el único que abre
-    // automáticamente el chat del cliente correcto (en vez de un selector
-    // genérico donde hay que buscarlo a mano).
     if (archivo.type === 'image/png'
       && typeof ClipboardItem !== 'undefined'
       && typeof navigator.clipboard?.write === 'function') {
@@ -851,39 +854,25 @@ export class ReciboService {
         this.abrirChatWhatsApp(urlChat);
         return '_clipboard_';
       } catch {
-        // Portapapeles no disponible en este navegador → siguientes métodos
+        // Portapapeles no disponible/bloqueado en este navegador → respaldo universal
       }
     }
 
-    // ── Móvil, respaldo: compartir nativo ────────────────────────────────
-    // Solo si el portapapeles no funcionó arriba. El archivo va adjunto de
-    // una vez, pero el usuario tiene que elegir el contacto a mano (el
-    // selector nativo del sistema no permite preseleccionar un chat).
-    const nav = navigator as any;
-    if (esMobil && typeof nav.canShare === 'function' && nav.canShare({ files: [archivo] })) {
-      try {
-        await nav.share({ files: [archivo], text: texto });
-        return null;
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return null;
-        // Otro error → último recurso
-      }
-    }
-
-    // ── Último recurso: descargar + abrir el chat con el texto listo ────────
     this.descargarBlob(archivo, archivo.name);
-    return urlChat;
+    this.abrirChatWhatsApp(urlChat);
+    return '_descarga_';
   }
 
   /**
-   * Abre el chat de WhatsApp de la URL/URI dada. Los esquemas nativos
-   * (`whatsapp://...`, usados en celular) hay que navegarlos con
-   * `location.href` — `window.open` a veces los abre en una pestaña nueva en
-   * blanco sin disparar la app en algunos navegadores móviles. Los links
-   * `https://` (WhatsApp Web en PC) sí se abren en pestaña nueva.
+   * Abre el chat de WhatsApp de la URL dada. En celular se navega con
+   * `location.href` — `window.open` (pestaña nueva) en algunos navegadores
+   * móviles no dispara el "app link" hacia WhatsApp/Business, se queda en
+   * una pestaña en blanco o en la página web de api.whatsapp.com sin
+   * redirigir a la app. En PC sí se abre en pestaña nueva (WhatsApp Web).
    */
   abrirChatWhatsApp(url: string): void {
-    if (url.startsWith('whatsapp://')) window.location.href = url;
+    const esMobil = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (esMobil || url.startsWith('whatsapp://')) window.location.href = url;
     else window.open(url, '_blank');
   }
 

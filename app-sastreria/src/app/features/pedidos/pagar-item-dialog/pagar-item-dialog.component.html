@@ -108,26 +108,19 @@
       {{ generandoPDF ? 'Generando...' : 'Generar PDF' }}
     </button>
 
-    <!-- Enviar a WhatsApp como imagen (automático vía backend; si falla, cae a manual) -->
-    <button class="btn-whatsapp" (click)="enviarWhatsApp()"
-      *ngIf="!urlFallback" [disabled]="enviandoWhatsApp">
+    <!-- Enviar a WhatsApp: siempre abre el chat del cliente directo -->
+    <button class="btn-whatsapp" (click)="enviarWhatsApp()" [disabled]="enviandoWhatsApp">
       <mat-spinner *ngIf="enviandoWhatsApp" diameter="16"></mat-spinner>
       <mat-icon *ngIf="!enviandoWhatsApp">send</mat-icon>
       {{ enviandoWhatsApp ? 'Enviando...' : 'Enviar a WhatsApp' }}
     </button>
 
-    <!-- Fallback PC -->
-    <ng-container *ngIf="urlFallback">
-      <button class="btn-whatsapp" (click)="abrirWhatsAppFallback()">
-        <mat-icon>chat</mat-icon> Abrir WhatsApp
-      </button>
-      <p style="font-size:10px;color:#777;margin:4px 0 0;text-align:center;">
-        📎 Adjunta la imagen descargada en WhatsApp
-      </p>
-    </ng-container>
-
     <p *ngIf="avisoPegarImagen" style="font-size:10px;color:#777;margin:4px 0 0;text-align:center;">
       📋 Se abrió el chat del cliente en WhatsApp — pega la imagen y envíala
+    </p>
+
+    <p *ngIf="avisoAdjuntarImagen" style="font-size:10px;color:#777;margin:4px 0 0;text-align:center;">
+      📥 Se abrió el chat del cliente en WhatsApp — adjunta la imagen descargada y envíala
     </p>
   </div>
 

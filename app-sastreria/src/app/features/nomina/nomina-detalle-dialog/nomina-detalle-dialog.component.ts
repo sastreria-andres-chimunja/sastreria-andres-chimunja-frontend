@@ -42,8 +42,8 @@ export class NominaDetalleDialogComponent implements OnInit {
   ultimoItemPagado: any = null;
   generandoPDFNomina = false;
   enviandoWhatsAppNomina = false;
-  urlFallbackNomina: string | null = null;
   avisoPegarImagenNomina = false;
+  avisoAdjuntarImagenNomina = false;
 
   // Se genera apenas se marca el pago (no al hacer clic en "Enviar a
   // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
@@ -85,8 +85,8 @@ export class NominaDetalleDialogComponent implements OnInit {
   pagar(item: any): void {
     this.pagandoId = item.idItemPedido;
     this.ultimoItemPagado   = null;
-    this.urlFallbackNomina  = null;
     this.avisoPegarImagenNomina = false;
+    this.avisoAdjuntarImagenNomina = false;
     this.imagenPromise = undefined;
     this.itemPedidoService.pagar(item.idItemPedido).subscribe({
       next: (resp: any) => {
@@ -144,22 +144,18 @@ export class NominaDetalleDialogComponent implements OnInit {
     const texto = this.reciboService.generarTextoWhatsAppNomina(this.nominaReciboData);
 
     this.enviandoWhatsAppNomina = true;
-    this.urlFallbackNomina = null;
     this.avisoPegarImagenNomina = false;
+    this.avisoAdjuntarImagenNomina = false;
     try {
       // Si por algo no se alcanzó a precalcular al marcar el pago (o falló),
       // se genera aquí como respaldo — más lento, pero mejor que fallar.
       const imagen = await (this.imagenPromise ?? this.reciboService.generarImagenBlobNomina(this.nominaReciboData));
       const resultado = await this.reciboService.compartirConWhatsApp(imagen, this.data.telefono, texto);
       if (resultado === '_clipboard_') this.avisoPegarImagenNomina = true;
-      else if (resultado) this.urlFallbackNomina = resultado;
+      else this.avisoAdjuntarImagenNomina = true;
     } finally {
       this.enviandoWhatsAppNomina = false;
     }
-  }
-
-  abrirWhatsAppFallbackNomina(): void {
-    if (this.urlFallbackNomina) this.reciboService.abrirChatWhatsApp(this.urlFallbackNomina);
   }
 
   pagarTodo(): void {
@@ -167,8 +163,8 @@ export class NominaDetalleDialogComponent implements OnInit {
     if (pendientes.length === 0) return;
     this.pagandoTodo       = true;
     this.ultimoItemPagado  = null;
-    this.urlFallbackNomina = null;
     this.avisoPegarImagenNomina = false;
+    this.avisoAdjuntarImagenNomina = false;
     this.imagenPromise = undefined;
 
     this.nominaService.liquidar(this.data.idEmpleado).subscribe({
