@@ -470,11 +470,11 @@
               </div>
             </div>
             <div class="guardar-actions">
-              <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
-                <mat-icon>payments</mat-icon> Registrar abono
-              </button>
               <button class="btn-add-item-bottom" (click)="abrirDialogoItem()">
                 <mat-icon>add</mat-icon> Agregar ítem
+              </button>
+              <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
+                <mat-icon>payments</mat-icon> Registrar abono
               </button>
               <button class="btn-guardar-bottom" (click)="guardar()" [disabled]="guardando">
                 <mat-spinner *ngIf="guardando" diameter="18"></mat-spinner>
