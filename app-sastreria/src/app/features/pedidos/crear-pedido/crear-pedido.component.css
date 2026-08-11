@@ -568,5 +568,6 @@
   .guardar-actions    { margin-left: 0; flex-direction: column; }
   .btn-guardar-bottom { width: 100%; justify-content: center; }
   .btn-add-item-bottom { width: 100%; justify-content: center; }
+  .btn-registrar-abono { width: 100%; justify-content: center; }
   .total-pedido-display { justify-content: center; }
 }
