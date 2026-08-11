@@ -427,9 +427,14 @@
                   </span>
                 </div>
               </div>
-              <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
-                <mat-icon>payments</mat-icon> Registrar abono
-              </button>
+              <div class="items-total-actions">
+                <button class="btn-add-item-bottom" (click)="abrirDialogoItem()">
+                  <mat-icon>add</mat-icon> Agregar ítem
+                </button>
+                <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
+                  <mat-icon>payments</mat-icon> Registrar abono
+                </button>
+              </div>
             </div>
           </div>
 
@@ -470,9 +475,6 @@
               </div>
             </div>
             <div class="guardar-actions">
-              <button class="btn-add-item-bottom" (click)="abrirDialogoItem()">
-                <mat-icon>add</mat-icon> Agregar ítem
-              </button>
               <button class="btn-registrar-abono" (click)="abrirDialogoPago()">
                 <mat-icon>payments</mat-icon> Registrar abono
               </button>

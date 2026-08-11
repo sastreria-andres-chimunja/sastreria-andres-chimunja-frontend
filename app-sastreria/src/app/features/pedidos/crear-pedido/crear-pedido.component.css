@@ -540,6 +540,11 @@
   &:hover { background: #b07820; }
 }
 
+.items-total-actions {
+  display: flex; flex-direction: column; align-items: stretch; gap: 8px; flex-shrink: 0;
+  .btn-add-item-bottom, .btn-registrar-abono { justify-content: center; }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
