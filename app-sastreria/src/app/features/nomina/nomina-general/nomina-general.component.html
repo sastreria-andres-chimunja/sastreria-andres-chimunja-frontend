@@ -1,6 +1,6 @@
 <div class="main-content">
   <div class="toolbar-clientes">
-    <div class="search-box" *ngIf="!soloPropia">
+    <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" placeholder="Buscar empleado..." (keyup)="applyFilter($event)" />
     </div>
@@ -40,7 +40,8 @@
     </div>
   </div>
 
-  <!-- Facturado día a día (solo operario/asistente, su propia nómina) -->
+  <!-- Facturado día a día (solo operario/asistente, su propia nómina):
+       se muestra ADEMÁS de la tarjeta de resumen de abajo, no en su lugar. -->
   <div class="dia-card" *ngIf="soloPropia">
     <div class="dia-card-header">
       <mat-icon>calendar_view_day</mat-icon>
@@ -61,7 +62,7 @@
     </div>
   </div>
 
-  <div class="nomina-lista" *ngIf="!soloPropia">
+  <div class="nomina-lista">
     <div class="pay-card" *ngFor="let emp of balanceFiltrado">
       <div class="card-stripe"></div>
       <div class="card-top">

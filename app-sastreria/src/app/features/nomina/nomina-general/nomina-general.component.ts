@@ -50,12 +50,12 @@ export class NominaGeneralComponent implements OnInit {
   fechaFinCtrl = new FormControl<Date | null>(null);
 
   // ── Tarjeta "Facturado día a día" (solo operario/asistente, su propia
-  // nómina) -- reemplaza por completo la tarjeta de resumen para estos
-  // roles. Agrupa por la fecha en que CADA ÍTEM pasó a estado "Terminado"
-  // (no por fecha de entrega, que el admin fija de antemano y no refleja
-  // cuándo se hizo el trabajo; tampoco por fecha de pago, que depende de
-  // cuándo el admin liquida). Respeta el mismo filtro Desde/Hasta/Hoy ya
-  // existente en la pantalla.
+  // nómina) -- se muestra JUNTO a la tarjeta de resumen normal (igual que
+  // ve el admin), no en su lugar. Agrupa por la fecha en que CADA ÍTEM
+  // pasó a estado "Terminado" (no por fecha de entrega, que el admin fija
+  // de antemano y no refleja cuándo se hizo el trabajo; tampoco por fecha
+  // de pago, que depende de cuándo el admin liquida). Respeta el mismo
+  // filtro Desde/Hasta/Hoy ya existente en la pantalla.
   desglosePorDia: DiaGanancia[] = [];
 
   constructor(
@@ -111,10 +111,27 @@ export class NominaGeneralComponent implements OnInit {
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
 
     if (this.soloPropia) {
-      // Operario/asistente: solo la tarjeta "Facturado día a día",
-      // agrupada por fecha en que cada ítem pasó a Terminado.
+      // Operario/asistente: la misma tarjeta de resumen de siempre (igual
+      // que ve el admin)...
       const idEmpleado = this.authService.getIdEmpleado();
       if (!idEmpleado) return;
+      const historial = !!(inicio || fin);
+      this.nominaService.nominaEmpleado(idEmpleado, inicio, fin, historial).subscribe((resp: any) => {
+        const detalle = resp.nominaEmpleado;
+        if (detalle) {
+          this.balance = [{
+            ...detalle.empleado,
+            totalEntradas: detalle.entradas.total,
+            totalSalidas: detalle.salidas.total,
+            saldo: detalle.saldo,
+          }];
+          this.balanceFiltrado = [...this.balance];
+        }
+      });
+
+      // ...más la tarjeta "Facturado día a día", agrupada por fecha en que
+      // cada ítem pasó a Terminado -- es la única que respeta el filtro
+      // de fecha a nivel de día individual.
       this.nominaService.facturadoDiario(idEmpleado, inicio, fin).subscribe((resp: any) => {
         this.desglosePorDia = this.agruparPorFecha(resp.facturado, 'fechaTerminado', 'valorEmpleado');
       });
