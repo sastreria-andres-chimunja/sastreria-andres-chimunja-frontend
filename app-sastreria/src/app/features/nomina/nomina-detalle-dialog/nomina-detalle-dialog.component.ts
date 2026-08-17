@@ -19,10 +19,7 @@ export interface NominaDetalleDialogData {
   nombres: string;
   apellidos: string;
   telefono?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
   soloLectura?: boolean;
-  historial?: boolean;
 }
 
 @Component({
@@ -46,7 +43,7 @@ export interface NominaDetalleDialogData {
 })
 export class NominaDetalleDialogComponent implements OnInit {
   cargando = true;
-  detalle: any = null;
+  resumen: any = null;
   pagandoId: number | null = null;
   pagandoTodo = false;
   ultimoItemPagado: any = null;
@@ -55,12 +52,10 @@ export class NominaDetalleDialogComponent implements OnInit {
   avisoPegarImagenNomina = false;
   avisoAdjuntarImagenNomina = false;
 
-  // ── Facturado (filtro de fecha propio del modal, independiente del que
-  // haya usado el admin para abrirlo) -- agrupa por la fecha en que cada
-  // ítem pasó a Terminado, no por fecha de entrega ni de pago. Totalmente
-  // aparte de "esHistorial" (que solo controla las pestañas Por pagar/
-  // Pagado): aplicar este filtro nunca oculta los ítems pendientes.
-  facturado = 0;
+  // ── Filtro de fecha del modal (único, no hay otro) -- agrupa TODO
+  // (Facturado, Pendiente de pago, Abonos, Saldo, las pestañas de abajo)
+  // por la fecha en que cada ítem pasó a Terminado, no por fecha de
+  // entrega ni de pago. Sin filtro: se ve todo el histórico.
   filtroFechaAbierto = false;
   filtroFechaActivo = false;
   fechaInicioCtrl = new FormControl<Date | null>(null);
@@ -83,12 +78,7 @@ export class NominaDetalleDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarDetalle();
-    this.cargarFacturado();
-  }
-
-  get esHistorial(): boolean {
-    return !!(this.data.historial);
+    this.cargarResumen();
   }
 
   toggleFiltroFecha(): void {
@@ -98,7 +88,7 @@ export class NominaDetalleDialogComponent implements OnInit {
   aplicarFiltroFecha(): void {
     this.filtroFechaActivo = !!(this.fechaInicioCtrl.value || this.fechaFinCtrl.value);
     this.filtroFechaAbierto = false;
-    this.cargarFacturado();
+    this.cargarResumen();
   }
 
   /** Atajo: filtra por la fecha de hoy (desde y hasta = hoy). */
@@ -114,46 +104,19 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.fechaFinCtrl.reset();
     this.filtroFechaActivo = false;
     this.filtroFechaAbierto = false;
-    this.cargarFacturado();
+    this.cargarResumen();
   }
 
-  cargarFacturado(): void {
+  cargarResumen(): void {
+    this.cargando = true;
     const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
-    this.nominaService.facturadoDiario(this.data.idEmpleado, inicio, fin).subscribe((resp: any) => {
-      this.facturado = (resp.facturado ?? []).reduce(
-        (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0,
-      );
-    });
-  }
-
-  cargarDetalle(): void {
-    this.cargando = true;
-    this.nominaService
-      .nominaEmpleado(this.data.idEmpleado, this.data.fechaInicio, this.data.fechaFin, this.esHistorial)
-      .subscribe({
-        next: (resp: any) => {
-          this.detalle = resp.nominaEmpleado;
-          this.cargando = false;
-        },
-        error: () => { this.cargando = false; },
-      });
-  }
-
-  pagar(item: any): void {
-    this.pagandoId = item.idItemPedido;
-    this.ultimoItemPagado   = null;
-    this.avisoPegarImagenNomina = false;
-    this.avisoAdjuntarImagenNomina = false;
-    this.imagenPromise = undefined;
-    this.itemPedidoService.pagar(item.idItemPedido).subscribe({
+    this.nominaService.resumenPeriodo(this.data.idEmpleado, inicio, fin).subscribe({
       next: (resp: any) => {
-        this.pagandoId = null;
-        this.ultimoItemPagado = resp.item ?? item;
-        this.imagenPromise = this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
-        this.cargarDetalle();
+        this.resumen = resp.resumen;
+        this.cargando = false;
       },
-      error: () => { this.pagandoId = null; },
+      error: () => { this.cargando = false; },
     });
   }
 
@@ -216,8 +179,32 @@ export class NominaDetalleDialogComponent implements OnInit {
     }
   }
 
+  pagar(item: any): void {
+    this.pagandoId = item.idItemPedido;
+    this.ultimoItemPagado   = null;
+    this.avisoPegarImagenNomina = false;
+    this.avisoAdjuntarImagenNomina = false;
+    this.imagenPromise = undefined;
+    this.itemPedidoService.pagar(item.idItemPedido).subscribe({
+      next: (resp: any) => {
+        this.pagandoId = null;
+        this.ultimoItemPagado = resp.item ?? item;
+        this.imagenPromise = this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
+        this.cargarResumen();
+      },
+      error: () => { this.pagandoId = null; },
+    });
+  }
+
+  /**
+   * Liquida TODOS los ítems pendientes del empleado (sin importar el
+   * período elegido acá — es la misma acción masiva de siempre). Por eso
+   * solo se muestra cuando no hay un filtro de fecha activo: con un
+   * filtro puesto, "Pendiente de pago" ya no representa el total real, y
+   * el botón terminaría pagando de más de lo que el número visible sugiere.
+   */
   pagarTodo(): void {
-    const pendientes = this.detalle?.entradas?.items ?? [];
+    const pendientes = this.resumen?.pendientes ?? [];
     if (pendientes.length === 0) return;
     this.pagandoTodo       = true;
     this.ultimoItemPagado  = null;
@@ -228,7 +215,7 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.nominaService.liquidar(this.data.idEmpleado).subscribe({
       next: () => {
         this.pagandoTodo = false;
-        this.cargarDetalle();
+        this.cargarResumen();
       },
       error: () => { this.pagandoTodo = false; },
     });
@@ -240,11 +227,12 @@ export class NominaDetalleDialogComponent implements OnInit {
       next: () => {
         item.comisionEmpleado = comision;
         item.valorEmpleado = Number(item.valor ?? 0) * comision / 100;
-        if (this.detalle?.entradas?.items) {
-          this.detalle.entradas.total = this.detalle.entradas.items.reduce(
+        if (this.resumen?.pendientes) {
+          this.resumen.totalPendiente = this.resumen.pendientes.reduce(
             (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0
           );
-          this.detalle.saldo = this.detalle.entradas.total - (this.detalle.salidas?.total ?? 0);
+          this.resumen.facturado = this.resumen.totalPendiente + Number(this.resumen.totalPagadoItems ?? 0);
+          this.resumen.saldo = this.resumen.totalPendiente - Number(this.resumen.totalAbonos ?? 0);
         }
       },
     });

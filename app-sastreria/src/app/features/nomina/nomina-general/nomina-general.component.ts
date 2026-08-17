@@ -121,20 +121,17 @@ export class NominaGeneralComponent implements OnInit {
     }
   }
 
+  // El modal tiene su propio filtro de fecha (independiente del de esta
+  // lista) para "Facturado"/"Pendiente de pago"/"Abonos"/"Saldo" -- por
+  // eso ya no hace falta pasarle fechaInicio/fechaFin/historial acá.
   verDetalle(emp: any): void {
-    const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
-    const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
-
     this.dialog.open(NominaDetalleDialogComponent, {
       data: {
         idEmpleado: emp.idEmpleado,
         nombres: emp.nombres,
         apellidos: emp.apellidos,
         telefono: emp.telefono,
-        fechaInicio: inicio,
-        fechaFin: fin,
         soloLectura: !this.puedePagar,
-        historial: !!(inicio || fin),
       },
       panelClass: 'nomina-dialog-panel',
       maxWidth: '95vw',

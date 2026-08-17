@@ -5,7 +5,7 @@
       <div class="dialog-avatar">{{ getInitials(data.nombres) }}</div>
       <div class="dialog-title-group">
         <h2 class="dialog-title">{{ data.nombres }} {{ data.apellidos }}</h2>
-        <p class="dialog-subtitle">{{ esHistorial ? 'Historial de nómina' : 'Detalle de nómina' }}</p>
+        <p class="dialog-subtitle">Detalle de nómina</p>
       </div>
     </div>
     <button class="btn-close-dialog" (click)="cerrar()">
@@ -13,15 +13,16 @@
     </button>
   </div>
 
-  <!-- Facturado: total por la fecha en que cada ítem pasó a Terminado,
-       con su propio filtro de fecha (no afecta las pestañas de abajo) -->
+  <!-- Facturado: filtro de fecha único del modal -- agrupa todo (Facturado,
+       Pendiente de pago, Abonos, Saldo y las pestañas de abajo) por la
+       fecha en que cada ítem pasó a Terminado. -->
   <div class="facturado-strip">
     <div class="facturado-info">
       <mat-icon>calendar_view_day</mat-icon>
       <span>Facturado{{ filtroFechaActivo ? ' en el período' : '' }}</span>
     </div>
     <div class="facturado-right">
-      <span class="facturado-valor">{{ formatCOP(facturado) }}</span>
+      <span class="facturado-valor">{{ formatCOP(resumen?.facturado ?? 0) }}</span>
       <div class="fecha-filter-wrapper">
         <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha">
           <mat-icon>date_range</mat-icon>
@@ -29,7 +30,7 @@
 
         <div class="fecha-panel" *ngIf="filtroFechaAbierto">
           <div class="fecha-panel-header">
-            <p class="fecha-panel-title">Facturado</p>
+            <p class="fecha-panel-title">Rango de fechas</p>
             <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
               <mat-icon>close</mat-icon>
             </button>
@@ -65,26 +66,26 @@
   </div>
 
   <!-- Content -->
-  <div class="dialog-body" *ngIf="!cargando && detalle">
+  <div class="dialog-body" *ngIf="!cargando && resumen">
 
     <!-- Resumen -->
     <div class="resumen-strip">
       <div class="resumen-item">
-        <span class="resumen-label">{{ esHistorial ? 'Total pagado' : 'Pendiente de pago' }}</span>
-        <span class="resumen-value income">{{ formatCOP(detalle.entradas.total) }}</span>
+        <span class="resumen-label">Pendiente de pago</span>
+        <span class="resumen-value income">{{ formatCOP(resumen.totalPendiente) }}</span>
       </div>
       <div class="resumen-divider"></div>
       <div class="resumen-item">
         <span class="resumen-label">Abonos</span>
-        <span class="resumen-value paid">{{ formatCOP(detalle.salidas.total) }}</span>
+        <span class="resumen-value paid">{{ formatCOP(resumen.totalAbonos) }}</span>
       </div>
       <div class="resumen-divider"></div>
       <div class="resumen-item">
-        <span class="resumen-label">{{ esHistorial ? 'Neto pagado' : 'Saldo' }}</span>
+        <span class="resumen-label">Saldo</span>
         <span class="resumen-value"
-          [class.pending]="(detalle.entradas.total - detalle.salidas.total) > 0"
-          [class.zero]="(detalle.entradas.total - detalle.salidas.total) === 0">
-          {{ formatCOP(detalle.entradas.total - detalle.salidas.total) }}
+          [class.pending]="resumen.saldo > 0"
+          [class.zero]="resumen.saldo === 0">
+          {{ formatCOP(resumen.saldo) }}
         </span>
       </div>
     </div>
@@ -117,44 +118,47 @@
   <!-- Tabs -->
     <mat-tab-group class="movimientos-tabs" animationDuration="150ms">
 
-      <!-- ── MODO NORMAL: ítems pendientes de pago ── -->
-      <mat-tab *ngIf="!esHistorial">
+      <!-- ── Ítems pendientes de pago (facturados en el período) ── -->
+      <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">schedule</mat-icon>
           Por pagar
-          <span class="tab-badge income-badge">{{ detalle.entradas.items.length }}</span>
+          <span class="tab-badge income-badge">{{ resumen.pendientes.length }}</span>
         </ng-template>
 
         <div class="tab-content">
-          <div class="empty-state" *ngIf="detalle.entradas.items.length === 0">
+          <div class="empty-state" *ngIf="resumen.pendientes.length === 0">
             <mat-icon>check_circle</mat-icon>
-            <p>Todo al día — sin ítems pendientes</p>
+            <p>Todo al día — sin ítems pendientes{{ filtroFechaActivo ? ' en este período' : '' }}</p>
           </div>
 
-          <div class="pagar-todo-bar" *ngIf="detalle.entradas.items.length > 0 && !data.soloLectura">
-            <span class="pagar-todo-hint">{{ detalle.entradas.items.length }} ítem(s) pendiente(s) · {{ formatCOP(detalle.entradas.total) }}</span>
+          <div class="pagar-todo-bar" *ngIf="resumen.pendientes.length > 0 && !data.soloLectura && !filtroFechaActivo">
+            <span class="pagar-todo-hint">{{ resumen.pendientes.length }} ítem(s) pendiente(s) · {{ formatCOP(resumen.totalPendiente) }}</span>
             <button class="btn-pagar-todo" (click)="pagarTodo()" [disabled]="pagandoTodo">
               <mat-icon *ngIf="!pagandoTodo">payments</mat-icon>
               <mat-spinner *ngIf="pagandoTodo" diameter="14"></mat-spinner>
               <span>{{ pagandoTodo ? 'Liquidando…' : 'Liquidar todo' }}</span>
             </button>
           </div>
+          <p class="filtro-hint" *ngIf="resumen.pendientes.length > 0 && !data.soloLectura && filtroFechaActivo">
+            Quita el filtro de fecha para liquidar todo lo pendiente de una vez.
+          </p>
 
-          <div class="movimiento-list" *ngIf="detalle.entradas.items.length > 0">
+          <div class="movimiento-list" *ngIf="resumen.pendientes.length > 0">
             <div class="mov-header-items">
               <span>Descripción</span>
-              <span>Entrega</span>
+              <span>Terminado</span>
               <span class="text-right">Valor ítem</span>
               <span class="text-center">% Comisión</span>
               <span class="text-right">A pagar</span>
               <span></span>
             </div>
-            <div class="mov-row-items" *ngFor="let item of detalle.entradas.items">
+            <div class="mov-row-items" *ngFor="let item of resumen.pendientes">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
                 <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
               </div>
-              <span class="mov-fecha">{{ item.fechaEntrega || '—' }}</span>
+              <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
               <span class="mov-valor" style="text-align:right">{{ formatCOP(item.valor) }}</span>
               <div style="display:flex;justify-content:center">
                 <input class="comision-input" type="number" min="0" max="100"
@@ -178,58 +182,59 @@
         </div>
       </mat-tab>
 
-      <!-- ── MODO HISTORIAL: ítems ya pagados (cuenta cruzada) ── -->
-      <mat-tab *ngIf="esHistorial">
+      <!-- ── Ítems ya pagados (facturados en el período) ── -->
+      <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">check_circle</mat-icon>
           Pagado
-          <span class="tab-badge income-badge">{{ detalle.entradas.pagos.length }}</span>
+          <span class="tab-badge income-badge">{{ resumen.pagados.length }}</span>
         </ng-template>
 
         <div class="tab-content">
-          <div class="empty-state" *ngIf="detalle.entradas.pagos.length === 0">
+          <div class="empty-state" *ngIf="resumen.pagados.length === 0">
             <mat-icon>inbox</mat-icon>
-            <p>Sin pagos registrados en este período</p>
+            <p>Sin ítems pagados en este período</p>
           </div>
 
-          <div class="movimiento-list" *ngIf="detalle.entradas.pagos.length > 0">
+          <div class="movimiento-list" *ngIf="resumen.pagados.length > 0">
             <div class="mov-header-row">
               <span>Descripción</span>
-              <span>Fecha pago</span>
+              <span>Terminado</span>
               <span class="text-right">Valor</span>
             </div>
-            <div class="mov-row" *ngFor="let pago of detalle.entradas.pagos">
+            <div class="mov-row" *ngFor="let item of resumen.pagados">
               <div class="mov-desc">
-                <span class="mov-label">{{ pago.observacion || 'Pago nómina' }}</span>
+                <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
+                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
               </div>
-              <span class="mov-fecha">{{ pago.fecha || '—' }}</span>
-              <span class="mov-valor income">{{ formatCOP(pago.valor) }}</span>
+              <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
+              <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>
             </div>
           </div>
         </div>
       </mat-tab>
 
-      <!-- Tab Abonos (igual en ambos modos) -->
+      <!-- Tab Abonos -->
       <mat-tab>
         <ng-template mat-tab-label>
           <mat-icon class="tab-icon">arrow_upward</mat-icon>
           Abonos
-          <span class="tab-badge paid-badge">{{ detalle.salidas.abonos.length }}</span>
+          <span class="tab-badge paid-badge">{{ resumen.abonos.length }}</span>
         </ng-template>
 
         <div class="tab-content">
-          <div class="empty-state" *ngIf="detalle.salidas.abonos.length === 0">
+          <div class="empty-state" *ngIf="resumen.abonos.length === 0">
             <mat-icon>inbox</mat-icon>
-            <p>Sin abonos en el período</p>
+            <p>Sin abonos en este período</p>
           </div>
 
-          <div class="movimiento-list" *ngIf="detalle.salidas.abonos.length > 0">
+          <div class="movimiento-list" *ngIf="resumen.abonos.length > 0">
             <div class="mov-header-row">
               <span>Observación</span>
               <span>Fecha</span>
               <span class="text-right">Valor</span>
             </div>
-            <div class="mov-row" *ngFor="let abono of detalle.salidas.abonos">
+            <div class="mov-row" *ngFor="let abono of resumen.abonos">
               <div class="mov-desc">
                 <span class="mov-label">{{ abono.observacion || 'Abono' }}</span>
                 <span class="mov-sub">{{ abono.nombreTipoMovimiento }}</span>
@@ -245,7 +250,7 @@
   </div>
 
   <!-- Error -->
-  <div class="dialog-loading" *ngIf="!cargando && !detalle">
+  <div class="dialog-loading" *ngIf="!cargando && !resumen">
     <mat-icon style="font-size: 32px; color: var(--danger);">error_outline</mat-icon>
     <p>No se pudo cargar la información.</p>
   </div>
