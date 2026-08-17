@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EstadoService } from '../../core/services/estado.service';
 import { AuthService } from '../../core/services/auth.service';
+import { stringToDate } from '../../utils/date.utils';
 
 export interface GrupoPedido {
   idPedido: number;
@@ -21,9 +25,13 @@ export interface GrupoPedido {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
   ],
   templateUrl: './mis-items.component.html',
   styleUrl: './mis-items.component.css',
@@ -37,6 +45,13 @@ export class MisItemsComponent implements OnInit {
   filtroEstado: 'asignado' | 'terminado' | null = null;
 
   cambioEstadoId: number | null = null;
+
+  // Filtro por rango de fecha de entrega (calendario, mismo patrón que
+  // items-admin/pedidos-list/movimientos-list/nomina-general).
+  filtroFechaAbierto = false;
+  filtroFechaActivo = false;
+  fechaInicioCtrl = new FormControl<Date | null>(null);
+  fechaFinCtrl = new FormControl<Date | null>(null);
 
   // Pedidos que el empleado abrió manualmente (fuera de eso, quedan
   // agrupados/colapsados por defecto para no saturar la vista con varios
@@ -98,8 +113,55 @@ export class MisItemsComponent implements OnInit {
         (i.nombreEstado ?? '').toLowerCase().includes(this.filtroEstado!),
       );
     }
+    if (this.fechaInicioCtrl.value || this.fechaFinCtrl.value) {
+      const desde = this.inicioDelDia(this.fechaInicioCtrl.value);
+      const hasta = this.finDelDia(this.fechaFinCtrl.value);
+      res = res.filter((i) => {
+        const f = stringToDate(i.fechaEntrega);
+        if (!f) return false;
+        if (desde && f < desde) return false;
+        if (hasta && f > hasta) return false;
+        return true;
+      });
+    }
     this.itemsFiltrados = res;
     this.gruposFiltrados = this.agruparPorPedido(res);
+  }
+
+  private inicioDelDia(fecha: Date | null): Date | null {
+    if (!fecha) return null;
+    return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 0, 0, 0, 0);
+  }
+
+  private finDelDia(fecha: Date | null): Date | null {
+    if (!fecha) return null;
+    return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 23, 59, 59, 999);
+  }
+
+  toggleFiltroFecha(): void {
+    this.filtroFechaAbierto = !this.filtroFechaAbierto;
+  }
+
+  aplicarFiltroFecha(): void {
+    this.filtroFechaActivo = !!(this.fechaInicioCtrl.value || this.fechaFinCtrl.value);
+    this.filtroFechaAbierto = false;
+    this.aplicarFiltro();
+  }
+
+  /** Atajo: filtra por la fecha de hoy (desde y hasta = hoy). */
+  filtrarHoy(): void {
+    const hoy = new Date();
+    this.fechaInicioCtrl.setValue(hoy);
+    this.fechaFinCtrl.setValue(hoy);
+    this.aplicarFiltroFecha();
+  }
+
+  limpiarFiltroFecha(): void {
+    this.fechaInicioCtrl.reset();
+    this.fechaFinCtrl.reset();
+    this.filtroFechaActivo = false;
+    this.filtroFechaAbierto = false;
+    this.aplicarFiltro();
   }
 
   /** Agrupa la lista de ítems por pedido, conservando el orden de aparición. */
