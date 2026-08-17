@@ -40,26 +40,17 @@
     </div>
   </div>
 
-  <!-- Facturado día a día (solo operario/asistente, su propia nómina):
-       se muestra ADEMÁS de la tarjeta de resumen de abajo, no en su lugar. -->
+  <!-- Facturado (solo operario/asistente, su propia nómina): una sola
+       tarjeta con el total de lo facturado en lo que esté elegido en el
+       filtro de fecha (todo el tiempo si no hay filtro, un solo día con
+       "Hoy", o un rango con Desde/Hasta) -- se muestra ADEMÁS de la
+       tarjeta de resumen de abajo, no en su lugar. -->
   <div class="dia-card" *ngIf="soloPropia">
     <div class="dia-card-header">
       <mat-icon>calendar_view_day</mat-icon>
-      <span>Facturado día a día</span>
-      <span class="dia-total" *ngIf="desglosePorDia.length > 0">{{ formatCOP(totalDesglose) }}</span>
+      <span>Facturado{{ filtroFechaActivo ? ' en el período' : '' }}</span>
     </div>
-
-    <div class="dia-list" *ngIf="desglosePorDia.length > 0">
-      <div class="dia-row" *ngFor="let dia of desglosePorDia">
-        <span class="dia-fecha">{{ dia.fecha }}</span>
-        <span class="dia-valor">{{ formatCOP(dia.valor) }}</span>
-      </div>
-    </div>
-
-    <div class="dia-empty" *ngIf="desglosePorDia.length === 0">
-      <mat-icon>inbox</mat-icon>
-      <p>Sin ítems marcados como terminados en este período</p>
-    </div>
+    <div class="dia-card-valor">{{ formatCOP(totalDesglose) }}</div>
   </div>
 
   <div class="nomina-lista">
