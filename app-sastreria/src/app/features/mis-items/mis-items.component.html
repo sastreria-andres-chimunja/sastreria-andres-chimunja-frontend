@@ -54,74 +54,88 @@
     </p>
   </div>
 
-  <!-- LISTA DE ÍTEMS -->
-  <div class="items-grid" *ngIf="!cargando && itemsFiltrados.length > 0">
-    <div class="item-card" *ngFor="let item of itemsFiltrados"
-      [class.card-terminado]="esTerminado(item)">
+  <!-- LISTA DE ÍTEMS AGRUPADA POR PEDIDO -->
+  <div class="pedidos-grupos" *ngIf="!cargando && gruposFiltrados.length > 0">
+    <div class="grupo-pedido" *ngFor="let grupo of gruposFiltrados">
 
-      <!-- Encabezado de la card -->
-      <div class="card-header">
-        <div class="card-desc">
-          <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
-          <span class="pedido-ref">Pedido #{{ item.idPedido }}</span>
+      <!-- Encabezado del pedido: clic para desplegar/ocultar sus ítems -->
+      <button class="grupo-header" (click)="toggleGrupo(grupo.idPedido)">
+        <mat-icon class="grupo-chevron" [class.expandido]="estaExpandido(grupo.idPedido)">chevron_right</mat-icon>
+        <div class="grupo-info">
+          <span class="grupo-pedido-num">Pedido #{{ grupo.idPedido }}</span>
+          <span class="grupo-cliente" *ngIf="grupo.nombreCliente">{{ grupo.nombreCliente }}</span>
         </div>
-        <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
-          {{ item.nombreEstado }}
-        </span>
-      </div>
+        <div class="grupo-resumen">
+          <span class="grupo-entrega">
+            <mat-icon class="meta-icon">event</mat-icon>{{ formatFecha(grupo.fechaEntrega) }}
+          </span>
+          <span class="grupo-count">{{ grupo.items.length }} ítem{{ grupo.items.length === 1 ? '' : 's' }}</span>
+          <span class="grupo-valor">{{ formatCOP(totalGrupo(grupo)) }}</span>
+        </div>
+      </button>
 
-      <!-- Datos del ítem -->
-      <div class="card-meta">
-        <span class="meta-item" *ngIf="item.nombreCliente">
-          <mat-icon class="meta-icon">person</mat-icon>
-          {{ item.nombreCliente }}
-        </span>
-        <span class="meta-item">
-          <mat-icon class="meta-icon">event</mat-icon>
-          {{ formatFecha(item.fechaEntrega) }}
-        </span>
-        <span class="meta-item">
-          <mat-icon class="meta-icon">attach_money</mat-icon>
-          {{ formatCOP(item.valor) }}
-        </span>
-        <span class="meta-item" *ngIf="item.tipoPrendaMedida">
-          <mat-icon class="meta-icon">straighten</mat-icon>
-          {{ item.tipoPrendaMedida }}
-        </span>
-      </div>
+      <!-- Ítems del pedido (desplegados) -->
+      <div class="items-grid" *ngIf="estaExpandido(grupo.idPedido)">
+        <div class="item-card" *ngFor="let item of grupo.items"
+          [class.card-terminado]="esTerminado(item)">
 
-      <!-- Observación -->
-      <div class="card-obs" *ngIf="item.observacion">
-        <mat-icon class="obs-icon">notes</mat-icon>
-        <span>{{ item.observacion }}</span>
-      </div>
+          <!-- Encabezado de la card -->
+          <div class="card-header">
+            <div class="card-desc">
+              <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
+            </div>
+            <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
+              {{ item.nombreEstado }}
+            </span>
+          </div>
 
-      <!-- Acciones -->
-      <div class="card-actions">
-        <!-- Marcar terminado (cuando está Asignado) -->
-        <button class="btn-terminado"
-          *ngIf="esAsignado(item)"
-          [disabled]="cambioEstadoId === item.idItemPedido"
-          (click)="marcarTerminado(item)">
-          <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
-          <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">check_circle</mat-icon>
-          <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Marcar terminado' }}</span>
-        </button>
+          <!-- Datos del ítem -->
+          <div class="card-meta">
+            <span class="meta-item">
+              <mat-icon class="meta-icon">attach_money</mat-icon>
+              {{ formatCOP(item.valor) }}
+            </span>
+            <span class="meta-item" *ngIf="item.tipoPrendaMedida">
+              <mat-icon class="meta-icon">straighten</mat-icon>
+              {{ item.tipoPrendaMedida }}
+            </span>
+          </div>
 
-        <!-- Reabrir (cuando está Terminado) -->
-        <button class="btn-reabrir"
-          *ngIf="esTerminado(item)"
-          [disabled]="cambioEstadoId === item.idItemPedido"
-          (click)="reabrir(item)">
-          <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
-          <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">undo</mat-icon>
-          <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
-        </button>
+          <!-- Observación -->
+          <div class="card-obs" *ngIf="item.observacion">
+            <mat-icon class="obs-icon">notes</mat-icon>
+            <span>{{ item.observacion }}</span>
+          </div>
 
-        <!-- Entregado (solo lectura) -->
-        <span class="entregado-label" *ngIf="!esAsignado(item) && !esTerminado(item)">
-          <mat-icon>local_shipping</mat-icon> Entregado
-        </span>
+          <!-- Acciones -->
+          <div class="card-actions">
+            <!-- Marcar terminado (cuando está Asignado) -->
+            <button class="btn-terminado"
+              *ngIf="esAsignado(item)"
+              [disabled]="cambioEstadoId === item.idItemPedido"
+              (click)="marcarTerminado(item)">
+              <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
+              <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">check_circle</mat-icon>
+              <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Marcar terminado' }}</span>
+            </button>
+
+            <!-- Reabrir (cuando está Terminado) -->
+            <button class="btn-reabrir"
+              *ngIf="esTerminado(item)"
+              [disabled]="cambioEstadoId === item.idItemPedido"
+              (click)="reabrir(item)">
+              <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
+              <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">undo</mat-icon>
+              <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
+            </button>
+
+            <!-- Entregado (solo lectura) -->
+            <span class="entregado-label" *ngIf="!esAsignado(item) && !esTerminado(item)">
+              <mat-icon>local_shipping</mat-icon> Entregado
+            </span>
+          </div>
+
+        </div>
       </div>
 
     </div>
