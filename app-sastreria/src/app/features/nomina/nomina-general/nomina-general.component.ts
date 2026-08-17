@@ -12,14 +12,9 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { dateToString, stringToDate } from '../../../utils/date.utils';
+import { dateToString } from '../../../utils/date.utils';
 import { NominaDetalleDialogComponent } from '../nomina-detalle-dialog/nomina-detalle-dialog.component';
 import { AuthService } from '../../../core/services/auth.service';
-
-export interface DiaGanancia {
-  fecha: string;
-  valor: number;
-}
 
 @Component({
   selector: 'app-nomina-general',
@@ -48,15 +43,6 @@ export class NominaGeneralComponent implements OnInit {
 
   fechaInicioCtrl = new FormControl<Date | null>(null);
   fechaFinCtrl = new FormControl<Date | null>(null);
-
-  // ── Tarjeta "Facturado día a día" (solo operario/asistente, su propia
-  // nómina) -- se muestra JUNTO a la tarjeta de resumen normal (igual que
-  // ve el admin), no en su lugar. Agrupa por la fecha en que CADA ÍTEM
-  // pasó a estado "Terminado" (no por fecha de entrega, que el admin fija
-  // de antemano y no refleja cuándo se hizo el trabajo; tampoco por fecha
-  // de pago, que depende de cuándo el admin liquida). Respeta el mismo
-  // filtro Desde/Hasta/Hoy ya existente en la pantalla.
-  desglosePorDia: DiaGanancia[] = [];
 
   constructor(
     private nominaService: NominaService,
@@ -111,8 +97,7 @@ export class NominaGeneralComponent implements OnInit {
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
 
     if (this.soloPropia) {
-      // Operario/asistente: la misma tarjeta de resumen de siempre (igual
-      // que ve el admin)...
+      // Operario/asistente: solo su propia nómina.
       const idEmpleado = this.authService.getIdEmpleado();
       if (!idEmpleado) return;
       const historial = !!(inicio || fin);
@@ -127,13 +112,6 @@ export class NominaGeneralComponent implements OnInit {
           }];
           this.balanceFiltrado = [...this.balance];
         }
-      });
-
-      // ...más la tarjeta "Facturado día a día", agrupada por fecha en que
-      // cada ítem pasó a Terminado -- es la única que respeta el filtro
-      // de fecha a nivel de día individual.
-      this.nominaService.facturadoDiario(idEmpleado, inicio, fin).subscribe((resp: any) => {
-        this.desglosePorDia = this.agruparPorFecha(resp.facturado, 'fechaTerminado', 'valorEmpleado');
       });
     } else {
       this.nominaService.nominaGeneral(inicio, fin).subscribe((resp: any) => {
@@ -163,28 +141,6 @@ export class NominaGeneralComponent implements OnInit {
       maxHeight: '90vh',
       autoFocus: false,
     });
-  }
-
-  get totalDesglose(): number {
-    return this.desglosePorDia.reduce((s, d) => s + d.valor, 0);
-  }
-
-  /**
-   * Agrupa una lista de ítems por su campo de fecha ("dd/mm/yyyy"), sumando
-   * el campo de valor indicado, y ordena del día más reciente al más
-   * antiguo (varios ítems del mismo día se suman en una sola fila).
-   */
-  private agruparPorFecha(lista: any[], campoFecha: string, campoValor: string): DiaGanancia[] {
-    const mapa = new Map<string, number>();
-    for (const registro of lista ?? []) {
-      const fecha = registro[campoFecha];
-      if (!fecha) continue;
-      const valor = Number(registro[campoValor] ?? 0);
-      mapa.set(fecha, (mapa.get(fecha) ?? 0) + valor);
-    }
-    return Array.from(mapa.entries())
-      .map(([fecha, valor]) => ({ fecha, valor }))
-      .sort((a, b) => (stringToDate(b.fecha)?.getTime() ?? 0) - (stringToDate(a.fecha)?.getTime() ?? 0));
   }
 
   getInitials(nombre: string): string {

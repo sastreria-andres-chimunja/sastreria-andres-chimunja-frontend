@@ -1,13 +1,18 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
+import { dateToString } from '../../../utils/date.utils';
 
 export interface NominaDetalleDialogData {
   idEmpleado: number;
@@ -26,10 +31,15 @@ export interface NominaDetalleDialogData {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatDialogModule,
     MatIconModule,
     MatTabsModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
   ],
   templateUrl: './nomina-detalle-dialog.component.html',
   styleUrl: './nomina-detalle-dialog.component.css',
@@ -44,6 +54,17 @@ export class NominaDetalleDialogComponent implements OnInit {
   enviandoWhatsAppNomina = false;
   avisoPegarImagenNomina = false;
   avisoAdjuntarImagenNomina = false;
+
+  // ── Facturado (filtro de fecha propio del modal, independiente del que
+  // haya usado el admin para abrirlo) -- agrupa por la fecha en que cada
+  // ítem pasó a Terminado, no por fecha de entrega ni de pago. Totalmente
+  // aparte de "esHistorial" (que solo controla las pestañas Por pagar/
+  // Pagado): aplicar este filtro nunca oculta los ítems pendientes.
+  facturado = 0;
+  filtroFechaAbierto = false;
+  filtroFechaActivo = false;
+  fechaInicioCtrl = new FormControl<Date | null>(null);
+  fechaFinCtrl = new FormControl<Date | null>(null);
 
   // Se genera apenas se marca el pago (no al hacer clic en "Enviar a
   // WhatsApp") — compartir/copiar al portapapeles solo funciona si el
@@ -63,10 +84,47 @@ export class NominaDetalleDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDetalle();
+    this.cargarFacturado();
   }
 
   get esHistorial(): boolean {
     return !!(this.data.historial);
+  }
+
+  toggleFiltroFecha(): void {
+    this.filtroFechaAbierto = !this.filtroFechaAbierto;
+  }
+
+  aplicarFiltroFecha(): void {
+    this.filtroFechaActivo = !!(this.fechaInicioCtrl.value || this.fechaFinCtrl.value);
+    this.filtroFechaAbierto = false;
+    this.cargarFacturado();
+  }
+
+  /** Atajo: filtra por la fecha de hoy (desde y hasta = hoy). */
+  filtrarHoy(): void {
+    const hoy = new Date();
+    this.fechaInicioCtrl.setValue(hoy);
+    this.fechaFinCtrl.setValue(hoy);
+    this.aplicarFiltroFecha();
+  }
+
+  limpiarFiltroFecha(): void {
+    this.fechaInicioCtrl.reset();
+    this.fechaFinCtrl.reset();
+    this.filtroFechaActivo = false;
+    this.filtroFechaAbierto = false;
+    this.cargarFacturado();
+  }
+
+  cargarFacturado(): void {
+    const inicio = this.fechaInicioCtrl.value ? dateToString(this.fechaInicioCtrl.value) : undefined;
+    const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
+    this.nominaService.facturadoDiario(this.data.idEmpleado, inicio, fin).subscribe((resp: any) => {
+      this.facturado = (resp.facturado ?? []).reduce(
+        (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0,
+      );
+    });
   }
 
   cargarDetalle(): void {

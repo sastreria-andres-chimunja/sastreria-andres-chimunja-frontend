@@ -13,6 +13,51 @@
     </button>
   </div>
 
+  <!-- Facturado: total por la fecha en que cada ítem pasó a Terminado,
+       con su propio filtro de fecha (no afecta las pestañas de abajo) -->
+  <div class="facturado-strip">
+    <div class="facturado-info">
+      <mat-icon>calendar_view_day</mat-icon>
+      <span>Facturado{{ filtroFechaActivo ? ' en el período' : '' }}</span>
+    </div>
+    <div class="facturado-right">
+      <span class="facturado-valor">{{ formatCOP(facturado) }}</span>
+      <div class="fecha-filter-wrapper">
+        <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha">
+          <mat-icon>date_range</mat-icon>
+        </button>
+
+        <div class="fecha-panel" *ngIf="filtroFechaAbierto">
+          <div class="fecha-panel-header">
+            <p class="fecha-panel-title">Facturado</p>
+            <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="fecha-inputs">
+            <mat-form-field appearance="outline" class="fecha-field">
+              <mat-label>Desde</mat-label>
+              <input matInput [matDatepicker]="pickerDesdeFacturado" [formControl]="fechaInicioCtrl" placeholder="dd/mm/aaaa" readonly />
+              <mat-datepicker-toggle matIconSuffix [for]="pickerDesdeFacturado"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDesdeFacturado></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="fecha-field">
+              <mat-label>Hasta</mat-label>
+              <input matInput [matDatepicker]="pickerHastaFacturado" [formControl]="fechaFinCtrl" placeholder="dd/mm/aaaa" readonly />
+              <mat-datepicker-toggle matIconSuffix [for]="pickerHastaFacturado"></mat-datepicker-toggle>
+              <mat-datepicker #pickerHastaFacturado></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="fecha-actions">
+            <button class="btn-hoy" (click)="filtrarHoy()">Hoy</button>
+            <button class="btn-limpiar-fecha" (click)="limpiarFiltroFecha()">Limpiar</button>
+            <button class="btn-aplicar" (click)="aplicarFiltroFecha()">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div class="dialog-loading" *ngIf="cargando">
     <mat-spinner diameter="36"></mat-spinner>
