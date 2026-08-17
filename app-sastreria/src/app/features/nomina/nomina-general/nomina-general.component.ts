@@ -12,9 +12,14 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { dateToString } from '../../../utils/date.utils';
+import { dateToString, stringToDate } from '../../../utils/date.utils';
 import { NominaDetalleDialogComponent } from '../nomina-detalle-dialog/nomina-detalle-dialog.component';
 import { AuthService } from '../../../core/services/auth.service';
+
+export interface DiaGanancia {
+  fecha: string;
+  valor: number;
+}
 
 @Component({
   selector: 'app-nomina-general',
@@ -44,6 +49,15 @@ export class NominaGeneralComponent implements OnInit {
   fechaInicioCtrl = new FormControl<Date | null>(null);
   fechaFinCtrl = new FormControl<Date | null>(null);
 
+  // ── Tarjeta "día a día" (solo operario/asistente, su propia nómina) ────
+  // Sin filtro de fecha: lo pendiente por cobrar, agrupado por fecha de
+  // entrega del ítem (mismo criterio "por pagar" de siempre). Con un rango
+  // de fecha aplicado: lo que YA se cobró en ese rango, agrupado por la
+  // fecha real de pago -- mismo criterio que ya usa "Ver movimientos" al
+  // aplicar un filtro (esHistorial = !!(inicio || fin)).
+  desglosePorDia: DiaGanancia[] = [];
+  desgloseEsHistorial = false;
+
   constructor(
     private nominaService: NominaService,
     private dialog: MatDialog,
@@ -54,8 +68,8 @@ export class NominaGeneralComponent implements OnInit {
     this.traerBalance();
   }
 
-  // Operario solo ve su propia nómina, Admin/Asistente ven todos
-  get soloPropia(): boolean { return this.authService.esOperario(); }
+  // Operario y asistente solo ven su propia nómina, Admin ve todas
+  get soloPropia(): boolean { return this.authService.esOperario() || this.authService.esAsistente(); }
   get puedeVerDetalle(): boolean { return true; }
   get puedePagar(): boolean { return this.authService.esAdmin(); }
 
@@ -97,10 +111,13 @@ export class NominaGeneralComponent implements OnInit {
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
 
     if (this.soloPropia) {
-      // Operario: solo su propia nómina
+      // Operario/asistente: solo su propia nómina. Igual criterio que "Ver
+      // movimientos": sin fecha = lo pendiente por cobrar; con fecha = el
+      // historial de lo ya cobrado en ese rango.
       const idEmpleado = this.authService.getIdEmpleado();
       if (!idEmpleado) return;
-      this.nominaService.nominaEmpleado(idEmpleado, inicio, fin).subscribe((resp: any) => {
+      const historial = !!(inicio || fin);
+      this.nominaService.nominaEmpleado(idEmpleado, inicio, fin, historial).subscribe((resp: any) => {
         const detalle = resp.nominaEmpleado;
         if (detalle) {
           this.balance = [{
@@ -110,6 +127,11 @@ export class NominaGeneralComponent implements OnInit {
             saldo: detalle.saldo,
           }];
           this.balanceFiltrado = [...this.balance];
+
+          this.desgloseEsHistorial = historial;
+          this.desglosePorDia = historial
+            ? this.agruparPorFecha(detalle.entradas.pagos, 'fecha', 'valor')
+            : this.agruparPorFecha(detalle.entradas.items, 'fechaEntrega', 'valorEmpleado');
         }
       });
     } else {
@@ -140,6 +162,26 @@ export class NominaGeneralComponent implements OnInit {
       maxHeight: '90vh',
       autoFocus: false,
     });
+  }
+
+  /**
+   * Agrupa una lista de movimientos/ítems por su campo de fecha ("dd/mm/yyyy"),
+   * sumando el campo de valor indicado, y ordena del día más reciente al
+   * más antiguo. Ambos campos son genéricos porque la fuente cambia según
+   * el modo: pagos reales (historial) usan {fecha, valor}, ítems pendientes
+   * (por cobrar) usan {fechaEntrega, valorEmpleado}.
+   */
+  private agruparPorFecha(lista: any[], campoFecha: string, campoValor: string): DiaGanancia[] {
+    const mapa = new Map<string, number>();
+    for (const registro of lista ?? []) {
+      const fecha = registro[campoFecha];
+      if (!fecha) continue;
+      const valor = Number(registro[campoValor] ?? 0);
+      mapa.set(fecha, (mapa.get(fecha) ?? 0) + valor);
+    }
+    return Array.from(mapa.entries())
+      .map(([fecha, valor]) => ({ fecha, valor }))
+      .sort((a, b) => (stringToDate(b.fecha)?.getTime() ?? 0) - (stringToDate(a.fecha)?.getTime() ?? 0));
   }
 
   getInitials(nombre: string): string {
