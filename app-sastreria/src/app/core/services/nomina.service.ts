@@ -29,4 +29,12 @@ export class NominaService {
   liquidar(idEmpleado: number) {
     return this.http.post(`${this.api}/${idEmpleado}/liquidar`, {});
   }
+
+  /** Ítems marcados Terminado en el rango, agrupables por día en el frontend. */
+  facturadoDiario(idEmpleado: number, fechaInicio?: string, fechaFin?: string) {
+    const params: Record<string, string> = {};
+    if (fechaInicio) params['fechaInicio'] = fechaInicio;
+    if (fechaFin) params['fechaFin'] = fechaFin;
+    return this.http.get(`${this.api}/${idEmpleado}/facturado`, { params });
+  }
 }

@@ -38,6 +38,15 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; color: var(--primary); }
 }
 
+.dia-total {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #059669;
+}
+
 .dia-list {
   max-height: 320px;
   overflow-y: auto;

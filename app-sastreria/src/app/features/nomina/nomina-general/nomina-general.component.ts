@@ -49,14 +49,14 @@ export class NominaGeneralComponent implements OnInit {
   fechaInicioCtrl = new FormControl<Date | null>(null);
   fechaFinCtrl = new FormControl<Date | null>(null);
 
-  // ── Tarjeta "día a día" (solo operario/asistente, su propia nómina) ────
-  // Sin filtro de fecha: lo pendiente por cobrar, agrupado por fecha de
-  // entrega del ítem (mismo criterio "por pagar" de siempre). Con un rango
-  // de fecha aplicado: lo que YA se cobró en ese rango, agrupado por la
-  // fecha real de pago -- mismo criterio que ya usa "Ver movimientos" al
-  // aplicar un filtro (esHistorial = !!(inicio || fin)).
+  // ── Tarjeta "Facturado día a día" (solo operario/asistente, su propia
+  // nómina) -- reemplaza por completo la tarjeta de resumen para estos
+  // roles. Agrupa por la fecha en que CADA ÍTEM pasó a estado "Terminado"
+  // (no por fecha de entrega, que el admin fija de antemano y no refleja
+  // cuándo se hizo el trabajo; tampoco por fecha de pago, que depende de
+  // cuándo el admin liquida). Respeta el mismo filtro Desde/Hasta/Hoy ya
+  // existente en la pantalla.
   desglosePorDia: DiaGanancia[] = [];
-  desgloseEsHistorial = false;
 
   constructor(
     private nominaService: NominaService,
@@ -111,28 +111,12 @@ export class NominaGeneralComponent implements OnInit {
     const fin = this.fechaFinCtrl.value ? dateToString(this.fechaFinCtrl.value) : undefined;
 
     if (this.soloPropia) {
-      // Operario/asistente: solo su propia nómina. Igual criterio que "Ver
-      // movimientos": sin fecha = lo pendiente por cobrar; con fecha = el
-      // historial de lo ya cobrado en ese rango.
+      // Operario/asistente: solo la tarjeta "Facturado día a día",
+      // agrupada por fecha en que cada ítem pasó a Terminado.
       const idEmpleado = this.authService.getIdEmpleado();
       if (!idEmpleado) return;
-      const historial = !!(inicio || fin);
-      this.nominaService.nominaEmpleado(idEmpleado, inicio, fin, historial).subscribe((resp: any) => {
-        const detalle = resp.nominaEmpleado;
-        if (detalle) {
-          this.balance = [{
-            ...detalle.empleado,
-            totalEntradas: detalle.entradas.total,
-            totalSalidas: detalle.salidas.total,
-            saldo: detalle.saldo,
-          }];
-          this.balanceFiltrado = [...this.balance];
-
-          this.desgloseEsHistorial = historial;
-          this.desglosePorDia = historial
-            ? this.agruparPorFecha(detalle.entradas.pagos, 'fecha', 'valor')
-            : this.agruparPorFecha(detalle.entradas.items, 'fechaEntrega', 'valorEmpleado');
-        }
+      this.nominaService.facturadoDiario(idEmpleado, inicio, fin).subscribe((resp: any) => {
+        this.desglosePorDia = this.agruparPorFecha(resp.facturado, 'fechaTerminado', 'valorEmpleado');
       });
     } else {
       this.nominaService.nominaGeneral(inicio, fin).subscribe((resp: any) => {
@@ -164,12 +148,14 @@ export class NominaGeneralComponent implements OnInit {
     });
   }
 
+  get totalDesglose(): number {
+    return this.desglosePorDia.reduce((s, d) => s + d.valor, 0);
+  }
+
   /**
-   * Agrupa una lista de movimientos/ítems por su campo de fecha ("dd/mm/yyyy"),
-   * sumando el campo de valor indicado, y ordena del día más reciente al
-   * más antiguo. Ambos campos son genéricos porque la fuente cambia según
-   * el modo: pagos reales (historial) usan {fecha, valor}, ítems pendientes
-   * (por cobrar) usan {fechaEntrega, valorEmpleado}.
+   * Agrupa una lista de ítems por su campo de fecha ("dd/mm/yyyy"), sumando
+   * el campo de valor indicado, y ordena del día más reciente al más
+   * antiguo (varios ítems del mismo día se suman en una sola fila).
    */
   private agruparPorFecha(lista: any[], campoFecha: string, campoValor: string): DiaGanancia[] {
     const mapa = new Map<string, number>();

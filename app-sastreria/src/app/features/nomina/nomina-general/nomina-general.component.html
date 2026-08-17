@@ -1,6 +1,6 @@
 <div class="main-content">
   <div class="toolbar-clientes">
-    <div class="search-box">
+    <div class="search-box" *ngIf="!soloPropia">
       <span class="search-icon">🔍</span>
       <input type="text" placeholder="Buscar empleado..." (keyup)="applyFilter($event)" />
     </div>
@@ -40,11 +40,12 @@
     </div>
   </div>
 
-  <!-- Ganancias día a día (solo operario/asistente, su propia nómina) -->
+  <!-- Facturado día a día (solo operario/asistente, su propia nómina) -->
   <div class="dia-card" *ngIf="soloPropia">
     <div class="dia-card-header">
       <mat-icon>calendar_view_day</mat-icon>
-      <span>{{ desgloseEsHistorial ? 'Cobrado día a día' : 'Por cobrar día a día' }}</span>
+      <span>Facturado día a día</span>
+      <span class="dia-total" *ngIf="desglosePorDia.length > 0">{{ formatCOP(totalDesglose) }}</span>
     </div>
 
     <div class="dia-list" *ngIf="desglosePorDia.length > 0">
@@ -56,11 +57,11 @@
 
     <div class="dia-empty" *ngIf="desglosePorDia.length === 0">
       <mat-icon>inbox</mat-icon>
-      <p>{{ desgloseEsHistorial ? 'Sin pagos registrados en este período' : 'Sin ítems pendientes de cobro' }}</p>
+      <p>Sin ítems marcados como terminados en este período</p>
     </div>
   </div>
 
-  <div class="nomina-lista">
+  <div class="nomina-lista" *ngIf="!soloPropia">
     <div class="pay-card" *ngFor="let emp of balanceFiltrado">
       <div class="card-stripe"></div>
       <div class="card-top">
