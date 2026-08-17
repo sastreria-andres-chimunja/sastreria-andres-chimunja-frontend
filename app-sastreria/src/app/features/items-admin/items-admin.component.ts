@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../core/services/empleado.service';
+import { stringToDate } from '../../utils/date.utils';
 
 @Component({
   selector: 'app-items-admin',
@@ -14,10 +18,14 @@ import { EmpleadoService } from '../../core/services/empleado.service';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterLink,
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
   ],
   templateUrl: './items-admin.component.html',
   styleUrl: './items-admin.component.css',
@@ -31,7 +39,14 @@ export class ItemsAdminComponent implements OnInit {
 
   empleados: any[] = [];
   filtroEmpleado: string = '';
-  filtroFecha = '';
+
+  // Filtro por rango de fecha de entrega (calendario, mismo patrón que
+  // pedidos-list/movimientos-list/nomina-general) — reemplaza el antiguo
+  // <input type="date"> de fecha exacta.
+  filtroFechaAbierto = false;
+  filtroFechaActivo = false;
+  fechaInicioCtrl = new FormControl<Date | null>(null);
+  fechaFinCtrl = new FormControl<Date | null>(null);
 
   resumenVisible = true;
   toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
@@ -80,8 +95,16 @@ export class ItemsAdminComponent implements OnInit {
     } else if (this.filtroEmpleado) {
       res = res.filter((i) => String(i.idEmpleado) === this.filtroEmpleado);
     }
-    if (this.filtroFecha) {
-      res = res.filter((i) => this.fechaAIso(i.fechaEntrega) === this.filtroFecha);
+    if (this.fechaInicioCtrl.value || this.fechaFinCtrl.value) {
+      const desde = this.inicioDelDia(this.fechaInicioCtrl.value);
+      const hasta = this.finDelDia(this.fechaFinCtrl.value);
+      res = res.filter((i) => {
+        const f = stringToDate(i.fechaEntrega);
+        if (!f) return false;
+        if (desde && f < desde) return false;
+        if (hasta && f > hasta) return false;
+        return true;
+      });
     }
     this.itemsFiltrados = res;
   }
@@ -96,20 +119,47 @@ export class ItemsAdminComponent implements OnInit {
     this.aplicarFiltro();
   }
 
-  /** Convierte "dd/mm/yyyy" (formato del backend) a "yyyy-mm-dd" (formato de <input type="date">). */
-  private fechaAIso(fecha: string): string {
-    const partes = (fecha ?? '').split('/');
-    if (partes.length !== 3) return '';
-    const [dia, mes, anio] = partes;
-    return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+  private inicioDelDia(fecha: Date | null): Date | null {
+    if (!fecha) return null;
+    return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 0, 0, 0, 0);
+  }
+
+  private finDelDia(fecha: Date | null): Date | null {
+    if (!fecha) return null;
+    return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 23, 59, 59, 999);
+  }
+
+  toggleFiltroFecha(): void {
+    this.filtroFechaAbierto = !this.filtroFechaAbierto;
+  }
+
+  aplicarFiltroFecha(): void {
+    this.filtroFechaActivo = !!(this.fechaInicioCtrl.value || this.fechaFinCtrl.value);
+    this.filtroFechaAbierto = false;
+    this.aplicarFiltro();
+  }
+
+  /** Atajo: filtra por la fecha de hoy (desde y hasta = hoy). */
+  filtrarHoy(): void {
+    const hoy = new Date();
+    this.fechaInicioCtrl.setValue(hoy);
+    this.fechaFinCtrl.setValue(hoy);
+    this.aplicarFiltroFecha();
+  }
+
+  limpiarFiltroFecha(): void {
+    this.fechaInicioCtrl.reset();
+    this.fechaFinCtrl.reset();
+    this.filtroFechaActivo = false;
+    this.filtroFechaAbierto = false;
+    this.aplicarFiltro();
   }
 
   limpiarFiltros(): void {
     this.busqueda = '';
     this.filtroEstado = null;
     this.filtroEmpleado = '';
-    this.filtroFecha = '';
-    this.aplicarFiltro();
+    this.limpiarFiltroFecha();
   }
 
   estadoClase(item: any): 'pendiente' | 'asignado' | 'terminado' | 'entregado' | 'no-realizado' {
@@ -122,7 +172,7 @@ export class ItemsAdminComponent implements OnInit {
   }
 
   get hayFiltrosActivos(): boolean {
-    return !!this.busqueda || !!this.filtroEstado || !!this.filtroEmpleado || !!this.filtroFecha;
+    return !!this.busqueda || !!this.filtroEstado || !!this.filtroEmpleado || this.filtroFechaActivo;
   }
 
   // ── Resumen ──────────────────────────────────────────────────

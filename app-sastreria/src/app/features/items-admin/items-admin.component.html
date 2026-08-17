@@ -13,8 +13,39 @@
       <option *ngFor="let e of empleados" [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
     </select>
 
-    <input class="filtro-fecha" type="date" [(ngModel)]="filtroFecha" (ngModelChange)="aplicarFiltro()"
-      title="Filtrar por fecha de entrega" />
+    <div class="fecha-filter-wrapper">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de entrega">
+        <mat-icon>date_range</mat-icon>
+      </button>
+
+      <div class="fecha-panel" *ngIf="filtroFechaAbierto">
+        <div class="fecha-panel-header">
+          <p class="fecha-panel-title">Fecha de entrega</p>
+          <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="fecha-inputs">
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Desde</mat-label>
+            <input matInput [matDatepicker]="pickerDesdeItems" [formControl]="fechaInicioCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerDesdeItems"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDesdeItems></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Hasta</mat-label>
+            <input matInput [matDatepicker]="pickerHastaItems" [formControl]="fechaFinCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerHastaItems"></mat-datepicker-toggle>
+            <mat-datepicker #pickerHastaItems></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="fecha-actions">
+          <button class="btn-hoy" (click)="filtrarHoy()">Hoy</button>
+          <button class="btn-limpiar-fecha" (click)="limpiarFiltroFecha()">Limpiar</button>
+          <button class="btn-aplicar" (click)="aplicarFiltroFecha()">Aplicar</button>
+        </div>
+      </div>
+    </div>
 
     <button class="btn-limpiar" *ngIf="hayFiltrosActivos" (click)="limpiarFiltros()" matTooltip="Limpiar filtros">
       <mat-icon>filter_alt_off</mat-icon>
