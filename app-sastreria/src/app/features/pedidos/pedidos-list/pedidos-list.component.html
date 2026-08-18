@@ -224,6 +224,14 @@
         </div>
       </div>
 
+      <!-- Progreso de ítems terminados -->
+      <div class="items-progreso" *ngIf="p.totalItems">
+        <mat-icon class="items-icon" [class.items-completo]="p.itemsTerminados === p.totalItems">checklist</mat-icon>
+        <span [class.items-completo-text]="p.itemsTerminados === p.totalItems">
+          {{ p.itemsTerminados }}/{{ p.totalItems }} ítems terminados
+        </span>
+      </div>
+
       <!-- Días restantes -->
       <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado' && estadoClase(p) !== 'terminado'">
         <ng-container [ngSwitch]="true">

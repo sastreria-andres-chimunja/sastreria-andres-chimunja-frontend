@@ -346,6 +346,20 @@
 .valor-saldo-pendiente { color: var(--danger); }
 .valor-saldo-pagado { color: var(--success, #2e7d32); }
 
+/* Chip progreso de ítems */
+.items-progreso {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.items-icon { font-size: 14px; width: 14px; height: 14px; color: var(--text-muted); }
+.items-icon.items-completo { color: var(--success); }
+.items-completo-text { color: var(--success); font-weight: 600; }
+
 /* Chip días restantes */
 .dias-chip {
   display: flex;

@@ -11,6 +11,8 @@ export class Pedido {
   idTipoPedido?: number = 0;
   nombreTipoPedido?: string = '';
   totalAbonado?: number = 0;
+  totalItems?: number = 0;
+  itemsTerminados?: number = 0;
   tokenPublico?: string = '';
   created_at?: string = '';
   updated_at?: string = '';
