@@ -344,7 +344,11 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
     };
   }
 
-  getImageUrl(ruta: string): string { return `http://localhost:3000/${ruta}`; }
+  // Bug real: apuntaba a "http://localhost:3000/..." fijo -- solo
+  // funcionaba en desarrollo por coincidencia; en producción cualquier
+  // foto ya guardada (al reabrir el ítem) se veía rota. ImagenService.getUrl()
+  // arma la URL correctamente para cualquier entorno.
+  getImageUrl(ruta: string): string { return this.imagenService.getUrl(ruta); }
 
   etiquetaMedida(m: Medida): string {
     return `${m.tipoPrenda || 'Sin tipo'} – Pecho ${m.pecho ?? '?'} / Cintura ${m.cintura ?? '?'}`;

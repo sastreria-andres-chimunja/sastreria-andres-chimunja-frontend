@@ -696,7 +696,11 @@ export class CrearPedidoComponent implements OnInit {
     return (nombre ?? '?').split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
   }
 
-  getImageUrl(ruta: string): string { return `http://localhost:3000/${ruta}`; }
+  // Bug real: apuntaba a "http://localhost:3000/..." fijo -- solo
+  // funcionaba en desarrollo por coincidencia; en producción cualquier
+  // foto ya guardada (al reabrir el ítem) se veía rota. ImagenService.getUrl()
+  // arma la URL correctamente para cualquier entorno.
+  getImageUrl(ruta: string): string { return this.imagenService.getUrl(ruta); }
 
   getEstadoChipStyle(nombreEstado: string | undefined): Record<string, string> {
     const estado = (nombreEstado || '').toLowerCase();

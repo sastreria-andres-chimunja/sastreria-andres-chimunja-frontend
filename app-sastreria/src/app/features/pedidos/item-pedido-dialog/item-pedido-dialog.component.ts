@@ -343,8 +343,13 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
 
   cerrar(): void { this.dialogRef.close(null); }
 
+  // Bug real: esto apuntaba a "http://localhost:3000/..." fijo -- funcionaba
+  // en desarrollo por pura coincidencia (el backend local corre ahí mismo),
+  // pero en producción esa URL nunca resuelve, así que cualquier foto YA
+  // guardada (al reabrir el ítem) se veía rota. ImagenService.getUrl() ya
+  // arma la URL bien (usa API.BASE_URL, que sí cambia entre entornos).
   getImageUrl(ruta: string): string {
-    return `http://localhost:3000/${ruta}`;
+    return this.imagenService.getUrl(ruta);
   }
 
   etiquetaMedida(m: Medida): string {

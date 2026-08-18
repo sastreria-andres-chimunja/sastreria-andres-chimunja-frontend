@@ -26,6 +26,8 @@ export class ImagenService {
   }
 
   getUrl(rutaImagen: string): string {
-    return `${API.BASE_URL}/${rutaImagen}`;
+    // rutaImagen viene de file.path (multer) -- en Windows (solo en
+    // desarrollo local) usa backslashes, que no sirven en una URL.
+    return `${API.BASE_URL}/${rutaImagen.replace(/\\/g, '/')}`;
   }
 }
