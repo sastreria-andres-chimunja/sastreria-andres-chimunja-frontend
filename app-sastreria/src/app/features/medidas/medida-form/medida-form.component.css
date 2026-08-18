@@ -141,6 +141,25 @@
   margin: 0;
 }
 
+.btn-tomar-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-top: 10px;
+  cursor: pointer;
+  color: var(--text-secondary, #757575);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { border-color: #c8922a; color: #c8922a; }
+}
+
 /* ── Preview grid ── */
 .image-preview-grid {
   display: grid;

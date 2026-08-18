@@ -193,6 +193,8 @@
   &:hover { background: rgba(192,57,43,0.85); }
 }
 
+.upload-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
 .upload-zone {
   display: flex;
   align-items: center;
@@ -206,6 +208,25 @@
   font-family: 'DM Sans', sans-serif;
   transition: border-color 0.15s, color 0.15s;
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { border-color: var(--primary); color: var(--primary); }
+}
+
+.btn-tomar-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-top: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
   &:hover { border-color: var(--primary); color: var(--primary); }
 }
 

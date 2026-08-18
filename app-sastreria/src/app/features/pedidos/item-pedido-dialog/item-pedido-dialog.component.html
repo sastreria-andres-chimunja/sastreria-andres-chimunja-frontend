@@ -236,6 +236,10 @@
         <p class="drop-hint">PNG, JPG hasta 10MB</p>
         <input #fileInputMedida type="file" multiple accept="image/*" hidden (change)="onFileMedidaChange($event)" />
       </div>
+      <button type="button" class="btn-tomar-foto" (click)="fileInputMedidaCamera.click()">
+        <mat-icon>photo_camera</mat-icon> Tomar foto
+      </button>
+      <input #fileInputMedidaCamera type="file" accept="image/*" capture="environment" hidden (change)="onFileMedidaChange($event)" />
       <div class="fotos-grid" *ngIf="fotosPreviewNuevaMedida.length > 0">
         <div class="foto-item nueva" *ngFor="let url of fotosPreviewNuevaMedida; let i = index">
           <img [src]="url" alt="foto medida {{ i + 1 }}" />
@@ -267,11 +271,18 @@
       </div>
     </div>
 
-    <label class="upload-zone">
-      <mat-icon>add_photo_alternate</mat-icon>
-      <span>Agregar fotos</span>
-      <input type="file" multiple accept="image/*" (change)="onFileChange($event)" hidden />
-    </label>
+    <div class="upload-actions">
+      <label class="upload-zone">
+        <mat-icon>add_photo_alternate</mat-icon>
+        <span>Agregar fotos</span>
+        <input type="file" multiple accept="image/*" (change)="onFileChange($event)" hidden />
+      </label>
+      <label class="upload-zone">
+        <mat-icon>photo_camera</mat-icon>
+        <span>Tomar foto</span>
+        <input type="file" accept="image/*" capture="environment" (change)="onFileChange($event)" hidden />
+      </label>
+    </div>
 
   </div>
 

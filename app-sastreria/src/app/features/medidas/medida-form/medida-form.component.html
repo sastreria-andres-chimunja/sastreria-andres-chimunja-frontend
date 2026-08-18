@@ -209,6 +209,17 @@
             (change)="onFileSelected($event)"
           />
         </div>
+        <button type="button" class="btn-tomar-foto" (click)="fileInputCamera.click()">
+          <mat-icon>photo_camera</mat-icon> Tomar foto
+        </button>
+        <input
+          #fileInputCamera
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          (change)="onFileSelected($event)"
+        />
 
         <!-- Preview de imágenes -->
         <div class="image-preview-grid" *ngIf="imagePreviews.length > 0">
