@@ -437,6 +437,30 @@
   margin-top: 1px;
 }
 
+/* ── ACCIONES ── */
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-recordatorio-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #b91c1c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.13s;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { background: #991515; }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
   .items-grid {

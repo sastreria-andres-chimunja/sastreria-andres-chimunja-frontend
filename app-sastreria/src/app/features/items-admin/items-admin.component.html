@@ -171,6 +171,16 @@
         <span>{{ item.observacion }}</span>
       </div>
 
+      <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
+      <div class="card-actions" *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente">
+        <button class="btn-recordatorio-item"
+          matTooltip="Avisar por WhatsApp que la prenda está lista"
+          (click)="enviarRecordatorioItem(item)">
+          <mat-icon>notifications_active</mat-icon>
+          <span>Recordatorio</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
