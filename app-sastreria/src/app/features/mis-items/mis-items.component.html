@@ -164,6 +164,15 @@
               <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
             </button>
 
+            <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
+            <button class="btn-recordatorio-item"
+              *ngIf="esTerminado(item) && item.telefonoCliente"
+              matTooltip="Avisar por WhatsApp que la prenda está lista"
+              (click)="enviarRecordatorioItem(item)">
+              <mat-icon>notifications_active</mat-icon>
+              <span>Recordatorio</span>
+            </button>
+
             <!-- Entregado (solo lectura) -->
             <span class="entregado-label" *ngIf="!esAsignado(item) && !esTerminado(item)">
               <mat-icon>local_shipping</mat-icon> Entregado

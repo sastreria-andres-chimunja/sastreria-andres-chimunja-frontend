@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EstadoService } from '../../core/services/estado.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ReciboService } from '../../core/services/recibo.service';
 import { stringToDate } from '../../utils/date.utils';
 
 export interface GrupoPedido {
@@ -65,6 +66,7 @@ export class MisItemsComponent implements OnInit {
     private authService: AuthService,
     private itemPedidoService: ItemPedidoService,
     private estadoService: EstadoService,
+    private reciboService: ReciboService,
   ) {}
 
   ngOnInit(): void {
@@ -241,6 +243,15 @@ export class MisItemsComponent implements OnInit {
       },
       error: () => { this.cambioEstadoId = null; },
     });
+  }
+
+  /** Avisa por WhatsApp al cliente que su prenda (este ítem puntual) ya está lista. */
+  enviarRecordatorioItem(item: any): void {
+    if (!item.telefonoCliente) return;
+    const texto =
+      `*SASTRERÍA ANDRÉS CHIMUNJA*\n` +
+      `La prenda que tienes como prioridad en sastrería ya está lista.`;
+    this.reciboService.abrirChatWhatsAppTexto(item.telefonoCliente, texto);
   }
 
   // ── Resumen ──────────────────────────────────────────────────

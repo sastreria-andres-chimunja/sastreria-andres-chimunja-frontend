@@ -257,7 +257,7 @@
         </span>
         <div class="card-footer-actions">
           <button class="btn-recordatorio" (click)="enviarRecordatorio(p, $event)"
-            matTooltip="Enviar recordatorio por WhatsApp" *ngIf="esTerminadoVencido(p) && p.telefonoCliente">
+            matTooltip="Avisar por WhatsApp que el pedido está terminado" *ngIf="esTerminado(p) && p.telefonoCliente">
             <mat-icon>notifications_active</mat-icon> Recordatorio
           </button>
           <button class="btn-asignar" (click)="abrirDialogoAsignar(p, $event)"

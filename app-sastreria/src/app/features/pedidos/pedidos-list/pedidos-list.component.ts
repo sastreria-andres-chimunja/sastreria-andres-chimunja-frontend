@@ -262,14 +262,13 @@ export class PedidosListComponent implements OnInit {
     });
   }
 
-  /** Recordatorio por WhatsApp para pedidos terminados y nunca entregados. */
+  /** Avisa por WhatsApp que el pedido completo (todos sus ítems) ya está terminado. */
   enviarRecordatorio(p: Pedido, event: Event): void {
     event.stopPropagation();
     if (!p.telefonoCliente) return;
-    const noPedido = String(p.idPedido).padStart(4, '0');
     const texto =
       `*SASTRERÍA ANDRÉS CHIMUNJA*\n` +
-      `Le recuerda que su pedido *#${noPedido}* se encuentra *terminado* y listo para ser *entregado*`;
+      `Tu pedido está terminado.`;
     this.reciboService.abrirChatWhatsAppTexto(p.telefonoCliente, texto);
   }
 
@@ -339,7 +338,7 @@ export class PedidosListComponent implements OnInit {
   private esCancelado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('cancel');
   }
-  private esTerminado(p: Pedido): boolean {
+  esTerminado(p: Pedido): boolean {
     return (p.nombreEstado ?? '').toLowerCase().includes('terminad');
   }
   esTerminadoVencido(p: Pedido): boolean {

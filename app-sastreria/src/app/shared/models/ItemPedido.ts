@@ -14,4 +14,5 @@ export class ItemPedido {
   nombreEstado?: string = '';
   tipoPrendaMedida?: string = '';
   nombreCliente?: string = '';
+  telefonoCliente?: string = '';
 }
