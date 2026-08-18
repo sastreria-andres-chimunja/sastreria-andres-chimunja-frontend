@@ -188,6 +188,26 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     };
     this.camposMedida.forEach(c => { medidaFields[c.key] = [0]; });
     this.medidaForm = this.fb.group(medidaFields);
+
+    // Al elegir/quitar el "Empleado encargado" acá, el Estado debe seguir el
+    // mismo criterio automático que ya usa "Asignar empleado" (el botón
+    // masivo de toda la hoja de trabajo): Pendiente -> Asignado al asignar,
+    // Asignado -> Pendiente al desasignar. Si no, un ítem asignado
+    // individualmente desde este diálogo se quedaba con el Estado viejo
+    // (normalmente Pendiente) porque el campo Estado no se tocaba, y por
+    // eso nunca aparecía en "Mis ítems" (esa vista oculta los Pendiente).
+    // Solo actúa entre Pendiente/Asignado -- nunca pisa Terminado/
+    // Entregado/No realizado, que son cambios manuales deliberados.
+    this.form.get('idEmpleado')!.valueChanges.subscribe((nuevoIdEmpleado) => {
+      const idPendiente = this.estados.find(e => e.nombre.toLowerCase() === 'pendiente')?.idEstado;
+      const idAsignado  = this.estados.find(e => e.nombre.toLowerCase() === 'asignado')?.idEstado;
+      const estadoActual = this.form.get('idEstado')!.value;
+      if (nuevoIdEmpleado && estadoActual === idPendiente && idAsignado != null) {
+        this.form.get('idEstado')!.setValue(idAsignado);
+      } else if (!nuevoIdEmpleado && estadoActual === idAsignado && idPendiente != null) {
+        this.form.get('idEstado')!.setValue(idPendiente);
+      }
+    });
   }
 
   onModoChange(): void {
