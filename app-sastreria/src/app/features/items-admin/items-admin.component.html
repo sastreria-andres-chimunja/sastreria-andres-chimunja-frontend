@@ -128,21 +128,19 @@
           <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
           <a class="pedido-ref" [routerLink]="['/app/pedidos/editar', item.idPedido]">Pedido #{{ item.idPedido }}</a>
         </div>
-        <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
-          {{ item.nombreEstado }}
-        </span>
-      </div>
-
-      <!-- Empleado a cargo -->
-      <div class="empleado-row">
-        <span class="empleado-chip" *ngIf="item.nombreEmpleado">
-          <mat-icon class="meta-icon">engineering</mat-icon>
-          {{ item.nombreEmpleado }}
-        </span>
-        <span class="empleado-chip sin-asignar" *ngIf="!item.nombreEmpleado">
-          <mat-icon class="meta-icon">person_off</mat-icon>
-          Sin asignar
-        </span>
+        <div class="card-header-right">
+          <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
+            {{ item.nombreEstado }}
+          </span>
+          <span class="empleado-chip" *ngIf="item.nombreEmpleado">
+            <mat-icon class="meta-icon">engineering</mat-icon>
+            {{ item.nombreEmpleado }}
+          </span>
+          <span class="empleado-chip sin-asignar" *ngIf="!item.nombreEmpleado">
+            <mat-icon class="meta-icon">person_off</mat-icon>
+            Sin asignar
+          </span>
+        </div>
       </div>
 
       <!-- Datos del ítem -->
