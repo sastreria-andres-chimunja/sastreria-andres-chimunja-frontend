@@ -57,7 +57,7 @@
       </mat-nav-list>
     </ng-container>
 
-    <!-- Balance (admin y asistente ven nómina; solo admin ve movimientos) -->
+    <!-- Balance (admin y asistente ven nómina y movimientos) -->
     <div class="nav-title nav-label">Balance</div>
     <mat-nav-list class="nav-section" (click)="sidenav.close()">
       <a mat-list-item routerLink="/app/nomina" routerLinkActive="active">
@@ -68,7 +68,7 @@
         mat-list-item
         routerLink="/app/movimientos"
         routerLinkActive="active"
-        *ngIf="authService.esAdmin()"
+        *ngIf="authService.esAdmin() || authService.esAsistente()"
       >
         <mat-icon matListItemIcon>trending_up</mat-icon>
         <span matListItemTitle class="nav-label">Movimientos</span>
