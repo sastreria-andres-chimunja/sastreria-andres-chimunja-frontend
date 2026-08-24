@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CrearMovimientoComponent } from '../crear-movimiento/crear-movimiento.component';
 import { dateToString } from '../../../utils/date.utils';
 
-type TabCategoria = 'pedidos' | 'nomina' | 'gastos';
+type TabCategoria = 'pedidos' | 'nomina' | 'gastos' | 'creditos';
 
 @Component({
   selector: 'app-movimientos-list',
@@ -40,6 +40,7 @@ export class MovimientosListComponent implements OnInit {
   private movsPedidos:  Movimiento[] = [];
   private movsNomina:   Movimiento[] = [];
   private movsGastos:   Movimiento[] = [];
+  private movsCreditos: Movimiento[] = [];
 
   filtroFechaAbierto = false;
   filtroFechaActivo = false;
@@ -60,22 +61,25 @@ export class MovimientosListComponent implements OnInit {
     const fin    = this.fechaFinCtrl.value    ? dateToString(this.fechaFinCtrl.value)    : undefined;
 
     forkJoin({
-      pedidos: this.movimientoService.listarMovimientos(inicio, fin, 'pedidos'),
-      nomina:  this.movimientoService.listarMovimientos(inicio, fin, 'nomina'),
-      gastos:  this.movimientoService.listarMovimientos(inicio, fin, 'gastos'),
+      pedidos:  this.movimientoService.listarMovimientos(inicio, fin, 'pedidos'),
+      nomina:   this.movimientoService.listarMovimientos(inicio, fin, 'nomina'),
+      gastos:   this.movimientoService.listarMovimientos(inicio, fin, 'gastos'),
+      creditos: this.movimientoService.listarMovimientos(inicio, fin, 'creditos'),
     }).subscribe((resp: any) => {
-      this.movsPedidos = resp.pedidos.movimientos ?? [];
-      this.movsNomina  = resp.nomina.movimientos  ?? [];
-      this.movsGastos  = resp.gastos.movimientos  ?? [];
+      this.movsPedidos  = resp.pedidos.movimientos  ?? [];
+      this.movsNomina   = resp.nomina.movimientos   ?? [];
+      this.movsGastos   = resp.gastos.movimientos   ?? [];
+      this.movsCreditos = resp.creditos.movimientos ?? [];
       this.actualizarLista();
     });
   }
 
   private actualizarLista(): void {
     const map: Record<TabCategoria, Movimiento[]> = {
-      pedidos: this.movsPedidos,
-      nomina:  this.movsNomina,
-      gastos:  this.movsGastos,
+      pedidos:  this.movsPedidos,
+      nomina:   this.movsNomina,
+      gastos:   this.movsGastos,
+      creditos: this.movsCreditos,
     };
     this.movimientos = map[this.tabActivo];
   }
@@ -149,6 +153,7 @@ export class MovimientosListComponent implements OnInit {
       pedidos: 'Pagos de pedidos',
       nomina: 'Nómina',
       gastos: 'Gastos',
+      creditos: 'Créditos',
     };
     return labels[tab];
   }
@@ -158,6 +163,7 @@ export class MovimientosListComponent implements OnInit {
       pedidos: 'receipt_long',
       nomina: 'engineering',
       gastos: 'shopping_cart',
+      creditos: 'credit_card',
     };
     return icons[tab];
   }

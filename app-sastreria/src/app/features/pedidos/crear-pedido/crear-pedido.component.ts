@@ -48,6 +48,10 @@ import {
   PedidoGuardadoDialogComponent,
   PedidoGuardadoDialogData,
 } from '../pedido-guardado-dialog/pedido-guardado-dialog.component';
+import {
+  ConfirmarEntregaDialogComponent,
+  ConfirmarEntregaDialogData,
+} from '../confirmar-entrega-dialog/confirmar-entrega-dialog.component';
 import { ItemInlineFormComponent } from '../item-inline-form/item-inline-form.component';
 
 @Component({
@@ -83,6 +87,7 @@ export class CrearPedidoComponent implements OnInit {
   // estado ni pagos.
   private fechaEntregaOriginal: string | null = null;
   private valorTotalOriginal = 0;
+  private idEstadoOriginal: number | null = null;
 
   // Datos de apoyo
   estados: Estado[] = [];
@@ -280,6 +285,7 @@ export class CrearPedidoComponent implements OnInit {
       });
       this.fechaEntregaOriginal = p.fechaEntrega;
       this.valorTotalOriginal   = Number(p.valorTotal ?? 0);
+      this.idEstadoOriginal     = p.idEstado;
       this.tokenPublicoActual   = p.tokenPublico;
       this.clienteQuery = p.nombreCliente ?? '';
       this.clienteSeleccionado = {
@@ -451,25 +457,55 @@ export class CrearPedidoComponent implements OnInit {
     });
   }
 
-  private guardarItemDirecto(result: ItemDialogResult, itemOriginal?: any): void {
+  private async guardarItemDirecto(result: ItemDialogResult, itemOriginal?: any): Promise<void> {
+    // Si este cambio hace que TODO el pedido quede Entregado (este ítem
+    // pasa a Entregado y todos los demás ya lo estaban) y queda saldo
+    // pendiente, hay que preguntar el método de pago ANTES de guardar nada
+    // -- con opción de cancelar para no entregar por error.
+    const idEntregado = this.idEstadoEntregado;
+    const yaEraEntregado = itemOriginal?.idEstado === idEntregado;
+    const pasaAEntregado = idEntregado != null && result.item.idEstado === idEntregado && !yaEraEntregado;
+    const otrosItems = this.items.filter((it: any) => it.idItemPedido !== itemOriginal?.idItemPedido);
+    const completariaElPedido = pasaAEntregado && (otrosItems.length === 0 || otrosItems.every((it: any) => it.idEstado === idEntregado));
+
+    let idMetodoPago: number | undefined;
+    if (completariaElPedido && this.saldoPedido > 0.01) {
+      const elegido = await this.pedirMetodoPagoEntrega();
+      if (!elegido) return; // cancelado -- no se guarda nada
+      idMetodoPago = elegido;
+    }
+
     const guardarFn = (idMedida: number | null) => {
       const itemData = {
         ...result.item,
         idMedida,
         fechaEntrega: dateToString(result.item.fechaEntrega),
+        ...(idMetodoPago ? { idMetodoPago } : {}),
       };
       const obs = itemOriginal?.idItemPedido
         ? this.itemService.actualizar(itemOriginal.idItemPedido, itemData)
         : this.itemService.crear(itemData);
 
-      obs.subscribe((r: any) => {
-        const savedItem = r.item;
-        if (result.fotosNuevas.length > 0) {
-          this.imagenService.subir('itemPedido', savedItem.idItemPedido, result.fotosNuevas).subscribe();
-        }
-        result.fotosEliminar.forEach((id) => this.imagenService.eliminar(id).subscribe());
-        this.cargarItems();
-        this.avisarSiConsolido(r.consolidacion);
+      obs.subscribe({
+        next: (r: any) => {
+          const savedItem = r.item;
+          if (result.fotosNuevas.length > 0) {
+            this.imagenService.subir('itemPedido', savedItem.idItemPedido, result.fotosNuevas).subscribe();
+          }
+          result.fotosEliminar.forEach((id) => this.imagenService.eliminar(id).subscribe());
+          this.cargarItems();
+          this.avisarSiConsolido(r.consolidacion);
+        },
+        // Si el backend rechazó por falta de método de pago (no debería
+        // pasar -- el diálogo de arriba ya lo pide antes -- pero por si el
+        // saldo cambió justo en el medio), avisar en vez de fallar en
+        // silencio.
+        error: (e: any) => {
+          console.error(e);
+          this.snackBar.open(e?.error?.error || 'Error al guardar el ítem. Intenta de nuevo.', 'Cerrar', {
+            duration: 6000, panelClass: ['snack-error'],
+          });
+        },
       });
     };
 
@@ -484,6 +520,32 @@ export class CrearPedidoComponent implements OnInit {
     } else {
       guardarFn(result.item.idMedida ?? null);
     }
+  }
+
+  /**
+   * Abre el diálogo que pregunta el método de pago del saldo pendiente
+   * antes de dejar pasar un cambio a "Entregado" -- con opción de cancelar
+   * por si el usuario marcó Entregado por error. Devuelve el idMetodoPago
+   * elegido, o `null` si se canceló (el llamador debe abortar el guardado
+   * completo, no solo el abono).
+   */
+  private pedirMetodoPagoEntrega(): Promise<number | null> {
+    const ref = this.dialog.open(ConfirmarEntregaDialogComponent, {
+      data: {
+        idPedido: this.idPedido ?? 0,
+        saldo: this.saldoPedido,
+        metodosPago: this.metodosPago,
+      } as ConfirmarEntregaDialogData,
+      maxWidth: '95vw',
+      autoFocus: false,
+    });
+    return new Promise((resolve) => {
+      ref.afterClosed().subscribe((idMetodoPago: number | null) => resolve(idMetodoPago ?? null));
+    });
+  }
+
+  private get idEstadoEntregado(): number | undefined {
+    return this.estados.find((e) => e.nombre === 'Entregado')?.idEstado;
   }
 
   /**
@@ -579,6 +641,21 @@ export class CrearPedidoComponent implements OnInit {
       }
     }
 
+    // Si al editar el pedido el <select> "Estado del pedido" pasa
+    // directamente a Entregado (sin pasar por los ítems) y queda saldo
+    // pendiente, preguntar el método de pago ANTES de guardar -- con
+    // opción de cancelar para no entregar por error.
+    let idMetodoPagoEntrega: number | undefined;
+    if (this.isEdit) {
+      const idEntregado = this.idEstadoEntregado;
+      const pasaAEntregado = idEntregado != null && fv.idEstado === idEntregado && this.idEstadoOriginal !== idEntregado;
+      if (pasaAEntregado && this.saldoPedido > 0.01) {
+        const elegido = await this.pedirMetodoPagoEntrega();
+        if (!elegido) return; // cancelado -- no se guarda nada
+        idMetodoPagoEntrega = elegido;
+      }
+    }
+
     this.guardando = true;
     const pedidoData = {
       idCliente:     this.clienteSeleccionado.idCliente,
@@ -587,6 +664,7 @@ export class CrearPedidoComponent implements OnInit {
       valorTotal:    fv.valorTotal,
       fechaRecibido: dateToString(fv.fechaRecibido),
       fechaEntrega:  dateToString(fv.fechaEntrega),
+      ...(idMetodoPagoEntrega ? { idMetodoPago: idMetodoPagoEntrega } : {}),
     };
 
     try {
@@ -662,10 +740,15 @@ export class CrearPedidoComponent implements OnInit {
           itemsResumen,
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      this.snackBar.open('Error al guardar. Intenta de nuevo.', 'Cerrar', {
-        duration: 5000, panelClass: ['snack-error'],
+      // Si el backend rechazó por falta de método de pago (no debería pasar
+      // -- el diálogo de arriba ya lo pide antes -- pero por si el saldo
+      // cambió justo en el medio), mostrar el mensaje real en vez del
+      // genérico, para que quede claro qué pasó.
+      const mensaje = e?.error?.error || 'Error al guardar. Intenta de nuevo.';
+      this.snackBar.open(mensaje, 'Cerrar', {
+        duration: 6000, panelClass: ['snack-error'],
       });
       this.guardando = false;
     }

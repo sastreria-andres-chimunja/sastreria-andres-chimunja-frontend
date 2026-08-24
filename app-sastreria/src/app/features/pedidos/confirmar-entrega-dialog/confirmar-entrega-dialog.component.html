@@ -1,0 +1,45 @@
+<div class="dialog-wrapper">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon"><mat-icon>local_shipping</mat-icon></div>
+      <div>
+        <h2 class="dialog-title">Marcar como Entregado</h2>
+        <p class="dialog-subtitle">Pedido #{{ data.idPedido }}</p>
+      </div>
+    </div>
+    <button class="btn-close" (click)="cancelar()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <div class="dialog-body">
+    <div class="aviso-saldo">
+      <mat-icon>info</mat-icon>
+      <span>
+        Este pedido tiene un saldo pendiente de <strong>{{ formatCOP(data.saldo) }}</strong>.
+        Al marcarlo como Entregado, ese saldo se registrará automáticamente como abono.
+        Indica cómo se pagó:
+      </span>
+    </div>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Método de pago</mat-label>
+      <mat-icon matPrefix>credit_card</mat-icon>
+      <mat-select [formControl]="idMetodoPagoCtrl">
+        <mat-option *ngFor="let m of data.metodosPago" [value]="m.idMetodoPago">
+          {{ m.nombreMetodoPago }}
+        </mat-option>
+      </mat-select>
+      <mat-error>Selecciona un método de pago</mat-error>
+    </mat-form-field>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+    <button class="btn-confirmar" (click)="confirmar()">
+      <mat-icon>check</mat-icon> Confirmar entrega
+    </button>
+  </div>
+
+</div>

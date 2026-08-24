@@ -93,7 +93,7 @@
     </div>
   </div>
 
-  <!-- 3 TABS -->
+  <!-- 4 TABS -->
   <div class="tabs-row">
     <div class="tabs">
       <div class="tab" [class.active]="tabActivo === 'pedidos'" (click)="cambiarTab('pedidos')">
@@ -107,6 +107,10 @@
       <div class="tab" [class.active]="tabActivo === 'gastos'" (click)="cambiarTab('gastos')">
         <mat-icon class="tab-icon">shopping_cart</mat-icon>
         <span>Gastos</span>
+      </div>
+      <div class="tab" [class.active]="tabActivo === 'creditos'" (click)="cambiarTab('creditos')">
+        <mat-icon class="tab-icon">credit_card</mat-icon>
+        <span>Créditos</span>
       </div>
     </div>
   </div>
