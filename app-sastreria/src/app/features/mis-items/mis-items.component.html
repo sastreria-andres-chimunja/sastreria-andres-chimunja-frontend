@@ -222,6 +222,11 @@
       </span>
     </div>
 
+    <div class="detalle-sin-fotos" *ngIf="!itemDetalle.fotos?.length">
+      <mat-icon>image_not_supported</mat-icon>
+      <span>No tiene imágenes de referencia</span>
+    </div>
+
     <div class="detalle-info">
       <div class="detalle-info-header">
         <span class="item-num">#{{ itemDetalle.idItemPedido }}</span>
