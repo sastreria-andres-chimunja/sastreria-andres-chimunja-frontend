@@ -232,6 +232,20 @@
         </span>
       </div>
 
+      <!-- Fotos de referencia: si hay, miniaturas para ampliar; si no, aviso -->
+      <div class="fotos-row" *ngIf="p.fotos?.length; else sinFotos">
+        <button class="foto-thumb" *ngFor="let foto of p.fotos; let i = index"
+          (click)="abrirGaleria(p, $event, i)" matTooltip="Ampliar foto de referencia">
+          <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto de referencia" />
+        </button>
+      </div>
+      <ng-template #sinFotos>
+        <div class="fotos-row fotos-row-vacio">
+          <mat-icon class="fotos-vacio-icon">image_not_supported</mat-icon>
+          <span>Sin fotos de referencia</span>
+        </div>
+      </ng-template>
+
       <!-- Empleado asignado: solo se muestra si TODO el pedido quedó para
            un mismo empleado; si está repartido entre varios, dice "Varios" -->
       <div class="empleado-chip" *ngIf="p.empleadoAsignado">
@@ -305,4 +319,23 @@
     </div>
   </ng-template>
 
+</div>
+
+<!-- OVERLAY: ampliar foto de referencia -->
+<div class="foto-overlay" *ngIf="pedidoGaleria" (click)="cerrarGaleria()">
+  <div class="foto-overlay-panel" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-foto" (click)="cerrarGaleria()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button class="btn-foto-nav btn-foto-prev" *ngIf="pedidoGaleria.fotos!.length > 1" (click)="fotoAnterior($event)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <img class="foto-overlay-img" [src]="getImageUrl(pedidoGaleria.fotos![fotoActivaIdx].rutaImagen)" alt="Foto de referencia" />
+    <button class="btn-foto-nav btn-foto-next" *ngIf="pedidoGaleria.fotos!.length > 1" (click)="fotoSiguiente($event)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <span class="foto-overlay-contador" *ngIf="pedidoGaleria.fotos!.length > 1">
+      {{ fotoActivaIdx + 1 }} / {{ pedidoGaleria.fotos!.length }}
+    </span>
+  </div>
 </div>

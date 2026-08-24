@@ -20,4 +20,6 @@ export class Pedido {
   empleadoAsignado?: string | null = null;
   /** Fecha/hora en que el pedido pasó a "Entregado" (se limpia si se revierte). */
   fechaEntregado?: string | null = null;
+  /** Fotos de referencia de todos los ítems del pedido, juntas. */
+  fotos?: { idImagen: number; rutaImagen: string }[];
 }

@@ -13,6 +13,7 @@ import { MetodoPagoService } from '../../../core/services/metodos-pago.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
 import { ReciboService } from '../../../core/services/recibo.service';
+import { ImagenService } from '../../../core/services/imagen.service';
 import { Pedido } from '../../../shared/models/Pedido';
 import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString } from '../../../utils/date.utils';
@@ -61,6 +62,10 @@ export class PedidosListComponent implements OnInit {
   resumenVisible = true;
   toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
 
+  // Galería de fotos de referencia (ampliar al tocar), mismo patrón que "Mis ítems"
+  pedidoGaleria: Pedido | null = null;
+  fotoActivaIdx = 0;
+
   constructor(
     private pedidoService: PedidoService,
     private router: Router,
@@ -70,6 +75,7 @@ export class PedidosListComponent implements OnInit {
     private itemPedidoService: ItemPedidoService,
     private empleadoService: EmpleadoService,
     private reciboService: ReciboService,
+    private imagenService: ImagenService,
   ) {}
 
   ngOnInit(): void {
@@ -310,6 +316,36 @@ export class PedidosListComponent implements OnInit {
         },
       });
     });
+  }
+
+  // ── Galería de fotos de referencia ────────────────────────────
+  getImageUrl(ruta: string): string {
+    return this.imagenService.getUrl(ruta);
+  }
+
+  abrirGaleria(p: Pedido, event: Event, idx = 0): void {
+    event.stopPropagation();
+    if (!p.fotos?.length) return;
+    this.pedidoGaleria = p;
+    this.fotoActivaIdx = idx;
+  }
+
+  cerrarGaleria(): void {
+    this.pedidoGaleria = null;
+    this.fotoActivaIdx = 0;
+  }
+
+  fotoAnterior(event: Event): void {
+    event.stopPropagation();
+    if (!this.pedidoGaleria?.fotos?.length) return;
+    this.fotoActivaIdx =
+      (this.fotoActivaIdx - 1 + this.pedidoGaleria.fotos.length) % this.pedidoGaleria.fotos.length;
+  }
+
+  fotoSiguiente(event: Event): void {
+    event.stopPropagation();
+    if (!this.pedidoGaleria?.fotos?.length) return;
+    this.fotoActivaIdx = (this.fotoActivaIdx + 1) % this.pedidoGaleria.fotos.length;
   }
 
   /** Avisa por WhatsApp que el pedido completo (todos sus ítems) ya está terminado. */

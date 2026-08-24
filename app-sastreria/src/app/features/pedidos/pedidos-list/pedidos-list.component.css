@@ -360,6 +360,37 @@
 .items-icon.items-completo { color: var(--success); }
 .items-completo-text { color: var(--success); font-weight: 600; }
 
+/* Fotos de referencia (miniaturas o aviso de que no tiene) */
+.fotos-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px 8px;
+}
+
+.fotos-row-vacio {
+  font-size: 11px;
+  color: var(--text-muted, var(--text-secondary));
+  font-style: italic;
+}
+
+.fotos-vacio-icon { font-size: 15px; width: 15px; height: 15px; opacity: 0.6; }
+
+.foto-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  background: var(--bg);
+  transition: border-color 0.15s, transform 0.1s;
+}
+.foto-thumb:hover { border-color: var(--primary); transform: scale(1.05); }
+.foto-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 /* Chip empleado asignado (o "Varios empleados" si el paquete está repartido) */
 .empleado-chip {
   display: flex;
@@ -579,4 +610,85 @@
     min-width: 0;
     width: auto;
   }
+}
+
+/* ── OVERLAY: ampliar foto de referencia (mismo patrón que mis-items) ── */
+.foto-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.foto-overlay-panel {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.foto-overlay-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+}
+
+.btn-cerrar-foto {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-cerrar-foto:hover { background: rgba(0, 0, 0, 0.75); }
+
+.btn-foto-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  z-index: 2;
+}
+.btn-foto-nav:hover { background: rgba(0, 0, 0, 0.65); }
+.btn-foto-prev { left: 6px; }
+.btn-foto-next { right: 6px; }
+
+.foto-overlay-contador {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
 }
