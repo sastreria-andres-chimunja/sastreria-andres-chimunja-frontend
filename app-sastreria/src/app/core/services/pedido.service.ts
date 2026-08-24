@@ -49,4 +49,9 @@ export class PedidoService {
     if (excluirIdPedido) params['excluirIdPedido'] = String(excluirIdPedido);
     return this.http.get<any>(`${this.api}/valor-programado`, { params });
   }
+
+  /** Revierte un pedido de "Entregado" a "Terminado" (Admin/Asistente). */
+  revertirEntregado(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/revertir-entregado`, {});
+  }
 }

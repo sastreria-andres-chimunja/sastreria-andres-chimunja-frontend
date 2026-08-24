@@ -400,6 +400,12 @@
   min-width: 0;
 }
 
+.item-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #757575);
+}
+
 .desc-text {
   font-size: 15px;
   font-weight: 600;
@@ -428,6 +434,57 @@
 .badge-asignado  { background: rgba(26,115,232,.12); color: #1a73e8; }
 .badge-terminado { background: rgba(56,142,60,.12); color: #388e3c; }
 .badge-entregado { background: rgba(156,39,176,.12); color: #7b1fa2; }
+
+/* ── FOTOS DEL ÍTEM (miniaturas, clic para ampliar) ── */
+.card-fotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.foto-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--border, #e0e0e0);
+  padding: 0;
+  cursor: pointer;
+  background: var(--bg, #f5f5f5);
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.foto-thumb:hover {
+  border-color: var(--primary, #1a73e8);
+  transform: scale(1.03);
+}
+
+.foto-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── BOTÓN VER DETALLE ── */
+.btn-detalle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary, #757575);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { border-color: var(--primary, #1a73e8); color: var(--primary, #1a73e8); }
+}
 
 /* ── CARD META ── */
 .card-meta {
@@ -554,6 +611,145 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+/* ── OVERLAY: ampliar foto + detalle del ítem ── */
+.detalle-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.detalle-panel {
+  background: var(--surface, #fff);
+  border-radius: 14px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cerrar-detalle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-cerrar-detalle:hover { background: rgba(0, 0, 0, 0.65); }
+
+.detalle-foto-wrap {
+  position: relative;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  max-height: 50vh;
+}
+
+.detalle-foto {
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  display: block;
+}
+
+.btn-foto-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-foto-nav:hover { background: rgba(0, 0, 0, 0.65); }
+.btn-foto-prev { left: 10px; }
+.btn-foto-next { right: 10px; }
+
+.detalle-foto-contador {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+
+.detalle-info {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detalle-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detalle-desc {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text, #212121);
+  margin: 0;
+}
+
+.detalle-datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detalle-dato {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-secondary, #757575);
+}
+
+.detalle-obs {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary, #757575);
+  background: var(--bg, #f5f5f5);
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 /* ── RESPONSIVE ── */

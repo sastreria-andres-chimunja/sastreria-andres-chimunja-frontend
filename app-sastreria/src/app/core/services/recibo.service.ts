@@ -35,6 +35,9 @@ export interface ReciboNominaData {
   valor: number;
   fechaPago: string;
   negocio?: string;
+  /** true cuando el comprobante es de "Pagar todo" (varios ítems/pedidos a la vez) — no hay un único # de pedido que mostrar. */
+  esLiquidacionTotal?: boolean;
+  cantidadItems?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -1133,7 +1136,9 @@ export class ReciboService {
   <div class="center sub">Comprobante de Pago Nómina</div>
   <div class="center sub">${data.fechaPago}</div>
   <div class="line"></div>
-  <div class="row"><span>Pedido #:</span><span>${data.idPedido}</span></div>
+  ${data.esLiquidacionTotal
+    ? `<div class="row"><span>Liquidación:</span><span>${data.cantidadItems ?? 0} ítem(s)</span></div>`
+    : `<div class="row"><span>Pedido #:</span><span>${data.idPedido}</span></div>`}
   <div class="row"><span>Empleado:</span><span>${data.nombreEmpleado}</span></div>
   <div class="line"></div>
   <div style="margin: 3px 0;">
@@ -1151,14 +1156,12 @@ export class ReciboService {
 </html>`;
   }
 
-  /** Igual que imprimir(), pero para el comprobante de pago de nómina. */
+  /**
+   * Igual que imprimir(), pero para el comprobante de pago de nómina — sin
+   * pasar por QZ Tray (mismo motivo documentado en imprimir()).
+   */
   async imprimirNomina(data: ReciboNominaData): Promise<void> {
-    try {
-      await this.qzPrint.imprimirNomina(data);
-    } catch (err) {
-      console.error('No se pudo imprimir vía QZ Tray, usando impresión del navegador:', err);
-      this.imprimirNominaNavegador(data);
-    }
+    this.imprimirNominaNavegador(data);
   }
 
   private imprimirNominaNavegador(data: ReciboNominaData): void {
@@ -1229,7 +1232,9 @@ export class ReciboService {
       `${em.fecha} ${data.fechaPago}`,
       sep,
       `${em.persona} *Empleado:* ${data.nombreEmpleado}`,
-      `${em.clip} *Pedido:* #${data.idPedido}`,
+      data.esLiquidacionTotal
+        ? `${em.clip} *Liquidación:* ${data.cantidadItems ?? 0} ítem(s)`
+        : `${em.clip} *Pedido:* #${data.idPedido}`,
       `${em.pin} *Trabajo:*`,
       `_${data.descripcion}_`,
       sep,
@@ -1268,7 +1273,9 @@ export class ReciboService {
       { lbl: 'Empleado',      val: data.nombreEmpleado },
       ...(data.telefonoEmpleado ? [{ lbl: 'Teléfono', val: data.telefonoEmpleado }] : []),
       { lbl: 'Fecha de pago', val: this.formatFechaLarga(data.fechaPago) },
-      { lbl: 'Pedido',        val: `#${noOrden}` },
+      data.esLiquidacionTotal
+        ? { lbl: 'Liquidación', val: `${data.cantidadItems ?? 0} ítem(s)` }
+        : { lbl: 'Pedido',      val: `#${noOrden}` },
     ].map(c => `
       <div class="info-cell">
         <div class="info-lbl">${c.lbl}</div>
@@ -1329,7 +1336,7 @@ export class ReciboService {
 
   <div class="title-band">
     <h1>Comprobante de Pago</h1>
-    <div class="doc-num">Pedido #${noOrden}</div>
+    <div class="doc-num">${data.esLiquidacionTotal ? `Liquidación · ${data.cantidadItems ?? 0} ítem(s)` : `Pedido #${noOrden}`}</div>
   </div>
 
   <div class="info-grid">${infoEmpleado}</div>
@@ -1381,7 +1388,7 @@ export class ReciboService {
   /** Genera el comprobante de nómina como PDF A4. */
   async generarPDFBlobNomina(data: ReciboNominaData): Promise<File> {
     const html    = this.generarHtmlFacturaA4Nomina(data);
-    const noOrden = String(data.idPedido).padStart(4, '0');
+    const noOrden = data.esLiquidacionTotal ? 'liquidacion' : String(data.idPedido).padStart(4, '0');
     const nombre  = `comprobante-nomina-${noOrden}.pdf`;
 
     const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);
@@ -1427,7 +1434,7 @@ export class ReciboService {
   /** Genera el comprobante de nómina como imagen PNG en memoria (para WhatsApp). */
   async generarImagenBlobNomina(data: ReciboNominaData): Promise<File> {
     const html    = this.generarHtmlFacturaA4Nomina(data);
-    const noOrden = String(data.idPedido).padStart(4, '0');
+    const noOrden = data.esLiquidacionTotal ? 'liquidacion' : String(data.idPedido).padStart(4, '0');
     const nombre  = `comprobante-nomina-${noOrden}.png`;
 
     const { wrapper, limpiar } = await this.renderizarEnIframe(html, 794);

@@ -11,6 +11,21 @@
 </div>
 
 <div class="scroll-area">
+  <div class="tabs-row">
+    <div class="tabs">
+      <div class="tab" [class.active]="tabEstado === 'activos'" (click)="cambiarTab('activos')">
+        <mat-icon class="tab-icon">person</mat-icon>
+        <span>Activos</span>
+        <span class="tab-count">{{ countActivos }}</span>
+      </div>
+      <div class="tab" [class.active]="tabEstado === 'inactivos'" (click)="cambiarTab('inactivos')">
+        <mat-icon class="tab-icon">person_off</mat-icon>
+        <span>Inactivos</span>
+        <span class="tab-count">{{ countInactivos }}</span>
+      </div>
+    </div>
+  </div>
+
   <div class="card-list" *ngIf="empleadosFiltrados.length > 0; else sinResultados">
     <div class="item-card" [class.item-card-inactivo]="!e.activo" *ngFor="let e of empleadosFiltrados">
       <div class="card-stripe" [ngClass]="e.activo ? 'stripe-success' : 'stripe-inactivo'"></div>
@@ -19,6 +34,9 @@
         <div class="item-info">
           <p class="item-nombre">{{ e.nombres }} {{ e.apellidos }}</p>
           <div class="item-meta">
+            <span class="meta-chip" *ngIf="e.username">
+              <mat-icon>account_circle</mat-icon>{{ e.username }}
+            </span>
             <span class="meta-chip" *ngIf="e.telefono">
               <mat-icon>phone</mat-icon>{{ e.telefono }}
             </span>

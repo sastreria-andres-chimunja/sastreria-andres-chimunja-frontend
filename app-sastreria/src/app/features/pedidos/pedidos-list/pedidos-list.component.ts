@@ -22,6 +22,7 @@ import {
   AsignarEmpleadoDialogComponent,
   AsignarEmpleadoDialogData,
 } from '../asignar-empleado-dialog/asignar-empleado-dialog.component';
+import Swal from 'sweetalert2';
 
 type TabTipoPedido = 'arreglo' | 'confeccion';
 
@@ -90,6 +91,11 @@ export class PedidosListComponent implements OnInit {
 
   get puedeCrearPedido(): boolean {
     return !this.authService.esOperario();
+  }
+
+  /** Solo Admin y Asistente pueden revertir un pedido de "Entregado" a "Terminado". */
+  get puedeRevertir(): boolean {
+    return this.authService.esAdmin() || this.authService.esAsistente();
   }
 
   cargarPedidos(): void {
@@ -258,6 +264,50 @@ export class PedidosListComponent implements OnInit {
       });
       ref.afterClosed().subscribe((asignado) => {
         if (asignado) this.cargarPedidos();
+      });
+    });
+  }
+
+  /**
+   * Revierte un pedido de "Entregado" de vuelta a "Terminado" (solo Admin/
+   * Asistente). El backend deshace también el abono automático consolidado
+   * al entregar (si lo hubo) y limpia la fecha de entrega registrada.
+   */
+  revertirEntregado(p: Pedido, event: Event): void {
+    event.stopPropagation();
+    Swal.fire({
+      title: '¿Revertir a Terminado?',
+      html:
+        `El pedido #${p.idPedido} volverá al estado <b>Terminado</b>.` +
+        (p.fechaEntregado
+          ? '<br><br>El abono automático que se generó al entregarlo se eliminará y el saldo quedará pendiente otra vez.'
+          : ''),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d97706',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Sí, revertir',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.pedidoService.revertirEntregado(p.idPedido!).subscribe({
+        next: () => {
+          this.cargarPedidos();
+          Swal.fire({
+            title: 'Revertido',
+            text: `El pedido #${p.idPedido} volvió a Terminado.`,
+            icon: 'success',
+            confirmButtonColor: '#2563eb',
+          });
+        },
+        error: (err) => {
+          Swal.fire({
+            title: 'No se pudo revertir',
+            text: err?.error?.error ?? 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
+        },
       });
     });
   }

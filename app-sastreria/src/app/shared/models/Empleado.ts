@@ -7,4 +7,5 @@ export class Empleado {
   fechaCumpleanios = '';
   idRol: number = 0;
   activo?: boolean = true;
+  username?: string;
 }

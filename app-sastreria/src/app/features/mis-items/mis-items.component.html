@@ -117,11 +117,20 @@
           <!-- Encabezado de la card -->
           <div class="card-header">
             <div class="card-desc">
+              <span class="item-num">#{{ item.idItemPedido }}</span>
               <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
             </div>
             <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
               {{ item.nombreEstado }}
             </span>
+          </div>
+
+          <!-- Fotos: clic para ampliar y ver el detalle del ítem -->
+          <div class="card-fotos" *ngIf="item.fotos?.length">
+            <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
+              (click)="abrirDetalle(item, i)" matTooltip="Ampliar y ver detalle">
+              <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto del ítem" />
+            </button>
           </div>
 
           <!-- Datos del ítem -->
@@ -141,6 +150,12 @@
             <mat-icon class="obs-icon">notes</mat-icon>
             <span>{{ item.observacion }}</span>
           </div>
+
+          <!-- Ver detalle del ítem (sin fotos, igual permite ver todo el detalle) -->
+          <button class="btn-detalle" (click)="abrirDetalle(item)">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalle</span>
+          </button>
 
           <!-- Acciones -->
           <div class="card-actions">
@@ -185,4 +200,58 @@
     </div>
   </div>
 
+</div>
+
+<!-- OVERLAY: ampliar foto + detalle del ítem -->
+<div class="detalle-overlay" *ngIf="itemDetalle" (click)="cerrarDetalle()">
+  <div class="detalle-panel" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-detalle" (click)="cerrarDetalle()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="detalle-foto-wrap" *ngIf="itemDetalle.fotos?.length">
+      <button class="btn-foto-nav btn-foto-prev" *ngIf="itemDetalle.fotos.length > 1" (click)="fotoAnterior($event)">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <img class="detalle-foto" [src]="getImageUrl(itemDetalle.fotos[fotoActivaIdx].rutaImagen)" alt="Foto del ítem" />
+      <button class="btn-foto-nav btn-foto-next" *ngIf="itemDetalle.fotos.length > 1" (click)="fotoSiguiente($event)">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <span class="detalle-foto-contador" *ngIf="itemDetalle.fotos.length > 1">
+        {{ fotoActivaIdx + 1 }} / {{ itemDetalle.fotos.length }}
+      </span>
+    </div>
+
+    <div class="detalle-info">
+      <div class="detalle-info-header">
+        <span class="item-num">#{{ itemDetalle.idItemPedido }}</span>
+        <span class="estado-badge" [class]="'badge-' + estadoClase(itemDetalle)">{{ itemDetalle.nombreEstado }}</span>
+      </div>
+      <p class="detalle-desc">{{ itemDetalle.descripcion || 'Sin descripción' }}</p>
+
+      <div class="detalle-datos">
+        <div class="detalle-dato" *ngIf="itemDetalle.nombreCliente">
+          <mat-icon class="meta-icon">person</mat-icon>
+          <span>{{ itemDetalle.nombreCliente }}</span>
+        </div>
+        <div class="detalle-dato">
+          <mat-icon class="meta-icon">attach_money</mat-icon>
+          <span>{{ formatCOP(itemDetalle.valor) }}</span>
+        </div>
+        <div class="detalle-dato" *ngIf="itemDetalle.tipoPrendaMedida">
+          <mat-icon class="meta-icon">straighten</mat-icon>
+          <span>{{ itemDetalle.tipoPrendaMedida }}</span>
+        </div>
+        <div class="detalle-dato" *ngIf="itemDetalle.fechaEntrega">
+          <mat-icon class="meta-icon">event</mat-icon>
+          <span>Entrega: {{ formatFecha(itemDetalle.fechaEntrega) }}</span>
+        </div>
+      </div>
+
+      <div class="detalle-obs" *ngIf="itemDetalle.observacion">
+        <mat-icon class="obs-icon">notes</mat-icon>
+        <span>{{ itemDetalle.observacion }}</span>
+      </div>
+    </div>
+  </div>
 </div>

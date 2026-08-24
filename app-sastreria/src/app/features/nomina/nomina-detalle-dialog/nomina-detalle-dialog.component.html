@@ -90,7 +90,7 @@
       </div>
     </div>
 
-    <!-- Acciones de ticket tras un pago individual -->
+    <!-- Acciones de ticket tras un pago (individual o "Pagar todo") -->
     <div class="ticket-actions" *ngIf="ultimoItemPagado">
       <span class="ticket-label">Pago registrado — {{ ultimoItemPagado.descripcion }}</span>
       <button class="btn-ticket" (click)="imprimirTicketNomina()">

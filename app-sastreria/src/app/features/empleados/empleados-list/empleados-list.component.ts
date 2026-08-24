@@ -10,6 +10,8 @@ import { CrearMovimientoComponent } from '../../movimientos/crear-movimiento/cre
 import { Movimiento } from '../../../shared/models/Movimiento';
 import Swal from 'sweetalert2';
 
+type TabEstado = 'activos' | 'inactivos';
+
 @Component({
   selector: 'app-empleados-list',
   standalone: true,
@@ -20,6 +22,7 @@ import Swal from 'sweetalert2';
 export class EmpleadosListComponent implements OnInit {
   empleados: Empleado[] = [];
   busqueda = '';
+  tabEstado: TabEstado = 'activos';
 
   constructor(private EmpleadoService: EmpleadoService, public dialog: MatDialog) {}
 
@@ -31,13 +34,31 @@ export class EmpleadosListComponent implements OnInit {
     });
   }
 
+  cambiarTab(tab: TabEstado): void {
+    this.tabEstado = tab;
+  }
+
+  get countActivos(): number {
+    return this.empleados.filter((e) => e.activo).length;
+  }
+
+  get countInactivos(): number {
+    return this.empleados.filter((e) => !e.activo).length;
+  }
+
   get empleadosFiltrados(): Empleado[] {
-    if (!this.busqueda.trim()) return this.empleados;
-    const q = this.busqueda.toLowerCase();
-    return this.empleados.filter(e =>
-      `${e.nombres} ${e.apellidos}`.toLowerCase().includes(q) ||
-      (e.telefono ?? '').toLowerCase().includes(q)
+    let resultado = this.empleados.filter((e) =>
+      this.tabEstado === 'activos' ? !!e.activo : !e.activo
     );
+    const q = this.busqueda.toLowerCase().trim();
+    if (q) {
+      resultado = resultado.filter(e =>
+        `${e.nombres} ${e.apellidos}`.toLowerCase().includes(q) ||
+        (e.telefono ?? '').toLowerCase().includes(q) ||
+        (e.username ?? '').toLowerCase().includes(q)
+      );
+    }
+    return resultado;
   }
 
   initials(e: Empleado): string {

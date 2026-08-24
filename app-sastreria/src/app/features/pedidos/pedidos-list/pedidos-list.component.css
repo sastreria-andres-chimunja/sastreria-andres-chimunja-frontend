@@ -360,6 +360,29 @@
 .items-icon.items-completo { color: var(--success); }
 .items-completo-text { color: var(--success); font-weight: 600; }
 
+/* Chip empleado asignado (o "Varios empleados" si el paquete está repartido) */
+.empleado-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.empleado-chip-icon { font-size: 14px; width: 14px; height: 14px; color: var(--text-muted); }
+
+/* Chip fecha real de entrega (se sella al pasar a Entregado) */
+.entregado-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+}
+.entregado-chip-icon { font-size: 14px; width: 14px; height: 14px; color: var(--success); }
+
 /* Chip días restantes */
 .dias-chip {
   display: flex;
@@ -434,6 +457,15 @@
   font-family: 'DM Sans', sans-serif; transition: background 0.13s;
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
   &:hover { background: #e6f1fb; }
+}
+
+.btn-revertir {
+  background: transparent; border: 1px solid #d97706; color: #d97706;
+  border-radius: 8px; padding: 5px 12px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Sans', sans-serif; transition: background 0.13s;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: #fef3e2; }
 }
 
 /* ── Estado vacío ────────────────────────────────────────────── */

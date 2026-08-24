@@ -232,6 +232,19 @@
         </span>
       </div>
 
+      <!-- Empleado asignado: solo se muestra si TODO el pedido quedó para
+           un mismo empleado; si está repartido entre varios, dice "Varios" -->
+      <div class="empleado-chip" *ngIf="p.empleadoAsignado">
+        <mat-icon class="empleado-chip-icon">engineering</mat-icon>
+        <span>{{ p.empleadoAsignado === 'Varios' ? 'Varios empleados' : p.empleadoAsignado }}</span>
+      </div>
+
+      <!-- Fecha real de entrega al cliente (se sella al pasar a Entregado) -->
+      <div class="entregado-chip" *ngIf="p.fechaEntregado">
+        <mat-icon class="entregado-chip-icon">event_available</mat-icon>
+        <span>Entregado: {{ p.fechaEntregado }}</span>
+      </div>
+
       <!-- Días restantes -->
       <div class="dias-chip" *ngIf="estadoClase(p) !== 'entregado' && estadoClase(p) !== 'cancelado' && estadoClase(p) !== 'terminado'">
         <ng-container [ngSwitch]="true">
@@ -267,6 +280,10 @@
           <button class="btn-abono" (click)="abrirDialogoPago(p, $event)"
             matTooltip="Registrar abono" *ngIf="puedeCrearPedido">
             <mat-icon>payments</mat-icon> Abono
+          </button>
+          <button class="btn-revertir" (click)="revertirEntregado(p, $event)"
+            matTooltip="Revertir a Terminado" *ngIf="estadoClase(p) === 'entregado' && puedeRevertir">
+            <mat-icon>undo</mat-icon> Revertir
           </button>
           <button class="btn-view" (click)="irAEditar(p)">
             <mat-icon>edit</mat-icon> Editar

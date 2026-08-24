@@ -132,6 +132,8 @@ export class NominaDetalleDialogComponent implements OnInit {
       descripcion:     item.descripcion ?? '',
       valor:           valorEmpleado,
       fechaPago:       new Date().toLocaleDateString('es-CO'),
+      esLiquidacionTotal: !!item._esLiquidacionTotal,
+      cantidadItems:      item._cantidadItems,
     };
   }
 
@@ -213,8 +215,27 @@ export class NominaDetalleDialogComponent implements OnInit {
     this.imagenPromise = undefined;
 
     this.nominaService.liquidar(this.data.idEmpleado).subscribe({
-      next: () => {
+      next: (resp: any) => {
         this.pagandoTodo = false;
+        const items: any[] = resp?.items ?? [];
+        // Comprobante consolidado: reutiliza toda la infraestructura de
+        // recibo (ticket/PDF/WhatsApp) ya construida para el pago de un
+        // ítem individual, armando un "ítem" sintético que resume la
+        // liquidación completa en vez de un ítem/pedido puntual.
+        if (items.length > 0) {
+          const descripcion = items.length === 1
+            ? items[0].descripcion
+            : `Liquidación de nómina — ${items.length} ítems terminados`;
+          this.ultimoItemPagado = {
+            idItemPedido: items[0].idItemPedido,
+            idPedido: items[0].idPedido,
+            descripcion,
+            valorEmpleado: Number(resp?.totalPagado ?? 0),
+            _esLiquidacionTotal: true,
+            _cantidadItems: items.length,
+          };
+          this.imagenPromise = this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
+        }
         this.cargarResumen();
       },
       error: () => { this.pagandoTodo = false; },

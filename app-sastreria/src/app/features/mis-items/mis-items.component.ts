@@ -11,6 +11,7 @@ import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EstadoService } from '../../core/services/estado.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReciboService } from '../../core/services/recibo.service';
+import { ImagenService } from '../../core/services/imagen.service';
 import { stringToDate } from '../../utils/date.utils';
 
 export interface GrupoPedido {
@@ -62,11 +63,16 @@ export class MisItemsComponent implements OnInit {
   private idEstadoAsignado: number | null = null;
   private idEstadoTerminado: number | null = null;
 
+  // Detalle/ampliar foto: ítem actualmente abierto en el overlay (null = cerrado)
+  itemDetalle: any | null = null;
+  fotoActivaIdx = 0;
+
   constructor(
     private authService: AuthService,
     private itemPedidoService: ItemPedidoService,
     private estadoService: EstadoService,
     private reciboService: ReciboService,
+    private imagenService: ImagenService,
   ) {}
 
   ngOnInit(): void {
@@ -285,5 +291,33 @@ export class MisItemsComponent implements OnInit {
   nombreUsuario(): string {
     const s = this.authService.getSesion();
     return s ? `${s.nombres}` : '';
+  }
+
+  // ── Detalle del ítem / ampliar foto ─────────────────────────────
+  getImageUrl(ruta: string): string {
+    return this.imagenService.getUrl(ruta);
+  }
+
+  abrirDetalle(item: any, idxFoto = 0): void {
+    this.itemDetalle = item;
+    this.fotoActivaIdx = idxFoto;
+  }
+
+  cerrarDetalle(): void {
+    this.itemDetalle = null;
+    this.fotoActivaIdx = 0;
+  }
+
+  fotoAnterior(event: Event): void {
+    event.stopPropagation();
+    if (!this.itemDetalle?.fotos?.length) return;
+    this.fotoActivaIdx =
+      (this.fotoActivaIdx - 1 + this.itemDetalle.fotos.length) % this.itemDetalle.fotos.length;
+  }
+
+  fotoSiguiente(event: Event): void {
+    event.stopPropagation();
+    if (!this.itemDetalle?.fotos?.length) return;
+    this.fotoActivaIdx = (this.fotoActivaIdx + 1) % this.itemDetalle.fotos.length;
   }
 }

@@ -469,6 +469,7 @@ export class CrearPedidoComponent implements OnInit {
         }
         result.fotosEliminar.forEach((id) => this.imagenService.eliminar(id).subscribe());
         this.cargarItems();
+        this.avisarSiConsolido(r.consolidacion);
       });
     };
 
@@ -483,6 +484,24 @@ export class CrearPedidoComponent implements OnInit {
     } else {
       guardarFn(result.item.idMedida ?? null);
     }
+  }
+
+  /**
+   * Aviso breve (no bloqueante) cuando el backend consolidó automáticamente
+   * el saldo pendiente del pedido al marcarlo como Entregado (punto 7 del
+   * pedido del usuario) -- se dispara tanto al cambiar el estado del ítem
+   * como al cambiar el estado del pedido directamente desde el <select>.
+   */
+  private avisarSiConsolido(consolidacion: any): void {
+    if (!consolidacion?.consolidado) return;
+    Swal.fire({
+      icon: 'info',
+      title: 'Saldo consolidado automáticamente',
+      text: `Se registró un abono automático de ${this.formatCOP(consolidacion.monto)} al marcar el pedido como Entregado.`,
+      confirmButtonColor: '#185FA5',
+      timer: 6000,
+      timerProgressBar: true,
+    });
   }
 
   eliminarItem(item: any, i: number): void {
@@ -574,7 +593,8 @@ export class CrearPedidoComponent implements OnInit {
       let idPed = this.idPedido;
 
       if (this.isEdit) {
-        await this.pedidoService.actualizar(idPed!, pedidoData).toPromise();
+        const respEdit: any = await this.pedidoService.actualizar(idPed!, pedidoData).toPromise();
+        this.avisarSiConsolido(respEdit?.consolidacion);
         const itemsResumenEdit = this.items.map((it: any) => ({
           descripcion: String(it.descripcion ?? ''),
           valor: Number(it.valor ?? 0),
