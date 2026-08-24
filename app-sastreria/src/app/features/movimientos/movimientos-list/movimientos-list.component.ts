@@ -14,7 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CrearMovimientoComponent } from '../crear-movimiento/crear-movimiento.component';
 import { dateToString } from '../../../utils/date.utils';
 
-type TabCategoria = 'pedidos' | 'nomina' | 'gastos' | 'creditos';
+type TabCategoria = 'pedidos' | 'nomina' | 'gastos' | 'creditos' | 'transferencias';
 
 @Component({
   selector: 'app-movimientos-list',
@@ -37,10 +37,11 @@ export class MovimientosListComponent implements OnInit {
   busqueda = '';
   movimientos: Movimiento[] = [];
 
-  private movsPedidos:  Movimiento[] = [];
-  private movsNomina:   Movimiento[] = [];
-  private movsGastos:   Movimiento[] = [];
-  private movsCreditos: Movimiento[] = [];
+  private movsPedidos:       Movimiento[] = [];
+  private movsNomina:        Movimiento[] = [];
+  private movsGastos:        Movimiento[] = [];
+  private movsCreditos:      Movimiento[] = [];
+  private movsTransferencias: Movimiento[] = [];
 
   filtroFechaAbierto = false;
   filtroFechaActivo = false;
@@ -61,25 +62,28 @@ export class MovimientosListComponent implements OnInit {
     const fin    = this.fechaFinCtrl.value    ? dateToString(this.fechaFinCtrl.value)    : undefined;
 
     forkJoin({
-      pedidos:  this.movimientoService.listarMovimientos(inicio, fin, 'pedidos'),
-      nomina:   this.movimientoService.listarMovimientos(inicio, fin, 'nomina'),
-      gastos:   this.movimientoService.listarMovimientos(inicio, fin, 'gastos'),
-      creditos: this.movimientoService.listarMovimientos(inicio, fin, 'creditos'),
+      pedidos:        this.movimientoService.listarMovimientos(inicio, fin, 'pedidos'),
+      nomina:         this.movimientoService.listarMovimientos(inicio, fin, 'nomina'),
+      gastos:         this.movimientoService.listarMovimientos(inicio, fin, 'gastos'),
+      creditos:       this.movimientoService.listarMovimientos(inicio, fin, 'creditos'),
+      transferencias: this.movimientoService.listarMovimientos(inicio, fin, 'transferencias'),
     }).subscribe((resp: any) => {
-      this.movsPedidos  = resp.pedidos.movimientos  ?? [];
-      this.movsNomina   = resp.nomina.movimientos   ?? [];
-      this.movsGastos   = resp.gastos.movimientos   ?? [];
-      this.movsCreditos = resp.creditos.movimientos ?? [];
+      this.movsPedidos        = resp.pedidos.movimientos        ?? [];
+      this.movsNomina         = resp.nomina.movimientos         ?? [];
+      this.movsGastos         = resp.gastos.movimientos         ?? [];
+      this.movsCreditos       = resp.creditos.movimientos       ?? [];
+      this.movsTransferencias = resp.transferencias.movimientos ?? [];
       this.actualizarLista();
     });
   }
 
   private actualizarLista(): void {
     const map: Record<TabCategoria, Movimiento[]> = {
-      pedidos:  this.movsPedidos,
-      nomina:   this.movsNomina,
-      gastos:   this.movsGastos,
-      creditos: this.movsCreditos,
+      pedidos:        this.movsPedidos,
+      nomina:         this.movsNomina,
+      gastos:         this.movsGastos,
+      creditos:       this.movsCreditos,
+      transferencias: this.movsTransferencias,
     };
     this.movimientos = map[this.tabActivo];
   }
@@ -154,6 +158,7 @@ export class MovimientosListComponent implements OnInit {
       nomina: 'Nómina',
       gastos: 'Gastos',
       creditos: 'Créditos',
+      transferencias: 'Transferencias',
     };
     return labels[tab];
   }
@@ -164,6 +169,7 @@ export class MovimientosListComponent implements OnInit {
       nomina: 'engineering',
       gastos: 'shopping_cart',
       creditos: 'credit_card',
+      transferencias: 'account_balance',
     };
     return icons[tab];
   }
