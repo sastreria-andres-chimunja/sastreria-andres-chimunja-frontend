@@ -269,6 +269,42 @@ export class MisItemsComponent implements OnInit {
     return this.items.filter((i) => this.esTerminado(i)).length;
   }
 
+  /**
+   * Valor de lo que el empleado ha terminado (fechaTerminado, no fechaEntrega)
+   * hoy, o en la fecha/rango seleccionado en el filtro de arriba si hay uno
+   * activo -- reutiliza el mismo filtro de fecha del listado (aunque ese
+   * filtra la lista por fechaEntrega) para no duplicar otro selector aparte.
+   */
+  private get rangoParaValorTerminado(): { desde: Date | null; hasta: Date | null } {
+    if (this.filtroFechaActivo && (this.fechaInicioCtrl.value || this.fechaFinCtrl.value)) {
+      return {
+        desde: this.fechaInicioCtrl.value ? this.inicioDelDia(this.fechaInicioCtrl.value) : null,
+        hasta: this.fechaFinCtrl.value ? this.finDelDia(this.fechaFinCtrl.value) : null,
+      };
+    }
+    const hoy = new Date();
+    return { desde: this.inicioDelDia(hoy), hasta: this.finDelDia(hoy) };
+  }
+
+  get valorTerminadoPeriodo(): number {
+    const { desde, hasta } = this.rangoParaValorTerminado;
+    return this.items
+      .filter((i) => {
+        if (!i.fechaTerminado) return false;
+        const f = new Date(i.fechaTerminado);
+        if (desde && f < desde) return false;
+        if (hasta && f > hasta) return false;
+        return true;
+      })
+      .reduce((s, i) => s + Number(i.valor ?? 0), 0);
+  }
+
+  get etiquetaValorTerminado(): string {
+    return this.filtroFechaActivo && (this.fechaInicioCtrl.value || this.fechaFinCtrl.value)
+      ? 'Terminado en el rango'
+      : 'Terminado hoy';
+  }
+
   estadoClase(item: any): string {
     const n = (item.nombreEstado ?? '').toLowerCase();
     if (n.includes('terminad')) return 'terminado';

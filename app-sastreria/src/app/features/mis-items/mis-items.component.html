@@ -44,6 +44,14 @@
     <button class="btn-refresh" (click)="cargarItems()" matTooltip="Actualizar">
       <mat-icon>refresh</mat-icon>
     </button>
+
+    <div class="chip-valor-terminado" matTooltip="Suma del valor de los ítems marcados Terminado en este período">
+      <mat-icon class="chip-valor-icon">payments</mat-icon>
+      <div class="chip-valor-textos">
+        <span class="chip-valor-label">{{ etiquetaValorTerminado }}</span>
+        <span class="chip-valor-monto">{{ formatCOP(valorTerminadoPeriodo) }}</span>
+      </div>
+    </div>
   </div>
 </div>
 
