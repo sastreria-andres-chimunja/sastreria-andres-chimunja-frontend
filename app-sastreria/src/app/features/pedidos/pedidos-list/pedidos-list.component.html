@@ -186,9 +186,17 @@
           <p class="cliente-nombre">{{ p.nombreCliente }}</p>
           <p class="pedido-id"># {{ p.idPedido }}</p>
         </div>
-        <span class="estado-badge" [ngClass]="'badge-' + estadoClase(p)">
-          {{ p.nombreEstado || 'Sin estado' }}
-        </span>
+        <div class="card-header-right">
+          <span class="estado-badge" [ngClass]="'badge-' + estadoClase(p)">
+            {{ p.nombreEstado || 'Sin estado' }}
+          </span>
+          <!-- Empleado asignado: solo se muestra si TODO el pedido quedó para
+               un mismo empleado; si está repartido entre varios, dice "Varios" -->
+          <span class="empleado-chip" *ngIf="p.empleadoAsignado">
+            <mat-icon>engineering</mat-icon>
+            {{ p.empleadoAsignado === 'Varios' ? 'Varios empleados' : p.empleadoAsignado }}
+          </span>
+        </div>
       </div>
 
       <!-- Fechas y valor -->
@@ -245,13 +253,6 @@
           <span>Sin fotos de referencia</span>
         </div>
       </ng-template>
-
-      <!-- Empleado asignado: solo se muestra si TODO el pedido quedó para
-           un mismo empleado; si está repartido entre varios, dice "Varios" -->
-      <div class="empleado-chip" *ngIf="p.empleadoAsignado">
-        <mat-icon class="empleado-chip-icon">engineering</mat-icon>
-        <span>{{ p.empleadoAsignado === 'Varios' ? 'Varios empleados' : p.empleadoAsignado }}</span>
-      </div>
 
       <!-- Fecha real de entrega al cliente (se sella al pasar a Entregado) -->
       <div class="entregado-chip" *ngIf="p.fechaEntregado">

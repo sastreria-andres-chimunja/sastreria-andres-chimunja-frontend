@@ -295,6 +295,14 @@
 
 .pedido-id { font-size: 11px; color: var(--text-muted); margin: 0; }
 
+.card-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
 .estado-badge {
   font-size: 10px; font-weight: 700; padding: 3px 9px;
   border-radius: 20px; white-space: nowrap; flex-shrink: 0;
@@ -393,14 +401,18 @@
 
 /* Chip empleado asignado (o "Varios empleados" si el paquete está repartido) */
 .empleado-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 0 14px 8px;
-  font-size: 11px;
-  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  background: rgba(26,115,232,.08);
+  color: var(--primary);
+  mat-icon { font-size: 12px; width: 12px; height: 12px; }
 }
-.empleado-chip-icon { font-size: 14px; width: 14px; height: 14px; color: var(--text-muted); }
 
 /* Chip fecha real de entrega (se sella al pasar a Entregado) */
 .entregado-chip {
