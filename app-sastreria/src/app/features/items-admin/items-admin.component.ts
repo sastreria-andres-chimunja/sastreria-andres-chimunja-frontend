@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../core/services/empleado.service';
 import { ReciboService } from '../../core/services/recibo.service';
+import { ImagenService } from '../../core/services/imagen.service';
 import { stringToDate } from '../../utils/date.utils';
 
 @Component({
@@ -52,10 +53,15 @@ export class ItemsAdminComponent implements OnInit {
   resumenVisible = true;
   toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
 
+  // Galería de fotos de referencia (ampliar al tocar), mismo patrón que "Mis ítems"/"Hoja de trabajo"
+  itemGaleria: any | null = null;
+  fotoActivaIdx = 0;
+
   constructor(
     private itemPedidoService: ItemPedidoService,
     private empleadoService: EmpleadoService,
     private reciboService: ReciboService,
+    private imagenService: ImagenService,
   ) {}
 
   ngOnInit(): void {
@@ -162,6 +168,36 @@ export class ItemsAdminComponent implements OnInit {
     this.filtroEstado = null;
     this.filtroEmpleado = '';
     this.limpiarFiltroFecha();
+  }
+
+  // ── Galería de fotos de referencia ────────────────────────────
+  getImageUrl(ruta: string): string {
+    return this.imagenService.getUrl(ruta);
+  }
+
+  abrirGaleria(item: any, event: Event, idx = 0): void {
+    event.stopPropagation();
+    if (!item.fotos?.length) return;
+    this.itemGaleria = item;
+    this.fotoActivaIdx = idx;
+  }
+
+  cerrarGaleria(): void {
+    this.itemGaleria = null;
+    this.fotoActivaIdx = 0;
+  }
+
+  fotoAnterior(event: Event): void {
+    event.stopPropagation();
+    if (!this.itemGaleria?.fotos?.length) return;
+    this.fotoActivaIdx =
+      (this.fotoActivaIdx - 1 + this.itemGaleria.fotos.length) % this.itemGaleria.fotos.length;
+  }
+
+  fotoSiguiente(event: Event): void {
+    event.stopPropagation();
+    if (!this.itemGaleria?.fotos?.length) return;
+    this.fotoActivaIdx = (this.fotoActivaIdx + 1) % this.itemGaleria.fotos.length;
   }
 
   /** Avisa por WhatsApp al cliente que su prenda (este ítem puntual) ya está lista. */

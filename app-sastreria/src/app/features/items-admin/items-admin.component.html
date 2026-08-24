@@ -169,6 +169,20 @@
         <span>{{ item.observacion }}</span>
       </div>
 
+      <!-- Fotos de referencia: si hay, miniaturas para ampliar; si no, aviso -->
+      <div class="fotos-row" *ngIf="item.fotos?.length; else sinFotos">
+        <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
+          (click)="abrirGaleria(item, $event, i)" matTooltip="Ampliar foto de referencia">
+          <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto de referencia" />
+        </button>
+      </div>
+      <ng-template #sinFotos>
+        <div class="fotos-row fotos-row-vacio">
+          <mat-icon class="fotos-vacio-icon">image_not_supported</mat-icon>
+          <span>Sin fotos de referencia</span>
+        </div>
+      </ng-template>
+
       <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
       <div class="card-actions" *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente">
         <button class="btn-recordatorio-item"
@@ -182,4 +196,23 @@
     </div>
   </div>
 
+</div>
+
+<!-- OVERLAY: ampliar foto de referencia -->
+<div class="foto-overlay" *ngIf="itemGaleria" (click)="cerrarGaleria()">
+  <div class="foto-overlay-panel" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-foto" (click)="cerrarGaleria()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button class="btn-foto-nav btn-foto-prev" *ngIf="itemGaleria.fotos.length > 1" (click)="fotoAnterior($event)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <img class="foto-overlay-img" [src]="getImageUrl(itemGaleria.fotos[fotoActivaIdx].rutaImagen)" alt="Foto de referencia" />
+    <button class="btn-foto-nav btn-foto-next" *ngIf="itemGaleria.fotos.length > 1" (click)="fotoSiguiente($event)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <span class="foto-overlay-contador" *ngIf="itemGaleria.fotos.length > 1">
+      {{ fotoActivaIdx + 1 }} / {{ itemGaleria.fotos.length }}
+    </span>
+  </div>
 </div>
