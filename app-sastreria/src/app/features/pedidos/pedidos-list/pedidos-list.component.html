@@ -240,6 +240,15 @@
         </span>
       </div>
 
+      <!-- Progreso de ítems asignados (independiente de quién -- ver el chip
+           de empleado/"Varios" arriba, en el encabezado, para eso) -->
+      <div class="items-progreso" *ngIf="p.totalItems">
+        <mat-icon class="items-icon" [class.items-completo]="p.itemsAsignados === p.totalItems">engineering</mat-icon>
+        <span [class.items-completo-text]="p.itemsAsignados === p.totalItems">
+          {{ p.itemsAsignados }}/{{ p.totalItems }} ítems asignados
+        </span>
+      </div>
+
       <!-- Fotos de referencia: si hay, miniaturas para ampliar; si no, aviso -->
       <div class="fotos-row" *ngIf="p.fotos?.length; else sinFotos">
         <button class="foto-thumb" *ngFor="let foto of p.fotos; let i = index"

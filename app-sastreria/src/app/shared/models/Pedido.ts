@@ -13,6 +13,7 @@ export class Pedido {
   totalAbonado?: number = 0;
   totalItems?: number = 0;
   itemsTerminados?: number = 0;
+  itemsAsignados?: number = 0;
   tokenPublico?: string = '';
   created_at?: string = '';
   updated_at?: string = '';
