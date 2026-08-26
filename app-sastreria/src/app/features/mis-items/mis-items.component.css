@@ -474,7 +474,25 @@
 .badge-terminado { background: rgba(56,142,60,.12); color: #388e3c; }
 .badge-entregado { background: rgba(156,39,176,.12); color: #7b1fa2; }
 
-/* ── FOTOS DEL ÍTEM (miniaturas, clic para ampliar) ── */
+/* ── FOTOS DEL ÍTEM + VER DETALLE (misma fila) ── */
+.fotos-detalle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fotos-chip-vacio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-secondary, #757575);
+  mat-icon { font-size: 15px; width: 15px; height: 15px; opacity: 0.6; }
+}
+
 .card-fotos {
   display: flex;
   flex-wrap: wrap;
@@ -510,7 +528,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  align-self: flex-start;
+  flex-shrink: 0;
   background: none;
   border: 1px solid var(--border, #e0e0e0);
   border-radius: 8px;

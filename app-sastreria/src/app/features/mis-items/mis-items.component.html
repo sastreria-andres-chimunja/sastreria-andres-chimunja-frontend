@@ -133,14 +133,6 @@
             </span>
           </div>
 
-          <!-- Fotos: clic para ampliar y ver el detalle del ítem -->
-          <div class="card-fotos" *ngIf="item.fotos?.length">
-            <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
-              (click)="abrirDetalle(item, i)" matTooltip="Ampliar y ver detalle">
-              <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto del ítem" />
-            </button>
-          </div>
-
           <!-- Datos del ítem -->
           <div class="card-meta">
             <span class="meta-item">
@@ -159,11 +151,26 @@
             <span>{{ item.observacion }}</span>
           </div>
 
-          <!-- Ver detalle del ítem (sin fotos, igual permite ver todo el detalle) -->
-          <button class="btn-detalle" (click)="abrirDetalle(item)">
-            <mat-icon>visibility</mat-icon>
-            <span>Ver detalle</span>
-          </button>
+          <!-- Fotos de referencia (clic para ampliar) + ver el detalle completo del ítem -->
+          <div class="fotos-detalle-row">
+            <div class="card-fotos" *ngIf="item.fotos?.length; else sinFotosChip">
+              <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
+                (click)="abrirDetalle(item, i)" matTooltip="Ampliar foto de referencia">
+                <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto del ítem" />
+              </button>
+            </div>
+            <ng-template #sinFotosChip>
+              <span class="fotos-chip-vacio">
+                <mat-icon>image_not_supported</mat-icon>
+                Sin fotos de referencia
+              </span>
+            </ng-template>
+
+            <button class="btn-detalle" (click)="abrirDetalle(item)">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+          </div>
 
           <!-- Acciones -->
           <div class="card-actions">
