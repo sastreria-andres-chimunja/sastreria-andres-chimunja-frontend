@@ -125,6 +125,7 @@
       <!-- Encabezado de la card -->
       <div class="card-header">
         <div class="card-desc">
+          <span class="item-num">Ítem #{{ item.numeroItem }}</span>
           <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
           <a class="pedido-ref" [routerLink]="['/app/pedidos/editar', item.idPedido]">Pedido #{{ item.idPedido }}</a>
         </div>

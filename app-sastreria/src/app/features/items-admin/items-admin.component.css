@@ -336,6 +336,12 @@
   min-width: 0;
 }
 
+.item-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #757575);
+}
+
 .desc-text {
   font-size: 15px;
   font-weight: 600;

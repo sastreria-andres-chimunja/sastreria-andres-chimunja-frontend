@@ -125,7 +125,7 @@
           <!-- Encabezado de la card -->
           <div class="card-header">
             <div class="card-desc">
-              <span class="item-num">#{{ item.idItemPedido }}</span>
+              <span class="item-num">Ítem #{{ item.numeroItem }}</span>
               <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
             </div>
             <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
@@ -237,7 +237,7 @@
 
     <div class="detalle-info">
       <div class="detalle-info-header">
-        <span class="item-num">#{{ itemDetalle.idItemPedido }}</span>
+        <span class="item-num">Ítem #{{ itemDetalle.numeroItem }}</span>
         <span class="estado-badge" [class]="'badge-' + estadoClase(itemDetalle)">{{ itemDetalle.nombreEstado }}</span>
       </div>
       <p class="detalle-desc">{{ itemDetalle.descripcion || 'Sin descripción' }}</p>
