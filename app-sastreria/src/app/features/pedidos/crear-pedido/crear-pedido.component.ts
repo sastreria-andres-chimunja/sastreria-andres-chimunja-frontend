@@ -202,7 +202,7 @@ export class CrearPedidoComponent implements OnInit {
         if (tipoTab && match) this.form.patchValue({ idTipoPedido: match.idTipoPedido });
       }
     });
-    this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados; });
+    this.empleadoService.getAll().subscribe((r: any) => { this.empleados = r.empleados ?? []; });
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
       this.metodosPago = r.metodosPago ?? [];
     });
@@ -400,13 +400,24 @@ export class CrearPedidoComponent implements OnInit {
     this.panelExpandidoIdx = this.panelExpandidoIdx === idx ? null : idx;
   }
 
+  /**
+   * Empleados para los selects de "asignar" -- solo activos, pero sin
+   * esconder al empleado que YA tiene asignado este ítem si resulta que
+   * quedó inactivo después de la asignación (si no, el select se vería
+   * vacío al editar ese ítem, aunque el dato siga siendo correcto).
+   */
+  empleadosParaAsignar(item?: any): Empleado[] {
+    const idActual = item?.idEmpleado;
+    return this.empleados.filter((e) => e.activo || (idActual && e.idEmpleado === idActual));
+  }
+
   // ── Modo EDITAR: dialog (comportamiento actual) ───────────────
   abrirDialogoItem(item?: any): void {
     const dialogData: ItemDialogData = {
       item:      item ?? null,
       idPedido:  this.idPedido ?? 0,
       idCliente: this.clienteSeleccionado?.idCliente ?? 0,
-      empleados: this.empleados,
+      empleados: this.empleadosParaAsignar(item),
       medidas:   this.clienteMedidas,
       imagenes:  item?._fotos ?? [],
     };

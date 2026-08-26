@@ -179,7 +179,14 @@ export class CrearMovimientoComponent implements OnInit {
 
   listarEmpleados() {
     this.empleadoService.getAll().subscribe((resp: any) => {
-      this.empleados = resp.empleados ?? [];
+      // Solo activos -- pero sin esconder al empleado ya elegido (p. ej. si
+      // este diálogo se abrió para pagarle a alguien que ahora quedó
+      // inactivo, o al editar un movimiento viejo de un empleado inactivo);
+      // si no, el select se vería vacío aunque el valor siga siendo válido.
+      const idActual = this.movimientoModel.idReferencia;
+      this.empleados = (resp.empleados ?? []).filter(
+        (e: Empleado) => e.activo || (idActual && e.idEmpleado === idActual),
+      );
     });
   }
 

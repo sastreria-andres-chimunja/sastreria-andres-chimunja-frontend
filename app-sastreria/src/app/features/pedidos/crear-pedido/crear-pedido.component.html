@@ -235,7 +235,7 @@
 
                   <div class="acordeon-body" *ngIf="panelExpandidoIdx === i">
                     <app-item-inline-form
-                      [empleados]="empleados"
+                      [empleados]="empleadosParaAsignar(it)"
                       [medidas]="clienteMedidas"
                       [idCliente]="clienteSeleccionado?.idCliente ?? 0"
                       [idPedido]="0"
@@ -280,7 +280,7 @@
               <app-item-inline-form
                 #formNuevoItem
                 *ngIf="mostrarFormNuevoItem"
-                [empleados]="empleados"
+                [empleados]="empleadosParaAsignar()"
                 [medidas]="clienteMedidas"
                 [idCliente]="clienteSeleccionado?.idCliente ?? 0"
                 [idPedido]="0"

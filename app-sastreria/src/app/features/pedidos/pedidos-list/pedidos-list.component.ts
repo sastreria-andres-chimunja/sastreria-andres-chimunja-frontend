@@ -84,7 +84,10 @@ export class PedidosListComponent implements OnInit {
       this.metodosPago = r.metodosPago ?? [];
     });
     this.empleadoService.getAll().subscribe((r: any) => {
-      this.empleados = r.empleados ?? [];
+      // Solo activos -- este listado alimenta el diálogo de "Asignar
+      // empleado" (elegir a quién asignarle trabajo nuevo), no tiene
+      // sentido ofrecer empleados inactivos ahí.
+      this.empleados = (r.empleados ?? []).filter((e: Empleado) => e.activo);
     });
   }
 

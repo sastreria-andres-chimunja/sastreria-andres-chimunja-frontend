@@ -67,7 +67,10 @@ export class ItemsAdminComponent implements OnInit {
   ngOnInit(): void {
     this.cargarItems();
     this.empleadoService.getAll().subscribe((r: any) => {
-      this.empleados = r.empleados ?? [];
+      // Solo activos en el filtro -- si algún ítem quedó con un empleado
+      // ya inactivo, sigue viéndose en "Todos" (o buscando), solo deja de
+      // ser un valor elegible del selector.
+      this.empleados = (r.empleados ?? []).filter((e: any) => e.activo);
     });
   }
 
