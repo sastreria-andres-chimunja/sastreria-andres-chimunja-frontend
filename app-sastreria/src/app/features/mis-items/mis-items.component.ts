@@ -63,8 +63,14 @@ export class MisItemsComponent implements OnInit {
   private idEstadoAsignado: number | null = null;
   private idEstadoTerminado: number | null = null;
 
-  // Detalle/ampliar foto: ítem actualmente abierto en el overlay (null = cerrado)
+  // Detalle del ítem (foto + descripción/datos): ítem actualmente abierto en
+  // el overlay de "Ver detalle" (null = cerrado)
   itemDetalle: any | null = null;
+  // Ampliar foto SOLA, sin descripción -- se abre al tocar una miniatura
+  // (tanto desde la tarjeta como desde dentro del overlay de detalle, donde
+  // queda apilada encima). Comparte fotoActivaIdx con itemDetalle para que,
+  // si se abrió desde ahí, al cerrarla se siga viendo la misma foto.
+  fotoGaleria: any | null = null;
   fotoActivaIdx = 0;
 
   constructor(
@@ -344,16 +350,34 @@ export class MisItemsComponent implements OnInit {
     this.fotoActivaIdx = 0;
   }
 
+  /** Abre la foto sola (sin descripción), lo más grande posible. */
+  abrirGaleria(item: any, idxFoto = 0): void {
+    if (!item?.fotos?.length) return;
+    this.fotoGaleria = item;
+    this.fotoActivaIdx = idxFoto;
+  }
+
+  cerrarGaleria(): void {
+    this.fotoGaleria = null;
+  }
+
+  /** El ítem cuyas fotos se están navegando en este momento -- la galería
+   * (si está abierta encima de todo) tiene prioridad sobre el detalle. */
+  private get itemFotosActivo(): any | null {
+    return this.fotoGaleria ?? this.itemDetalle;
+  }
+
   fotoAnterior(event: Event): void {
     event.stopPropagation();
-    if (!this.itemDetalle?.fotos?.length) return;
-    this.fotoActivaIdx =
-      (this.fotoActivaIdx - 1 + this.itemDetalle.fotos.length) % this.itemDetalle.fotos.length;
+    const item = this.itemFotosActivo;
+    if (!item?.fotos?.length) return;
+    this.fotoActivaIdx = (this.fotoActivaIdx - 1 + item.fotos.length) % item.fotos.length;
   }
 
   fotoSiguiente(event: Event): void {
     event.stopPropagation();
-    if (!this.itemDetalle?.fotos?.length) return;
-    this.fotoActivaIdx = (this.fotoActivaIdx + 1) % this.itemDetalle.fotos.length;
+    const item = this.itemFotosActivo;
+    if (!item?.fotos?.length) return;
+    this.fotoActivaIdx = (this.fotoActivaIdx + 1) % item.fotos.length;
   }
 }

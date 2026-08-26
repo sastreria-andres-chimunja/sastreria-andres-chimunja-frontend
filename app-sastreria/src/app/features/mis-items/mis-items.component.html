@@ -155,7 +155,7 @@
           <div class="fotos-detalle-row">
             <div class="card-fotos" *ngIf="item.fotos?.length; else sinFotosChip">
               <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
-                (click)="abrirDetalle(item, i)" matTooltip="Ampliar foto de referencia">
+                (click)="abrirGaleria(item, i)" matTooltip="Ampliar foto de referencia">
                 <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto del ítem" />
               </button>
             </div>
@@ -228,7 +228,8 @@
       <button class="btn-foto-nav btn-foto-prev" *ngIf="itemDetalle.fotos.length > 1" (click)="fotoAnterior($event)">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <img class="detalle-foto" [src]="getImageUrl(itemDetalle.fotos[fotoActivaIdx].rutaImagen)" alt="Foto del ítem" />
+      <img class="detalle-foto" [src]="getImageUrl(itemDetalle.fotos[fotoActivaIdx].rutaImagen)" alt="Foto del ítem"
+        (click)="abrirGaleria(itemDetalle, fotoActivaIdx)" matTooltip="Ampliar" />
       <button class="btn-foto-nav btn-foto-next" *ngIf="itemDetalle.fotos.length > 1" (click)="fotoSiguiente($event)">
         <mat-icon>chevron_right</mat-icon>
       </button>
@@ -273,5 +274,24 @@
         <span>{{ itemDetalle.observacion }}</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- OVERLAY: solo la foto, lo más grande posible, sin descripción -->
+<div class="foto-overlay" *ngIf="fotoGaleria" (click)="cerrarGaleria()">
+  <div class="foto-overlay-panel" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-foto" (click)="cerrarGaleria()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button class="btn-foto-nav btn-foto-prev" *ngIf="fotoGaleria.fotos.length > 1" (click)="fotoAnterior($event)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <img class="foto-overlay-img" [src]="getImageUrl(fotoGaleria.fotos[fotoActivaIdx].rutaImagen)" alt="Foto de referencia" />
+    <button class="btn-foto-nav btn-foto-next" *ngIf="fotoGaleria.fotos.length > 1" (click)="fotoSiguiente($event)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <span class="foto-overlay-contador" *ngIf="fotoGaleria.fotos.length > 1">
+      {{ fotoActivaIdx + 1 }} / {{ fotoGaleria.fotos.length }}
+    </span>
   </div>
 </div>
