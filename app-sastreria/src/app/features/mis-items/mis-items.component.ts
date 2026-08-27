@@ -119,6 +119,7 @@ export class MisItemsComponent implements OnInit {
       res = res.filter(
         (i) =>
           (i.descripcion ?? '').toLowerCase().includes(q) ||
+          (i.nombreCliente ?? '').toLowerCase().includes(q) ||
           String(i.idPedido).includes(q),
       );
     }

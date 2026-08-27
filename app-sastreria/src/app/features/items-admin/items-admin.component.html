@@ -117,81 +117,96 @@
     </p>
   </div>
 
-  <!-- LISTA DE ÍTEMS -->
-  <div class="items-grid" *ngIf="!cargando && itemsFiltrados.length > 0">
-    <div class="item-card" *ngFor="let item of itemsFiltrados"
-      [class.card-terminado]="estadoClase(item) === 'terminado' || estadoClase(item) === 'entregado'">
+  <!-- LISTA DE ÍTEMS AGRUPADA POR PEDIDO -->
+  <div class="pedidos-grupos" *ngIf="!cargando && gruposFiltrados.length > 0">
+    <div class="grupo-pedido" *ngFor="let grupo of gruposFiltrados">
 
-      <!-- Encabezado de la card -->
-      <div class="card-header">
-        <div class="card-desc">
-          <span class="item-num">Ítem #{{ item.numeroItem }}</span>
-          <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
-          <a class="pedido-ref" [routerLink]="['/app/pedidos/editar', item.idPedido]">Pedido #{{ item.idPedido }}</a>
+      <!-- Encabezado del pedido: clic para desplegar/ocultar sus ítems -->
+      <button class="grupo-header" (click)="toggleGrupo(grupo.idPedido)">
+        <mat-icon class="grupo-chevron" [class.expandido]="estaExpandido(grupo.idPedido)">chevron_right</mat-icon>
+        <div class="grupo-info">
+          <a class="grupo-pedido-num" [routerLink]="['/app/pedidos/editar', grupo.idPedido]"
+            (click)="$event.stopPropagation()" matTooltip="Editar pedido">Pedido #{{ grupo.idPedido }}</a>
+          <span class="grupo-cliente" *ngIf="grupo.nombreCliente">{{ grupo.nombreCliente }}</span>
         </div>
-        <div class="card-header-right">
-          <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
-            {{ item.nombreEstado }}
+        <div class="grupo-resumen">
+          <span class="grupo-entrega">
+            <mat-icon class="meta-icon">event</mat-icon>{{ formatFecha(grupo.fechaEntrega) }}
           </span>
-          <span class="empleado-chip" *ngIf="item.nombreEmpleado">
-            <mat-icon class="meta-icon">engineering</mat-icon>
-            {{ item.nombreEmpleado }}
-          </span>
-          <span class="empleado-chip sin-asignar" *ngIf="!item.nombreEmpleado">
-            <mat-icon class="meta-icon">person_off</mat-icon>
-            Sin asignar
-          </span>
+          <span class="grupo-count">{{ grupo.items.length }} ítem{{ grupo.items.length === 1 ? '' : 's' }}</span>
+          <span class="grupo-valor">{{ formatCOP(totalGrupo(grupo)) }}</span>
         </div>
-      </div>
+      </button>
 
-      <!-- Datos del ítem -->
-      <div class="card-meta">
-        <span class="meta-item" *ngIf="item.nombreCliente">
-          <mat-icon class="meta-icon">person</mat-icon>
-          {{ item.nombreCliente }}
-        </span>
-        <span class="meta-item">
-          <mat-icon class="meta-icon">event</mat-icon>
-          {{ formatFecha(item.fechaEntrega) }}
-        </span>
-        <span class="meta-item">
-          <mat-icon class="meta-icon">attach_money</mat-icon>
-          {{ formatCOP(item.valor) }}
-        </span>
-        <span class="meta-item" *ngIf="item.tipoPrendaMedida">
-          <mat-icon class="meta-icon">straighten</mat-icon>
-          {{ item.tipoPrendaMedida }}
-        </span>
-      </div>
+      <!-- Ítems del pedido (desplegados) -->
+      <div class="items-grid" *ngIf="estaExpandido(grupo.idPedido)">
+        <div class="item-card" *ngFor="let item of grupo.items"
+          [class.card-terminado]="estadoClase(item) === 'terminado' || estadoClase(item) === 'entregado'">
 
-      <!-- Observación -->
-      <div class="card-obs" *ngIf="item.observacion">
-        <mat-icon class="obs-icon">notes</mat-icon>
-        <span>{{ item.observacion }}</span>
-      </div>
+          <!-- Encabezado de la card -->
+          <div class="card-header">
+            <div class="card-desc">
+              <span class="item-num">Ítem #{{ item.numeroItem }}</span>
+              <span class="desc-text">{{ item.descripcion || 'Sin descripción' }}</span>
+            </div>
+            <div class="card-header-right">
+              <span class="estado-badge" [class]="'badge-' + estadoClase(item)">
+                {{ item.nombreEstado }}
+              </span>
+              <span class="empleado-chip" *ngIf="item.nombreEmpleado">
+                <mat-icon class="meta-icon">engineering</mat-icon>
+                {{ item.nombreEmpleado }}
+              </span>
+              <span class="empleado-chip sin-asignar" *ngIf="!item.nombreEmpleado">
+                <mat-icon class="meta-icon">person_off</mat-icon>
+                Sin asignar
+              </span>
+            </div>
+          </div>
 
-      <!-- Fotos de referencia: si hay, miniaturas para ampliar; si no, aviso -->
-      <div class="fotos-row" *ngIf="item.fotos?.length; else sinFotos">
-        <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
-          (click)="abrirGaleria(item, $event, i)" matTooltip="Ampliar foto de referencia">
-          <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto de referencia" />
-        </button>
-      </div>
-      <ng-template #sinFotos>
-        <div class="fotos-row fotos-row-vacio">
-          <mat-icon class="fotos-vacio-icon">image_not_supported</mat-icon>
-          <span>Sin fotos de referencia</span>
+          <!-- Datos del ítem -->
+          <div class="card-meta">
+            <span class="meta-item">
+              <mat-icon class="meta-icon">attach_money</mat-icon>
+              {{ formatCOP(item.valor) }}
+            </span>
+            <span class="meta-item" *ngIf="item.tipoPrendaMedida">
+              <mat-icon class="meta-icon">straighten</mat-icon>
+              {{ item.tipoPrendaMedida }}
+            </span>
+          </div>
+
+          <!-- Observación -->
+          <div class="card-obs" *ngIf="item.observacion">
+            <mat-icon class="obs-icon">notes</mat-icon>
+            <span>{{ item.observacion }}</span>
+          </div>
+
+          <!-- Fotos de referencia: si hay, miniaturas para ampliar; si no, aviso -->
+          <div class="fotos-row" *ngIf="item.fotos?.length; else sinFotos">
+            <button class="foto-thumb" *ngFor="let foto of item.fotos; let i = index"
+              (click)="abrirGaleria(item, $event, i)" matTooltip="Ampliar foto de referencia">
+              <img [src]="getImageUrl(foto.rutaImagen)" alt="Foto de referencia" />
+            </button>
+          </div>
+          <ng-template #sinFotos>
+            <div class="fotos-row fotos-row-vacio">
+              <mat-icon class="fotos-vacio-icon">image_not_supported</mat-icon>
+              <span>Sin fotos de referencia</span>
+            </div>
+          </ng-template>
+
+          <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
+          <div class="card-actions" *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente">
+            <button class="btn-recordatorio-item"
+              matTooltip="Avisar por WhatsApp que la prenda está lista"
+              (click)="enviarRecordatorioItem(item)">
+              <mat-icon>notifications_active</mat-icon>
+              <span>Recordatorio</span>
+            </button>
+          </div>
+
         </div>
-      </ng-template>
-
-      <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
-      <div class="card-actions" *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente">
-        <button class="btn-recordatorio-item"
-          matTooltip="Avisar por WhatsApp que la prenda está lista"
-          (click)="enviarRecordatorioItem(item)">
-          <mat-icon>notifications_active</mat-icon>
-          <span>Recordatorio</span>
-        </button>
       </div>
 
     </div>

@@ -14,6 +14,13 @@ import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
 import { stringToDate } from '../../utils/date.utils';
 
+export interface GrupoPedido {
+  idPedido: number;
+  nombreCliente: string;
+  fechaEntrega: string;
+  items: any[];
+}
+
 @Component({
   selector: 'app-items-admin',
   standalone: true,
@@ -35,9 +42,16 @@ import { stringToDate } from '../../utils/date.utils';
 export class ItemsAdminComponent implements OnInit {
   items: any[] = [];
   itemsFiltrados: any[] = [];
+  gruposFiltrados: GrupoPedido[] = [];
   cargando = false;
   busqueda = '';
   filtroEstado: 'pendiente' | 'asignado' | 'terminado' | 'entregado' | null = null;
+
+  // Pedidos abiertos manualmente -- fuera de eso, quedan agrupados/
+  // colapsados por defecto (mismo patrón que "Mis ítems"), salvo que algún
+  // filtro esté activo, en cuyo caso se expanden solos para no esconder
+  // los resultados que el admin está buscando.
+  private pedidosExpandidos = new Set<number>();
 
   empleados: any[] = [];
   filtroEmpleado: string = '';
@@ -118,6 +132,39 @@ export class ItemsAdminComponent implements OnInit {
       });
     }
     this.itemsFiltrados = res;
+    this.gruposFiltrados = this.agruparPorPedido(res);
+  }
+
+  /** Agrupa la lista de ítems por pedido, conservando el orden de aparición. */
+  private agruparPorPedido(lista: any[]): GrupoPedido[] {
+    const mapa = new Map<number, GrupoPedido>();
+    for (const item of lista) {
+      let grupo = mapa.get(item.idPedido);
+      if (!grupo) {
+        grupo = {
+          idPedido: item.idPedido,
+          nombreCliente: item.nombreCliente,
+          fechaEntrega: item.fechaEntrega,
+          items: [],
+        };
+        mapa.set(item.idPedido, grupo);
+      }
+      grupo.items.push(item);
+    }
+    return Array.from(mapa.values());
+  }
+
+  estaExpandido(idPedido: number): boolean {
+    return this.pedidosExpandidos.has(idPedido) || this.hayFiltrosActivos;
+  }
+
+  toggleGrupo(idPedido: number): void {
+    if (this.pedidosExpandidos.has(idPedido)) this.pedidosExpandidos.delete(idPedido);
+    else this.pedidosExpandidos.add(idPedido);
+  }
+
+  totalGrupo(grupo: GrupoPedido): number {
+    return grupo.items.reduce((s, i) => s + Number(i.valor ?? 0), 0);
   }
 
   onBusqueda(event: Event): void {
