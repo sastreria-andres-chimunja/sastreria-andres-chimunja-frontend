@@ -13,6 +13,7 @@ import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
 import { dateToString } from '../../../utils/date.utils';
+import Swal from 'sweetalert2';
 
 export interface NominaDetalleDialogData {
   idEmpleado: number;
@@ -242,20 +243,61 @@ export class NominaDetalleDialogComponent implements OnInit {
     });
   }
 
+  // % de comisión antes de que el usuario lo tocara -- se guarda al hacer
+  // foco en el campo (ver onFocusComision()), para poder mostrarlo en la
+  // confirmación y para revertir el valor mostrado si cancela o falla el guardado.
+  private comisionOriginal = new Map<number, number>();
+
+  onFocusComision(item: any): void {
+    if (!this.comisionOriginal.has(item.idItemPedido)) {
+      this.comisionOriginal.set(item.idItemPedido, Number(item.comisionEmpleado ?? 0));
+    }
+  }
+
+  /**
+   * Cambiar la comisión afecta directamente cuánto se le paga al empleado
+   * -- se confirma antes de guardar (con opción de cancelar), en vez de
+   * guardar directo al cambiar el campo como antes.
+   */
   actualizarComision(item: any, pct: number): void {
-    const comision = Math.max(0, Math.min(100, Number(pct) || 0));
-    this.itemPedidoService.actualizarComision(item.idItemPedido, comision).subscribe({
-      next: () => {
-        item.comisionEmpleado = comision;
-        item.valorEmpleado = Number(item.valor ?? 0) * comision / 100;
-        if (this.resumen?.pendientes) {
-          this.resumen.totalPendiente = this.resumen.pendientes.reduce(
-            (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0
-          );
-          this.resumen.facturado = this.resumen.totalPendiente + Number(this.resumen.totalPagadoItems ?? 0);
-          this.resumen.saldo = this.resumen.totalPendiente - Number(this.resumen.totalAbonos ?? 0);
-        }
-      },
+    const nuevaComision = Math.max(0, Math.min(100, Number(pct) || 0));
+    const anterior = this.comisionOriginal.get(item.idItemPedido) ?? nuevaComision;
+
+    if (nuevaComision === anterior) return; // sin cambio real
+
+    Swal.fire({
+      title: '¿Cambiar la comisión?',
+      html:
+        `<b>${item.descripcion || 'Este ítem'}</b> pasará de <b>${anterior}%</b> a <b>${nuevaComision}%</b> de comisión.` +
+        `<br>Esto cambia lo que se le paga al empleado por este ítem.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#185FA5',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Sí, cambiar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        item.comisionEmpleado = anterior;
+        return;
+      }
+      this.itemPedidoService.actualizarComision(item.idItemPedido, nuevaComision).subscribe({
+        next: () => {
+          item.comisionEmpleado = nuevaComision;
+          item.valorEmpleado = Number(item.valor ?? 0) * nuevaComision / 100;
+          this.comisionOriginal.set(item.idItemPedido, nuevaComision);
+          if (this.resumen?.pendientes) {
+            this.resumen.totalPendiente = this.resumen.pendientes.reduce(
+              (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0
+            );
+            this.resumen.facturado = this.resumen.totalPendiente + Number(this.resumen.totalPagadoItems ?? 0);
+            this.resumen.saldo = this.resumen.totalPendiente - Number(this.resumen.totalAbonos ?? 0);
+          }
+        },
+        error: () => {
+          item.comisionEmpleado = anterior;
+        },
+      });
     });
   }
 

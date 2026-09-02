@@ -163,6 +163,7 @@
               <div style="display:flex;justify-content:center">
                 <input class="comision-input" type="number" min="0" max="100"
                   [(ngModel)]="item.comisionEmpleado"
+                  (focus)="onFocusComision(item)"
                   (change)="actualizarComision(item, item.comisionEmpleado)"
                   [disabled]="!!data.soloLectura"
                   title="% comisión" />

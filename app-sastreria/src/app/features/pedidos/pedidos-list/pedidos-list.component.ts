@@ -14,6 +14,7 @@ import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
 import { ReciboService } from '../../../core/services/recibo.service';
 import { ImagenService } from '../../../core/services/imagen.service';
+import { FiltroFechaPedidosService } from '../../../core/services/filtro-fecha-pedidos.service';
 import { Pedido } from '../../../shared/models/Pedido';
 import { Empleado } from '../../../shared/models/Empleado';
 import { dateToString } from '../../../utils/date.utils';
@@ -76,9 +77,17 @@ export class PedidosListComponent implements OnInit {
     private empleadoService: EmpleadoService,
     private reciboService: ReciboService,
     private imagenService: ImagenService,
+    private filtroFechaService: FiltroFechaPedidosService,
   ) {}
 
   ngOnInit(): void {
+    // Restaura la fecha elegida antes de salir a editar un pedido -- si no,
+    // Angular recrea este componente al volver y el filtro se perdía.
+    if (this.filtroFechaService.activo) {
+      this.fechaInicioCtrl.setValue(this.filtroFechaService.desde);
+      this.fechaFinCtrl.setValue(this.filtroFechaService.hasta);
+      this.filtroFechaActivo = true;
+    }
     this.cargarPedidos();
     this.metodoPagoService.listarMetodosPago().subscribe((r: any) => {
       this.metodosPago = r.metodosPago ?? [];
@@ -203,6 +212,7 @@ export class PedidosListComponent implements OnInit {
   aplicarFiltroFecha(): void {
     this.filtroFechaActivo = !!(this.fechaInicioCtrl.value || this.fechaFinCtrl.value);
     this.filtroFechaAbierto = false;
+    this.filtroFechaService.guardar(this.fechaInicioCtrl.value, this.fechaFinCtrl.value);
     this.cargarPedidos();
   }
 
@@ -219,6 +229,7 @@ export class PedidosListComponent implements OnInit {
     this.fechaFinCtrl.reset();
     this.filtroFechaActivo = false;
     this.filtroFechaAbierto = false;
+    this.filtroFechaService.limpiar();
     this.cargarPedidos();
   }
 
@@ -415,9 +426,16 @@ export class PedidosListComponent implements OnInit {
     return this.pedidosDelTab.filter((p) => this.esTerminadoVencido(p)).length;
   }
 
-  /** Suma del valor total de los pedidos que están visibles con el filtro/búsqueda/tab actual. */
+  /**
+   * Suma del valor total de los pedidos que están visibles con el filtro/
+   * búsqueda/tab actual -- excluye los ya Terminados (trabajo ya hecho, no
+   * es "valor pendiente por hacer" del día/rango filtrado).
+   */
   get valorTotalListado(): number {
-    return this.pedidosFiltrados.reduce((acc, p) => acc + Number(p.valorTotal ?? 0), 0);
+    return this.pedidosFiltrados.reduce((acc, p) => {
+      if (this.esTerminado(p)) return acc;
+      return acc + Number(p.valorTotal ?? 0);
+    }, 0);
   }
 
   // ── Helpers ────────────────────────────────────────────────

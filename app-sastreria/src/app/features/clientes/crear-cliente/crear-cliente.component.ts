@@ -90,6 +90,12 @@ export class CrearClienteComponent implements OnInit {
         error: (err) => {
           this.isLoading = false;
           console.error('Error al guardar cliente:', err);
+          Swal.fire({
+            title: 'No se pudo guardar',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
         },
       });
     } else {
@@ -102,6 +108,12 @@ export class CrearClienteComponent implements OnInit {
         error: (err) => {
           this.isLoading = false;
           console.error('Error al guardar cliente:', err);
+          Swal.fire({
+            title: 'No se pudo crear',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
         },
       });
     }
