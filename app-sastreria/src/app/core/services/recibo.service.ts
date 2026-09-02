@@ -371,6 +371,125 @@ export class ReciboService {
   }
 
   /**
+   * Igual que generarHtmlTicketAdhesivo(), pero SIN la fila de
+   * TOTAL/ABONO/SALDO -- para pegar en la prenda sin que quede visible
+   * ningún valor del pedido (p. ej. si la va a manipular alguien que no
+   * debería ver esa información). Mismo layout/tamaño (100mm x 50mm),
+   * mismo logo -- el bloque de info se centra verticalmente en la columna
+   * izquierda para llenar el espacio que dejan los totales al no estar.
+   */
+  generarHtmlTicketInformativo(data: ReciboData, logoSrc?: string): string {
+    const imgSrc = logoSrc ?? this.logoUrlTermico;
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ticket</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-weight: 700;
+      width: 100mm;
+      height: 50mm;
+      color: #000;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .header-nombre {
+      text-align: center;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 17px;
+      letter-spacing: 2px;
+      white-space: nowrap;
+      line-height: 1;
+      padding: 1mm 1mm 1.8mm;
+    }
+    .fila-row {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+    .left-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 1.5mm 2mm 1.8mm 3.5mm;
+    }
+    .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.1; word-break: break-word; }
+    .fila { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 1mm; line-height: 1; }
+    .fila-entrega { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 0.6mm; line-height: 1; }
+    .right-col {
+      width: 33.6mm;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1mm 2mm 2mm;
+    }
+    .logo-big { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+    @media print {
+      @page { margin: 0; size: 100mm 50mm; }
+      body { width: 100mm; height: 50mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nombre">SASTRERÍA ANDRÉS CHIMUNJA</div>
+  <div class="fila-row">
+    <div class="left-col">
+      <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
+      ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+      <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
+    </div>
+    <div class="right-col">
+      <img class="logo-big" src="${imgSrc}" alt="Sastrería Andrés Chimunja" crossorigin="anonymous"/>
+    </div>
+  </div>
+</body>
+</html>`;
+  }
+
+  /** Igual que imprimirTicket(), pero para el ticket informativo (sin valores) -- misma ruta directa por el navegador, sin QZ Tray. */
+  async imprimirTicketInformativo(data: ReciboData): Promise<void> {
+    this.imprimirTicketInformativoHtmlNavegador(data);
+  }
+
+  /** Mismo patrón que imprimirTicketHtmlNavegador(), usando la plantilla sin valores. */
+  private imprimirTicketInformativoHtmlNavegador(data: ReciboData): void {
+    const html = this.generarHtmlTicketInformativo(data);
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;top:-200px;left:-200px;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument!.open();
+    iframe.contentDocument!.write(html);
+    iframe.contentDocument!.close();
+
+    let impreso = false;
+    const ejecutarImpresion = () => {
+      if (impreso) return;
+      impreso = true;
+      iframe.contentWindow!.focus();
+      iframe.contentWindow!.print();
+      setTimeout(() => document.body.removeChild(iframe), 1500);
+    };
+
+    const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
+    if (img && !img.complete) {
+      img.onload  = ejecutarImpresion;
+      img.onerror = ejecutarImpresion;
+      setTimeout(ejecutarImpresion, 3000);
+    } else {
+      setTimeout(ejecutarImpresion, 300);
+    }
+  }
+
+  /**
    * Imprime el ticket adhesivo directo por el diálogo de impresión del
    * navegador/Windows — SIN pasar por QZ Tray. Se descubrió que esta
    * impresora (SAT TT460, 203 dpi) usa protocolo ZPL, no ESC/POS: todo el

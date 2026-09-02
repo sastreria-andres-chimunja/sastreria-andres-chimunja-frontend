@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReciboService } from '../../../core/services/recibo.service';
 
 export interface PedidoGuardadoDialogData {
@@ -21,7 +22,7 @@ export interface PedidoGuardadoDialogData {
 @Component({
   selector: 'app-pedido-guardado-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatDialogModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './pedido-guardado-dialog.component.html',
   styleUrl: './pedido-guardado-dialog.component.css',
 })
@@ -73,6 +74,11 @@ export class PedidoGuardadoDialogComponent implements OnInit {
 
   imprimirTicket(): void {
     this.reciboService.imprimirTicket(this.reciboData);
+  }
+
+  /** Igual, pero el ticket informativo (sin valores) -- para pegar en la prenda sin mostrar cuánto vale/debe el pedido. */
+  imprimirTicketInformativo(): void {
+    this.reciboService.imprimirTicketInformativo(this.reciboData);
   }
 
   /** Genera el PDF y lo descarga directo, para quien quiera guardarlo/imprimirlo aparte. */

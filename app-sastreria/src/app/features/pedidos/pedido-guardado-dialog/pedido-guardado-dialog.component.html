@@ -62,6 +62,10 @@
     <button class="btn-print" (click)="imprimirTicket()" *ngIf="data.items !== undefined">
       <mat-icon>local_offer</mat-icon> Imprimir ticket
     </button>
+    <button class="btn-print" (click)="imprimirTicketInformativo()" *ngIf="data.items !== undefined"
+      matTooltip="Ticket sin valores del pedido">
+      <mat-icon>info</mat-icon> Ticket informativo
+    </button>
     <button class="btn-aceptar" (click)="aceptar()">
       <mat-icon>check</mat-icon> Aceptar
     </button>
