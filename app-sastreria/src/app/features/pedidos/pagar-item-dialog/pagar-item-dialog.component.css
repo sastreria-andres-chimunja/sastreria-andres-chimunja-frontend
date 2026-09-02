@@ -108,7 +108,7 @@
 
 .pago-fila {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr auto auto;
   gap: 8px;
   font-size: 12px;
   padding: 4px 0;
@@ -119,6 +119,20 @@
 .pago-fecha { color: var(--text-muted, #888); }
 .pago-metodo { color: #555; }
 .pago-valor { color: #059669; font-weight: 600; text-align: right; }
+
+.btn-eliminar-abono {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted, #888);
+  border-radius: 6px;
+  transition: background 0.13s, color 0.13s;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+.btn-eliminar-abono:hover { background: #fdecea; color: #d33; }
 
 /* ── Form ── */
 .form-section {

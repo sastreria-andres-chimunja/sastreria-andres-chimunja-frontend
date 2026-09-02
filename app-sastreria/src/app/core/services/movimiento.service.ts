@@ -30,4 +30,8 @@ export class MovimientoService {
     const { idMovimiento } = movimiento;
     return this.http.put(`${this.api}/${idMovimiento}`, movimiento);
   }
+
+  eliminar(idMovimiento: number) {
+    return this.http.delete(`${this.api}/${idMovimiento}`);
+  }
 }

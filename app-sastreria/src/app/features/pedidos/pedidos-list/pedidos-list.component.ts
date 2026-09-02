@@ -111,9 +111,18 @@ export class PedidosListComponent implements OnInit {
     return !this.authService.esOperario();
   }
 
-  /** Solo Admin y Asistente pueden revertir un pedido de "Entregado" a "Terminado". */
-  get puedeRevertir(): boolean {
-    return this.authService.esAdmin() || this.authService.esAsistente();
+  /**
+   * Revertir Entregado→Terminado sigue siendo Admin y Asistente (como ya
+   * era); revertir Terminado→Asignado es nuevo y solo Admin.
+   */
+  puedeRevertir(p: Pedido): boolean {
+    if (this.estadoClase(p) === 'entregado') {
+      return this.authService.esAdmin() || this.authService.esAsistente();
+    }
+    if (this.esTerminado(p)) {
+      return this.authService.esAdmin();
+    }
+    return false;
   }
 
   cargarPedidos(): void {
@@ -289,17 +298,20 @@ export class PedidosListComponent implements OnInit {
   }
 
   /**
-   * Revierte un pedido de "Entregado" de vuelta a "Terminado" (solo Admin/
-   * Asistente). El backend deshace también el abono automático consolidado
-   * al entregar (si lo hubo) y limpia la fecha de entrega registrada.
+   * Revierte un pedido un paso hacia atrás: Entregado→Terminado (Admin/
+   * Asistente) o Terminado→Asignado (solo Admin). El backend decide cuál
+   * de las dos aplica según el estado actual del pedido, y deshace también
+   * el abono automático consolidado al entregar (si lo hubo) en el primer caso.
    */
-  revertirEntregado(p: Pedido, event: Event): void {
+  revertirEstado(p: Pedido, event: Event): void {
     event.stopPropagation();
+    const aEntregado = this.estadoClase(p) === 'entregado';
+    const estadoDestino = aEntregado ? 'Terminado' : 'Asignado';
     Swal.fire({
-      title: '¿Revertir a Terminado?',
+      title: `¿Revertir a ${estadoDestino}?`,
       html:
-        `El pedido #${p.idPedido} volverá al estado <b>Terminado</b>.` +
-        (p.fechaEntregado
+        `El pedido #${p.idPedido} volverá al estado <b>${estadoDestino}</b>.` +
+        (aEntregado && p.fechaEntregado
           ? '<br><br>El abono automático que se generó al entregarlo se eliminará y el saldo quedará pendiente otra vez.'
           : ''),
       icon: 'warning',
@@ -310,12 +322,12 @@ export class PedidosListComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (!result.isConfirmed) return;
-      this.pedidoService.revertirEntregado(p.idPedido!).subscribe({
+      this.pedidoService.revertirEstado(p.idPedido!).subscribe({
         next: () => {
           this.cargarPedidos();
           Swal.fire({
             title: 'Revertido',
-            text: `El pedido #${p.idPedido} volvió a Terminado.`,
+            text: `El pedido #${p.idPedido} volvió a ${estadoDestino}.`,
             icon: 'success',
             confirmButtonColor: '#2563eb',
           });

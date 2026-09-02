@@ -43,6 +43,10 @@
       <span class="pago-fecha">{{ a.fecha }}</span>
       <span class="pago-metodo">{{ a.nombreMetodoPago ?? 'Sin método' }}</span>
       <span class="pago-valor">+{{ formatCOP(a.valor) }}</span>
+      <button class="btn-eliminar-abono" *ngIf="puedeEliminarAbono"
+        (click)="eliminarAbono(a)" matTooltip="Eliminar abono">
+        <mat-icon>delete</mat-icon>
+      </button>
     </div>
   </div>
 

@@ -8,8 +8,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PedidoService } from '../../../core/services/pedido.service';
 import { ReciboService } from '../../../core/services/recibo.service';
+import { MovimientoService } from '../../../core/services/movimiento.service';
+import { AuthService } from '../../../core/services/auth.service';
+import Swal from 'sweetalert2';
 
 export interface PagarItemDialogData {
   idPedido: number;
@@ -35,6 +39,7 @@ export interface PagarItemDialogData {
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './pagar-item-dialog.component.html',
   styleUrl: './pagar-item-dialog.component.css',
@@ -65,7 +70,14 @@ export class PagarItemDialogComponent implements OnInit {
     private fb: FormBuilder,
     private pedidoService: PedidoService,
     private reciboService: ReciboService,
+    private movimientoService: MovimientoService,
+    private authService: AuthService,
   ) {}
+
+  /** Solo Admin puede eliminar un abono ya registrado. */
+  get puedeEliminarAbono(): boolean {
+    return this.authService.esAdmin();
+  }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -85,6 +97,48 @@ export class PagarItemDialogComponent implements OnInit {
         this.cargando = false;
       },
       error: () => { this.cargando = false; },
+    });
+  }
+
+  /**
+   * Elimina un abono ya registrado (solo Admin) -- con confirmación, ya que
+   * cambia el saldo real del pedido. Los abonos generados automáticamente
+   * al marcar el pedido como Entregado (autoGenerado) no se pueden borrar
+   * por acá -- el backend los rechaza; hay que usar "Revertir" en la Hoja
+   * de trabajo, que deshace el estado y el abono juntos.
+   */
+  eliminarAbono(a: any): void {
+    if (a.autoGenerado) {
+      Swal.fire({
+        title: 'No se puede eliminar directamente',
+        text: 'Este abono se generó automáticamente al marcar el pedido como Entregado. Usa "Revertir" en la Hoja de trabajo en vez de eliminarlo.',
+        icon: 'info',
+        confirmButtonColor: '#185FA5',
+      });
+      return;
+    }
+    Swal.fire({
+      title: '¿Eliminar este abono?',
+      html: `Se eliminará el abono de <b>${this.formatCOP(a.valor)}</b> del ${a.fecha}. El saldo pendiente del pedido volverá a subir.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.movimientoService.eliminar(a.idMovimiento).subscribe({
+        next: () => this.cargarAbonos(),
+        error: (err) => {
+          Swal.fire({
+            title: 'No se pudo eliminar',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
+        },
+      });
     });
   }
 

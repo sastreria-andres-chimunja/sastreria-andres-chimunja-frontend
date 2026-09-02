@@ -50,8 +50,11 @@ export class PedidoService {
     return this.http.get<any>(`${this.api}/valor-programado`, { params });
   }
 
-  /** Revierte un pedido de "Entregado" a "Terminado" (Admin/Asistente). */
-  revertirEntregado(id: number) {
-    return this.http.post<any>(`${this.api}/${id}/revertir-entregado`, {});
+  /**
+   * Revierte un pedido un paso hacia atrás en Entregado→Terminado→Asignado
+   * (según en cuál esté) -- solo Admin.
+   */
+  revertirEstado(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/revertir-estado`, {});
   }
 }

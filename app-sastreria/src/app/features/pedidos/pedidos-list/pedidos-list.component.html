@@ -305,8 +305,9 @@
             matTooltip="Registrar abono" *ngIf="puedeCrearPedido">
             <mat-icon>payments</mat-icon> Abono
           </button>
-          <button class="btn-revertir" (click)="revertirEntregado(p, $event)"
-            matTooltip="Revertir a Terminado" *ngIf="estadoClase(p) === 'entregado' && puedeRevertir">
+          <button class="btn-revertir" (click)="revertirEstado(p, $event)"
+            [matTooltip]="estadoClase(p) === 'entregado' ? 'Revertir a Terminado' : 'Revertir a Asignado'"
+            *ngIf="(estadoClase(p) === 'entregado' || esTerminado(p)) && puedeRevertir(p)">
             <mat-icon>undo</mat-icon> Revertir
           </button>
           <button class="btn-view" (click)="irAEditar(p)">
