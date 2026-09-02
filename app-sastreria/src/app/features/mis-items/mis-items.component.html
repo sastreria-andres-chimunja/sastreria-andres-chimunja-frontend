@@ -52,6 +52,14 @@
         <span class="chip-valor-monto">{{ formatCOP(valorTerminadoPeriodo) }}</span>
       </div>
     </div>
+
+    <div class="chip-valor-terminado chip-ganado" matTooltip="Suma de la comisión ganada (no el valor completo del ítem) en este período">
+      <mat-icon class="chip-valor-icon">savings</mat-icon>
+      <div class="chip-valor-textos">
+        <span class="chip-valor-label">{{ etiquetaGanado }}</span>
+        <span class="chip-valor-monto">{{ formatCOP(ganadoPeriodo) }}</span>
+      </div>
+    </div>
   </div>
 </div>
 

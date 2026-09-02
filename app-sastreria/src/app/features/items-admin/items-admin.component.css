@@ -190,6 +190,45 @@
   background: var(--bg, #f5f5f5);
 }
 
+/* ── Chip "Ganado por <empleado>" ── */
+.chip-ganado-empleado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid rgba(24,95,165,.3);
+  background: rgba(24,95,165,.08);
+  border-radius: 8px;
+}
+
+.chip-valor-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--primary, #185fa5);
+  flex-shrink: 0;
+}
+
+.chip-valor-textos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.chip-valor-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #757575);
+}
+
+.chip-valor-monto {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary, #185fa5);
+}
+
 /* ── SCROLL AREA ── */
 .scroll-area {
   padding: 16px;

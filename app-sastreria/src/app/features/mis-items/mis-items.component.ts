@@ -312,6 +312,28 @@ export class MisItemsComponent implements OnInit {
       : 'Terminado hoy';
   }
 
+  /** Lo que el empleado GANÓ (comisión, no el valor completo del ítem) en
+   * el mismo período que valorTerminadoPeriodo -- misma fecha de referencia
+   * (fechaTerminado), solo cambia qué se suma. */
+  get ganadoPeriodo(): number {
+    const { desde, hasta } = this.rangoParaValorTerminado;
+    return this.items
+      .filter((i) => {
+        if (!i.fechaTerminado) return false;
+        const f = new Date(i.fechaTerminado);
+        if (desde && f < desde) return false;
+        if (hasta && f > hasta) return false;
+        return true;
+      })
+      .reduce((s, i) => s + Number(i.valor ?? 0) * Number(i.comisionEmpleado ?? 0) / 100, 0);
+  }
+
+  get etiquetaGanado(): string {
+    return this.filtroFechaActivo && (this.fechaInicioCtrl.value || this.fechaFinCtrl.value)
+      ? 'Ganado en el rango'
+      : 'Ganado hoy';
+  }
+
   estadoClase(item: any): string {
     const n = (item.nombreEstado ?? '').toLowerCase();
     if (n.includes('terminad')) return 'terminado';

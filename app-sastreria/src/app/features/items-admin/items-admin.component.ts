@@ -167,6 +167,24 @@ export class ItemsAdminComponent implements OnInit {
     return grupo.items.reduce((s, i) => s + Number(i.valor ?? 0), 0);
   }
 
+  /** Solo cuando el filtro apunta a UN empleado puntual (no "Todos" ni
+   * "Sin asignar") tiene sentido mostrar cuánto ganó -- con varios
+   * empleados mezclados el número no significaría nada útil. */
+  get empleadoFiltrado(): any | null {
+    if (!this.filtroEmpleado || this.filtroEmpleado === 'sin-asignar') return null;
+    return this.empleados.find((e: any) => String(e.idEmpleado) === this.filtroEmpleado) ?? null;
+  }
+
+  /** Comisión ganada (no el valor completo del ítem) por el empleado
+   * filtrado, sobre los ítems ya Terminados/Entregados dentro del filtro
+   * actual (fecha/búsqueda incluidos) -- los Pendientes/Asignados todavía
+   * no generaron comisión. */
+  get ganadoEmpleadoFiltrado(): number {
+    return this.itemsFiltrados
+      .filter((i) => this.estadoClase(i) === 'terminado' || this.estadoClase(i) === 'entregado')
+      .reduce((s, i) => s + Number(i.valor ?? 0) * Number(i.comisionEmpleado ?? 0) / 100, 0);
+  }
+
   onBusqueda(event: Event): void {
     this.busqueda = (event.target as HTMLInputElement).value;
     this.aplicarFiltro();

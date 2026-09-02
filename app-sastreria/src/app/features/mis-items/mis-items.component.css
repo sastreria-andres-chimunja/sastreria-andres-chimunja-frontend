@@ -98,6 +98,15 @@
   color: #388e3c;
 }
 
+/* Variante "Ganado" -- mismo chip, acento azul en vez de verde para
+   distinguirlo a simple vista del de "Terminado". */
+.chip-ganado {
+  border-color: rgba(24,95,165,.3);
+  background: rgba(24,95,165,.08);
+}
+.chip-ganado .chip-valor-icon { color: var(--primary, #185fa5); }
+.chip-ganado .chip-valor-monto { color: var(--primary, #185fa5); }
+
 /* ── Filtro de fechas (calendario, mismo patrón que items-admin/
    pedidos-list/movimientos-list/nomina-general) ────────────────── */
 .fecha-filter-wrapper { position: relative; }
