@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { API } from '../../utils/constants';
 import { QzPrintService } from './qz-print.service';
+import { telefonoConIndicativo } from '../../utils/telefono.utils';
 
 export interface ReciboData {
   idPedido: number;
@@ -44,7 +45,6 @@ export interface ReciboNominaData {
 export class ReciboService {
 
   constructor(private http: HttpClient, private qzPrint: QzPrintService) {}
-
 
   // ─── RECIBO CLIENTE ───────────────────────────────────────────────────────────
 
@@ -833,7 +833,7 @@ export class ReciboService {
     telefono: string,
     texto: string,
   ): Promise<string> {
-    const tel        = telefono.replace(/\D/g, '');
+    const tel        = telefonoConIndicativo(telefono);
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     // En PC, WhatsApp Web. En celular, api.whatsapp.com/send — el mismo
@@ -844,8 +844,8 @@ export class ReciboService {
     // registra la app normal — con WhatsApp Business instalado (sin la
     // normal) el enlace fallaba en vez de abrir Business.
     const urlChat = esMobil
-      ? (tel ? `https://api.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
-      : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
+      ? (tel ? `https://api.whatsapp.com/send?phone=${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
+      : (tel ? `https://web.whatsapp.com/send?phone=${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
 
     if (archivo.type === 'image/png'
       && typeof ClipboardItem !== 'undefined'
@@ -884,12 +884,12 @@ export class ReciboService {
    * imagen adjunta — para avisos/recordatorios rápidos (no un recibo).
    */
   abrirChatWhatsAppTexto(telefono: string, texto: string): void {
-    const tel        = telefono.replace(/\D/g, '');
+    const tel        = telefonoConIndicativo(telefono);
     const textoParam = encodeURIComponent(texto);
     const esMobil    = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const url = esMobil
-      ? (tel ? `https://api.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
-      : (tel ? `https://web.whatsapp.com/send?phone=57${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
+      ? (tel ? `https://api.whatsapp.com/send?phone=${tel}&text=${textoParam}` : `https://api.whatsapp.com/send?text=${textoParam}`)
+      : (tel ? `https://web.whatsapp.com/send?phone=${tel}&text=${textoParam}` : `https://web.whatsapp.com/`);
     this.abrirChatWhatsApp(url);
   }
 
@@ -1247,18 +1247,18 @@ export class ReciboService {
 
   abrirWhatsApp(data: ReciboData, telefono?: string): void {
     const texto = encodeURIComponent(this.generarTextoWhatsApp(data));
-    const tel = (telefono ?? '').replace(/\D/g, '');
+    const tel = telefonoConIndicativo(telefono);
     const url = tel
-      ? `https://wa.me/57${tel}?text=${texto}`
+      ? `https://wa.me/${tel}?text=${texto}`
       : `https://wa.me/?text=${texto}`;
     window.open(url, '_blank');
   }
 
   abrirWhatsAppNomina(data: ReciboNominaData, telefono?: string): void {
     const texto = encodeURIComponent(this.generarTextoWhatsAppNomina(data));
-    const tel = (telefono ?? '').replace(/\D/g, '');
+    const tel = telefonoConIndicativo(telefono);
     const url = tel
-      ? `https://wa.me/57${tel}?text=${texto}`
+      ? `https://wa.me/${tel}?text=${texto}`
       : `https://wa.me/?text=${texto}`;
     window.open(url, '_blank');
   }

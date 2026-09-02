@@ -38,20 +38,30 @@
         <input matInput formControlName="cedula" placeholder="Ej: 1234567890" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Teléfono</mat-label>
-        <mat-icon matPrefix>phone</mat-icon>
-        <input
-          matInput
-          formControlName="telefono"
-          placeholder="Ej: 3001234567"
-          type="tel"
-          inputmode="numeric"
-        />
-        <mat-error *ngIf="form.get('telefono')?.hasError('required')">
-          El teléfono es requerido
-        </mat-error>
-      </mat-form-field>
+      <div class="telefono-row">
+        <mat-form-field appearance="outline" class="form-field indicativo-field">
+          <mat-label>Indicativo</mat-label>
+          <mat-select formControlName="indicativo">
+            <mat-option *ngFor="let p of paises" [value]="p.indicativo">
+              {{ p.bandera }} +{{ p.indicativo }} {{ p.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field telefono-field">
+          <mat-label>Teléfono</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input
+            matInput
+            formControlName="telefono"
+            placeholder="Ej: 3001234567"
+            type="tel"
+            inputmode="numeric"
+          />
+          <mat-error *ngIf="form.get('telefono')?.hasError('required')">
+            El teléfono es requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
     </form>
   </div>
 </mat-dialog-content>

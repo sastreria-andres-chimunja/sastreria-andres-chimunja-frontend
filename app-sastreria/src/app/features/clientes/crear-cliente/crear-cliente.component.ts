@@ -17,7 +17,9 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { Cliente } from '../../../shared/models/Cliente';
+import { PAISES_INDICATIVO, parsearTelefonoGuardado } from '../../../utils/paises-indicativo';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -34,6 +36,7 @@ import Swal from 'sweetalert2';
     MatIconModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
 })
 export class CrearClienteComponent implements OnInit {
@@ -42,6 +45,7 @@ export class CrearClienteComponent implements OnInit {
   isLoading = false;
   titulo = '';
   icono = '';
+  paises = PAISES_INDICATIVO;
 
   constructor(
     private fb: FormBuilder,
@@ -58,11 +62,13 @@ export class CrearClienteComponent implements OnInit {
   }
 
   createForm() {
+    const { indicativo, local } = parsearTelefonoGuardado(this.clienteModel.telefono);
     this.form = this.fb.group({
       nombres: [this.clienteModel.nombres, [Validators.required]],
       apellidos: [this.clienteModel.apellidos, [Validators.required]],
       cedula: [this.clienteModel.cedula],
-      telefono: [this.clienteModel.telefono, [Validators.required]],
+      indicativo: [indicativo, [Validators.required]],
+      telefono: [local, [Validators.required]],
     });
   }
 
@@ -72,8 +78,12 @@ export class CrearClienteComponent implements OnInit {
       return;
     }
 
-    // Mapear valores del form al modelo
-    Object.assign(this.clienteModel, this.form.value);
+    // Mapear valores del form al modelo -- el teléfono se guarda concatenado
+    // con el indicativo en el mismo campo (p. ej. "573001234567"), para
+    // poder mandarle WhatsApp a números extranjeros sin un campo aparte.
+    const { indicativo, telefono, ...resto } = this.form.value;
+    Object.assign(this.clienteModel, resto);
+    this.clienteModel.telefono = `${indicativo}${(telefono ?? '').replace(/\D/g, '')}`;
 
     this.isLoading = true;
     console.log('id1', this.clienteModel.idCliente);

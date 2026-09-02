@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { AuthService } from '../../core/services/auth.service';
+import { telefonoConIndicativo } from '../../utils/telefono.utils';
 
 @Component({
   selector: 'app-recuperar-clave',
@@ -71,7 +72,8 @@ export class RecuperarClaveComponent {
           `🔑 Contraseña temporal: ${resp.claveTemp}\n\n` +
           `⚠️ Cambia tu contraseña al ingresar por primera vez.`
         );
-        this.urlWhatsApp = tel ? `https://wa.me/57${tel}?text=${msg}` : '';
+        const telConIndicativo = telefonoConIndicativo(resp.telefono);
+        this.urlWhatsApp = telConIndicativo ? `https://wa.me/${telConIndicativo}?text=${msg}` : '';
         this.enviado     = true;
       },
       error: (err) => {

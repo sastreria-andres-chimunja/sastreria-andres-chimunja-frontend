@@ -23,6 +23,8 @@ import { Empleado } from '../../../shared/models/Empleado';
 import { Rol } from '../../../shared/models/Rol';
 import { RolService } from '../../../core/services/rol.service';
 import { MatSelectModule } from '@angular/material/select';
+import { telefonoConIndicativo } from '../../../utils/telefono.utils';
+import { PAISES_INDICATIVO, parsearTelefonoGuardado } from '../../../utils/paises-indicativo';
 import { dateToString, stringToDate } from '../../../utils/date.utils';
 import Swal from 'sweetalert2';
 
@@ -56,6 +58,7 @@ export class CrearEmpleadoComponent implements OnInit {
   titulo = '';
   icono = '';
   roles: Rol[] = [];
+  paises = PAISES_INDICATIVO;
 
   // Estado post-creación
   empleadoCreado: Empleado | null = null;
@@ -88,6 +91,7 @@ export class CrearEmpleadoComponent implements OnInit {
   }
 
   createForm() {
+    const { indicativo, local } = parsearTelefonoGuardado(this.empleadoModel.telefono);
     this.form = this.fb.group({
       nombres: [this.empleadoModel.nombres, [Validators.required]],
       apellidos: [this.empleadoModel.apellidos, [Validators.required]],
@@ -95,7 +99,8 @@ export class CrearEmpleadoComponent implements OnInit {
         stringToDate(this.empleadoModel.fechaCumpleanios) ?? new Date(),
         [Validators.required],
       ],
-      telefono: [this.empleadoModel.telefono, [Validators.required]],
+      indicativo: [indicativo, [Validators.required]],
+      telefono: [local, [Validators.required]],
       direccion: [this.empleadoModel.direccion, [Validators.required]],
       idRol: [this.empleadoModel.idRol, [Validators.required]],
     });
@@ -107,8 +112,13 @@ export class CrearEmpleadoComponent implements OnInit {
       return;
     }
 
-    const formValue = { ...this.form.value };
+    // El teléfono se guarda concatenado con el indicativo en el mismo
+    // campo (p. ej. "573001234567"), para poder mandarle credenciales por
+    // WhatsApp a empleados con número extranjero.
+    const { indicativo, telefono, ...resto } = this.form.value;
+    const formValue: any = { ...resto };
     formValue.fechaCumpleanios = dateToString(formValue.fechaCumpleanios);
+    formValue.telefono = `${indicativo}${(telefono ?? '').replace(/\D/g, '')}`;
     Object.assign(this.empleadoModel, formValue);
 
     this.isLoading = true;
@@ -123,6 +133,12 @@ export class CrearEmpleadoComponent implements OnInit {
         error: (err) => {
           this.isLoading = false;
           console.error('Error al guardar empleado:', err);
+          Swal.fire({
+            title: 'No se pudo guardar',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
         },
       });
     } else {
@@ -136,6 +152,12 @@ export class CrearEmpleadoComponent implements OnInit {
         error: (err) => {
           this.isLoading = false;
           console.error('Error al guardar empleado:', err);
+          Swal.fire({
+            title: 'No se pudo crear',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
         },
       });
     }
@@ -145,8 +167,16 @@ export class CrearEmpleadoComponent implements OnInit {
     return `${this.empleadoCreado?.nombres ?? ''} ${this.empleadoCreado?.apellidos ?? ''}`.trim();
   }
 
+  /**
+   * Número completo CON el indicativo elegido en el form -- a diferencia de
+   * telefonoConIndicativo() (que adivina el indicativo por longitud para
+   * números YA guardados), acá el indicativo se sabe con certeza porque es
+   * justo el que el usuario seleccionó en el select de al lado.
+   */
   get telefonoEmpleado(): string {
-    return (this.form.get('telefono')?.value ?? '').replace(/\D/g, '');
+    const indicativo = this.form.get('indicativo')?.value ?? '57';
+    const local = (this.form.get('telefono')?.value ?? '').replace(/\D/g, '');
+    return local ? `${indicativo}${local}` : '';
   }
 
   get usernameEmpleado(): string {
@@ -170,13 +200,15 @@ export class CrearEmpleadoComponent implements OnInit {
   }
 
   get urlWaEmpleado(): string {
+    // telefonoEmpleado ya viene con el indicativo elegido concatenado --
+    // no hace falta (ni conviene) adivinarlo de nuevo con telefonoConIndicativo().
     const tel = this.telefonoEmpleado;
-    return tel ? `https://wa.me/57${tel}?text=${this.mensajeCredenciales}` : '';
+    return tel ? `https://wa.me/${tel}?text=${this.mensajeCredenciales}` : '';
   }
 
   get urlWaAdmin(): string {
-    const tel = this.telefonoAdmin.replace(/\D/g, '');
-    return tel ? `https://wa.me/57${tel}?text=${this.mensajeCredenciales}` : '';
+    const tel = telefonoConIndicativo(this.telefonoAdmin);
+    return tel ? `https://wa.me/${tel}?text=${this.mensajeCredenciales}` : '';
   }
 
   abrirWaEmpleado(): void {
