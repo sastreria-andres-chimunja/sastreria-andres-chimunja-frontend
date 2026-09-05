@@ -113,13 +113,13 @@ export class PedidosListComponent implements OnInit {
 
   /**
    * Revertir Entregado→Terminado sigue siendo Admin y Asistente (como ya
-   * era); revertir Terminado→Asignado es nuevo y solo Admin.
+   * era); revertir Terminado→Asignado y Asignado→Pendiente son solo Admin.
    */
   puedeRevertir(p: Pedido): boolean {
     if (this.estadoClase(p) === 'entregado') {
       return this.authService.esAdmin() || this.authService.esAsistente();
     }
-    if (this.esTerminado(p)) {
+    if (this.esTerminado(p) || this.estadoClase(p) === 'asignado') {
       return this.authService.esAdmin();
     }
     return false;
@@ -299,20 +299,26 @@ export class PedidosListComponent implements OnInit {
 
   /**
    * Revierte un pedido un paso hacia atrás: Entregado→Terminado (Admin/
-   * Asistente) o Terminado→Asignado (solo Admin). El backend decide cuál
-   * de las dos aplica según el estado actual del pedido, y deshace también
-   * el abono automático consolidado al entregar (si lo hubo) en el primer caso.
+   * Asistente), Terminado→Asignado o Asignado→Pendiente (estas dos últimas
+   * solo Admin). El backend decide cuál de las tres aplica según el estado
+   * actual del pedido -- deshace también el abono automático consolidado al
+   * entregar (si lo hubo) en el primer caso, y desasigna el empleado de
+   * cada ítem en el último (Pendiente significa justamente "sin empleado").
    */
   revertirEstado(p: Pedido, event: Event): void {
     event.stopPropagation();
     const aEntregado = this.estadoClase(p) === 'entregado';
-    const estadoDestino = aEntregado ? 'Terminado' : 'Asignado';
+    const aAsignado = this.estadoClase(p) === 'asignado';
+    const estadoDestino = aEntregado ? 'Terminado' : aAsignado ? 'Pendiente' : 'Asignado';
     Swal.fire({
       title: `¿Revertir a ${estadoDestino}?`,
       html:
         `El pedido #${p.idPedido} volverá al estado <b>${estadoDestino}</b>.` +
         (aEntregado && p.fechaEntregado
           ? '<br><br>El abono automático que se generó al entregarlo se eliminará y el saldo quedará pendiente otra vez.'
+          : '') +
+        (aAsignado
+          ? '<br><br>El empleado asignado a cada ítem se quitará (Pendiente significa que todavía no tiene a quién).'
           : ''),
       icon: 'warning',
       showCancelButton: true,
