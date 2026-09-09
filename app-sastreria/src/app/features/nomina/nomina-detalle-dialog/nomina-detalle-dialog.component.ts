@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
+import { GarantiaService } from '../../../core/services/garantia.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
@@ -80,6 +81,7 @@ export class NominaDetalleDialogComponent implements OnInit {
     private location: Location,
     private nominaService: NominaService,
     private itemPedidoService: ItemPedidoService,
+    private garantiaService: GarantiaService,
     private empleadoService: EmpleadoService,
     private authService: AuthService,
     private reciboService: ReciboService,
@@ -256,23 +258,34 @@ export class NominaDetalleDialogComponent implements OnInit {
 
   // % de comisión antes de que el usuario lo tocara -- se guarda al hacer
   // foco en el campo (ver onFocusComision()), para poder mostrarlo en la
-  // confirmación y para revertir el valor mostrado si cancela o falla el guardado.
-  private comisionOriginal = new Map<number, number>();
+  // confirmación y para revertir el valor mostrado si cancela o falla el
+  // guardado. Clave unificada porque acá se mezclan ítems (idItemPedido) y
+  // garantías (idGarantia) en la misma lista de "pendientes".
+  private comisionOriginal = new Map<string, number>();
+
+  private claveComision(item: any): string {
+    return item._esGarantia ? `g${item.idGarantia}` : `i${item.idItemPedido}`;
+  }
 
   onFocusComision(item: any): void {
-    if (!this.comisionOriginal.has(item.idItemPedido)) {
-      this.comisionOriginal.set(item.idItemPedido, Number(item.comisionEmpleado ?? 0));
+    const clave = this.claveComision(item);
+    if (!this.comisionOriginal.has(clave)) {
+      this.comisionOriginal.set(clave, Number(item.comisionEmpleado ?? 0));
     }
   }
 
   /**
    * Cambiar la comisión afecta directamente cuánto se le paga al empleado
    * -- se confirma antes de guardar (con opción de cancelar), en vez de
-   * guardar directo al cambiar el campo como antes.
+   * guardar directo al cambiar el campo como antes. Sirve tanto para
+   * ítems normales como para garantías (ver claveComision()) -- en una
+   * garantía esto NO toca el gasto ya registrado (siempre el valor
+   * completo), solo cuánto de eso se le reconoce al empleado.
    */
   actualizarComision(item: any, pct: number): void {
+    const clave = this.claveComision(item);
     const nuevaComision = Math.max(0, Math.min(100, Number(pct) || 0));
-    const anterior = this.comisionOriginal.get(item.idItemPedido) ?? nuevaComision;
+    const anterior = this.comisionOriginal.get(clave) ?? nuevaComision;
 
     if (nuevaComision === anterior) return; // sin cambio real
 
@@ -280,7 +293,7 @@ export class NominaDetalleDialogComponent implements OnInit {
       title: '¿Cambiar la comisión?',
       html:
         `<b>${item.descripcion || 'Este ítem'}</b> pasará de <b>${anterior}%</b> a <b>${nuevaComision}%</b> de comisión.` +
-        `<br>Esto cambia lo que se le paga al empleado por este ítem.`,
+        `<br>Esto cambia lo que se le paga al empleado por este${item._esGarantia ? ' concepto' : ' ítem'}.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#185FA5',
@@ -292,11 +305,14 @@ export class NominaDetalleDialogComponent implements OnInit {
         item.comisionEmpleado = anterior;
         return;
       }
-      this.itemPedidoService.actualizarComision(item.idItemPedido, nuevaComision).subscribe({
+      const actualizar$ = item._esGarantia
+        ? this.garantiaService.actualizarComision(item.idGarantia, nuevaComision)
+        : this.itemPedidoService.actualizarComision(item.idItemPedido, nuevaComision);
+      actualizar$.subscribe({
         next: () => {
           item.comisionEmpleado = nuevaComision;
           item.valorEmpleado = Number(item.valor ?? 0) * nuevaComision / 100;
-          this.comisionOriginal.set(item.idItemPedido, nuevaComision);
+          this.comisionOriginal.set(clave, nuevaComision);
           if (this.resumen?.pendientes) {
             this.resumen.totalPendiente = this.resumen.pendientes.reduce(
               (s: number, i: any) => s + Number(i.valorEmpleado ?? 0), 0

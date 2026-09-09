@@ -21,4 +21,8 @@ export class GarantiaService {
     if (idEmpleado) params['idEmpleado'] = String(idEmpleado);
     return this.http.get(this.api, { params });
   }
+
+  actualizarComision(idGarantia: number, comisionEmpleado: number) {
+    return this.http.put<any>(`${this.api}/${idGarantia}/comision`, { comisionEmpleado });
+  }
 }

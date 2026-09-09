@@ -159,16 +159,15 @@
                 <span class="mov-sub" *ngIf="item._esGarantia">Garantía</span>
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
-              <span class="mov-valor" style="text-align:right">{{ item._esGarantia ? '—' : formatCOP(item.valor) }}</span>
-              <div style="display:flex;justify-content:center" *ngIf="!item._esGarantia">
+              <span class="mov-valor" style="text-align:right">{{ formatCOP(item.valor) }}</span>
+              <div style="display:flex;justify-content:center">
                 <input class="comision-input" type="number" min="0" max="100"
                   [(ngModel)]="item.comisionEmpleado"
                   (focus)="onFocusComision(item)"
                   (change)="actualizarComision(item, item.comisionEmpleado)"
                   [disabled]="!!data.soloLectura"
-                  title="% comisión" />
+                  [title]="item._esGarantia ? '% de comisión reconocido en su nómina (el gasto registrado es el valor completo)' : '% comisión'" />
               </div>
-              <span *ngIf="item._esGarantia" class="text-center">—</span>
               <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>
             </div>
           </div>
