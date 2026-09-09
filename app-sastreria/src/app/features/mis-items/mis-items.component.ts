@@ -59,10 +59,14 @@ export class MisItemsComponent implements OnInit {
   fechaInicioCtrl = new FormControl<Date | null>(null);
   fechaFinCtrl = new FormControl<Date | null>(null);
 
-  // Pedidos que el empleado abrió manualmente (fuera de eso, quedan
-  // agrupados/colapsados por defecto para no saturar la vista con varios
-  // ítems del mismo pedido repetidos como tarjetas sueltas).
-  private pedidosExpandidos = new Set<number>();
+  // Estado de expansión de cada pedido, EXPLÍCITO una vez que el empleado
+  // lo toca -- sin búsqueda, colapsado por defecto (para no saturar la
+  // vista con varios ítems del mismo pedido repetidos como tarjetas
+  // sueltas); con una búsqueda escrita, expandido por defecto. Se guarda
+  // el valor explícito (true/false) en vez de solo "está abierto o no",
+  // porque contra `!!busqueda` la flecha de retraer quedaba sin efecto
+  // mientras hubiera texto en el buscador.
+  private pedidosExpandidosManual = new Map<number, boolean>();
 
   private idEstadoAsignado: number | null = null;
   private idEstadoTerminado: number | null = null;
@@ -225,12 +229,12 @@ export class MisItemsComponent implements OnInit {
    * que el empleado está buscando.
    */
   estaExpandido(idPedido: number): boolean {
-    return this.pedidosExpandidos.has(idPedido) || !!this.busqueda.trim();
+    const manual = this.pedidosExpandidosManual.get(idPedido);
+    return manual !== undefined ? manual : !!this.busqueda.trim();
   }
 
   toggleGrupo(idPedido: number): void {
-    if (this.pedidosExpandidos.has(idPedido)) this.pedidosExpandidos.delete(idPedido);
-    else this.pedidosExpandidos.add(idPedido);
+    this.pedidosExpandidosManual.set(idPedido, !this.estaExpandido(idPedido));
   }
 
   totalGrupo(grupo: GrupoPedido): number {

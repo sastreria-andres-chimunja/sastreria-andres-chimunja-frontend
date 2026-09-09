@@ -47,11 +47,15 @@ export class ItemsAdminComponent implements OnInit {
   busqueda = '';
   filtroEstado: 'pendiente' | 'asignado' | 'terminado' | 'entregado' | null = null;
 
-  // Pedidos abiertos manualmente -- fuera de eso, quedan agrupados/
-  // colapsados por defecto (mismo patrón que "Mis ítems"), salvo que algún
-  // filtro esté activo, en cuyo caso se expanden solos para no esconder
-  // los resultados que el admin está buscando.
-  private pedidosExpandidos = new Set<number>();
+  // Estado de expansión de cada pedido, EXPLÍCITO una vez que el admin lo
+  // toca (mismo patrón que "Mis ítems"). Sin filtro activo, por defecto
+  // colapsado; con un filtro activo, por defecto expandido (para no
+  // esconder los resultados que el admin está buscando) -- pero un clic
+  // en la flecha siempre debe poder revertir ese default, así que se
+  // guarda el valor explícito (true/false), no solo "está abierto o no",
+  // que antes se perdía contra hayFiltrosActivos y la flecha de retraer
+  // quedaba sin efecto mientras hubiera un filtro puesto.
+  private pedidosExpandidosManual = new Map<number, boolean>();
 
   empleados: any[] = [];
   filtroEmpleado: string = '';
@@ -155,12 +159,12 @@ export class ItemsAdminComponent implements OnInit {
   }
 
   estaExpandido(idPedido: number): boolean {
-    return this.pedidosExpandidos.has(idPedido) || this.hayFiltrosActivos;
+    const manual = this.pedidosExpandidosManual.get(idPedido);
+    return manual !== undefined ? manual : this.hayFiltrosActivos;
   }
 
   toggleGrupo(idPedido: number): void {
-    if (this.pedidosExpandidos.has(idPedido)) this.pedidosExpandidos.delete(idPedido);
-    else this.pedidosExpandidos.add(idPedido);
+    this.pedidosExpandidosManual.set(idPedido, !this.estaExpandido(idPedido));
   }
 
   totalGrupo(grupo: GrupoPedido): number {
