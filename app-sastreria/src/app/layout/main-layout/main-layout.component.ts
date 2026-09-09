@@ -46,6 +46,7 @@ export class MainLayoutComponent implements OnInit {
     '/app/pedidos/crear': 'Nuevo pedido',
     '/app/clientes': 'Clientes',
     '/app/empleados': 'Empleados',
+    '/app/nomina': 'Nómina',
     '/app/garantias': 'Garantías',
     '/app/movimientos': 'Movimientos',
     '/app/metodosPago': 'Métodos de pago',

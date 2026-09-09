@@ -57,9 +57,16 @@
       </mat-nav-list>
     </ng-container>
 
-    <!-- Balance (admin y asistente ven nómina y movimientos) -->
+    <!-- Balance -->
     <div class="nav-title nav-label">Balance</div>
     <mat-nav-list class="nav-section" (click)="sidenav.close()">
+      <!-- Nómina: solo Admin (ve el balance de todos los empleados).
+           Operario/asistente ven su propio saldo desde "Mi nómina" en
+           "Mis ítems" -- para ellos, "Garantías" ocupa este lugar del menú. -->
+      <a mat-list-item routerLink="/app/nomina" routerLinkActive="active" *ngIf="authService.esAdmin()">
+        <mat-icon matListItemIcon>engineering</mat-icon>
+        <span matListItemTitle class="nav-label">Nómina</span>
+      </a>
       <a mat-list-item routerLink="/app/garantias" routerLinkActive="active">
         <mat-icon matListItemIcon>verified_user</mat-icon>
         <span matListItemTitle class="nav-label">Garantías</span>

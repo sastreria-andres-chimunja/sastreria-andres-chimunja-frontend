@@ -1,0 +1,327 @@
+/* ── Layout ──────────────────────────────────────────────────── */
+.main-content {
+  width: 100%;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.nomina-lista {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 1rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────── */
+.toolbar-clientes {
+  padding: 0.5rem 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  max-width: 400px;
+  width: 100%;
+  transition: border-color 0.15s;
+  &:focus-within { border-color: var(--primary); }
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  background: transparent;
+  width: 100%;
+  height: 36px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-primary);
+}
+
+.search-box input::placeholder { color: var(--text-muted); }
+.search-box .search-icon       { font-size: 14px; color: var(--text-muted); }
+
+/* ── Tarjeta empleado ────────────────────────────────────────── */
+.pay-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.pay-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(24, 95, 165, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Franja superior con color primario */
+.card-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, #2e87d4 100%);
+  flex-shrink: 0;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #2e87d4 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(24, 95, 165, 0.25);
+}
+
+.pay-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Importes ────────────────────────────────────────────────── */
+.card-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 0 16px 12px;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.amount-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 4px;
+  &:not(:last-child) { border-right: 1px solid var(--border-light); }
+}
+
+.amount-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1;
+}
+
+.amount-value {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.income  { color: var(--success); }
+.paid    { color: var(--primary); }
+.pending { color: var(--danger); }
+.zero    { color: var(--success); }
+
+/* ── Footer tarjeta ──────────────────────────────────────────── */
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 12px 12px;
+}
+
+.btn-view {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.01em;
+  transition: background 0.13s, border-color 0.13s, box-shadow 0.13s;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+  &:hover {
+    background: #e6f1fb;
+    border-color: var(--primary);
+    box-shadow: 0 2px 6px rgba(24, 95, 165, 0.12);
+  }
+}
+
+/* ── Sin datos ───────────────────────────────────────────────── */
+.no-data {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ── Filtro de fechas ────────────────────────────────────────── */
+.fecha-filter-wrapper { position: relative; }
+
+.btn-fecha {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  &:hover { border-color: var(--primary); color: var(--primary); }
+  &.activo { border-color: var(--primary); color: var(--primary); background: #e6f1fb; }
+}
+
+.fecha-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+  z-index: 100;
+  min-width: 280px;
+}
+
+.fecha-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.fecha-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.btn-cerrar-panel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  border-radius: 4px;
+  &:hover { color: var(--text-primary); background: var(--bg); }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+.fecha-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fecha-field { width: 100%; }
+
+.fecha-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-hoy {
+  background: none;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  margin-right: auto;
+  &:hover { background: var(--primary); color: #fff; }
+}
+
+.btn-limpiar {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  &:hover { background: var(--bg); }
+}
+
+.btn-aplicar {
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  &:hover { background: var(--primary-hover); }
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .nomina-lista { grid-template-columns: 1fr; }
+
+  /* El panel se abría con right:0 anclado al botón de filtro — en celular
+     podía extenderse fuera de la pantalla (min-width:280px) tapando las
+     etiquetas "Desde"/"Hasta". position:fixed con left/right explícitos
+     lo ancla a la pantalla completa en vez del botón. */
+  .fecha-panel {
+    position: fixed;
+    top: 110px;
+    left: 12px;
+    right: 12px;
+    min-width: 0;
+    width: auto;
+  }
+}

@@ -9,6 +9,7 @@ import { MetodosPagoListComponent } from './features/metodos-pago/metodos-pago-l
 import { TipoMovimientoListComponent } from './features/tipo-movimiento/tipo-movimiento-list/tipo-movimiento-list.component';
 import { CategoriaMovimientoListComponent } from './features/categorias-movimiento/categoria-movimiento-list/categoria-movimiento-list.component';
 import { RolesListComponent } from './features/roles/roles-list/roles-list.component';
+import { NominaGeneralComponent } from './features/nomina/nomina-general/nomina-general.component';
 import { NominaDetalleDialogComponent } from './features/nomina/nomina-detalle-dialog/nomina-detalle-dialog.component';
 import { GarantiasListComponent } from './features/garantias/garantias-list/garantias-list.component';
 import { LoginComponent } from './features/login/login.component';
@@ -45,10 +46,12 @@ export const routes: Routes = [
       { path: 'categoriaMovimientos', component: CategoriaMovimientoListComponent },
       { path: 'roles', component: RolesListComponent },
       { path: 'limite-diario', component: LimiteDiarioComponent },
-      // Nómina de un empleado puntual -- se llega acá desde "Empleados"
-      // (Admin/Asistente) o desde "Mis ítems" (el propio empleado viendo
-      // su saldo pendiente). Ya no hay un listado general en el menú --
-      // ver punto 8 del pedido del cliente / "Garantías" reemplazándolo.
+      // Nómina: listado general (solo Admin, ve el balance de todos) y
+      // detalle de un empleado puntual (se llega desde el listado, desde
+      // "Empleados", o desde "Mis ítems" para el propio empleado viendo su
+      // saldo pendiente). "Garantías" reemplaza a "Nómina" en el menú
+      // SOLO para operario/asistente -- el Admin ve ambas.
+      { path: 'nomina', component: NominaGeneralComponent },
       { path: 'nomina/:idEmpleado', component: NominaDetalleDialogComponent },
       { path: 'garantias', component: GarantiasListComponent },
       // Pedidos
