@@ -40,6 +40,69 @@
   width: 100%;
 }
 
+/* ── Autocompletar cliente (mismo patrón que crear-pedido) ──────── */
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.form-error {
+  display: block;
+  margin: -6px 0 4px 14px;
+  font-size: 11px;
+  color: var(--danger, #d33);
+}
+
+.sugerencias-panel {
+  position: absolute;
+  top: calc(100% - 14px);
+  left: 0;
+  right: 0;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  z-index: 200;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.sugerencia-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  &:hover { background: var(--bg, #f5f5f5); }
+  &:not(:last-child) { border-bottom: 1px solid var(--border-light, #eee); }
+}
+
+.sug-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #185FA5) 0%, #2478c5 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sug-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sug-nombre {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary, #2C2518);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sug-cc { font-size: 10.5px; color: var(--text-muted, #999); }
+
 .dialog-actions {
   padding: 8px 24px 20px;
   gap: 8px;
