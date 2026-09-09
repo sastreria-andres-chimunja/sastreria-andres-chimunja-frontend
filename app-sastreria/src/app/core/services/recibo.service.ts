@@ -328,6 +328,7 @@ export class ReciboService {
     }
     .cliente-nombre { font-family: 'Arial Black', Arial, sans-serif; font-size: 15px; line-height: 1.1; word-break: break-word; }
     .fila { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 1mm; line-height: 1; }
+    .fila-pedido { font-family: 'Arial Black', Arial, sans-serif; font-size: 13px; margin-top: 1mm; line-height: 1; }
     .fila-entrega { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; margin-top: 0.6mm; line-height: 1; }
     .totales { margin-top: 0.6mm; }
     .fila-linea { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; line-height: 1.1; margin-top: 0.8mm; }
@@ -354,7 +355,7 @@ export class ReciboService {
       <div>
         <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
         ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
-        <div class="fila">PEDIDO #${data.idPedido}</div>
+        <div class="fila-pedido">PEDIDO ${data.idPedido}</div>
         <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
       </div>
       <div class="totales">
