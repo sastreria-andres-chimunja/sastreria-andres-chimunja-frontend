@@ -13,6 +13,15 @@
       <option *ngFor="let e of empleados" [value]="e.idEmpleado">{{ e.nombres }} {{ e.apellidos }}</option>
     </select>
 
+    <!-- Atajos para liquidar el día/la semana -- aplican el mismo filtro de
+         fecha de arriba, sin tener que abrir el panel y elegir a mano. -->
+    <button class="btn-fecha-atajo" (click)="filtrarHoy()" matTooltip="Filtrar por hoy">
+      <mat-icon>today</mat-icon> Día
+    </button>
+    <button class="btn-fecha-atajo" (click)="filtrarSemana()" matTooltip="Filtrar por la semana actual (lunes a sábado)">
+      <mat-icon>date_range</mat-icon> Semana
+    </button>
+
     <div class="fecha-filter-wrapper">
       <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de entrega">
         <mat-icon>date_range</mat-icon>

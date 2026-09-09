@@ -107,6 +107,26 @@
 .chip-ganado .chip-valor-icon { color: var(--primary, #185fa5); }
 .chip-ganado .chip-valor-monto { color: var(--primary, #185fa5); }
 
+.btn-ver-nomina {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e0e0e0);
+  background: var(--surface, #fff);
+  color: var(--primary, #185fa5);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  &:hover { border-color: var(--primary, #185fa5); background: rgba(24,95,165,.08); }
+}
+
 /* ── Filtro de fechas (calendario, mismo patrón que items-admin/
    pedidos-list/movimientos-list/nomina-general) ────────────────── */
 .fecha-filter-wrapper { position: relative; }

@@ -1,11 +1,14 @@
 /* ── Wrapper ────────────────────────────────────────────────── */
+/* Antes vivía dentro de un MatDialog (ancho/alto fijos, scroll interno) --
+   ahora es una página completa (ver punto 8: nómina se ve abriendo al
+   empleado, no en un modal), así que ocupa el ancho disponible y deja que
+   la página misma haga scroll en vez de encerrarlo en una caja. */
 .dialog-wrapper {
   display: flex;
   flex-direction: column;
-  width: 680px;
-  max-width: 100%;
-  max-height: 80vh;
-  overflow: hidden;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
   background: var(--surface);
   border-radius: 14px;
 }
@@ -440,9 +443,9 @@
 .mov-header-row { display: grid; grid-template-columns: 1fr 100px 90px; }
 .mov-row        { display: grid; grid-template-columns: 1fr 100px 90px; }
 
-/* Ítems por pagar: 6 columnas */
-.mov-header-items { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px 80px; gap: 0 6px; }
-.mov-row-items    { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px 80px; gap: 0 6px; }
+/* Ítems por pagar: 5 columnas (se quitó la del botón "Pagar" individual) */
+.mov-header-items { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px; gap: 0 6px; }
+.mov-row-items    { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px; gap: 0 6px; }
 
 .text-right  { text-align: right; }
 .text-center { text-align: center; }
@@ -490,27 +493,6 @@
   font-size: 13px;
   font-weight: 600;
   text-align: right;
-}
-
-/* ── Botón pagar ─────────────────────────────────────────────── */
-.btn-pagar {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: linear-gradient(135deg, var(--success) 0%, #3ea03e 100%);
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  transition: opacity 0.13s;
-  white-space: nowrap;
-  mat-icon { font-size: 14px; width: 14px; height: 14px; }
-  &:hover:not(:disabled) { opacity: 0.85; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 /* ── Amount colors ──────────────────────────────────────────── */

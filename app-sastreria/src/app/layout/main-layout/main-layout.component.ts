@@ -46,7 +46,7 @@ export class MainLayoutComponent implements OnInit {
     '/app/pedidos/crear': 'Nuevo pedido',
     '/app/clientes': 'Clientes',
     '/app/empleados': 'Empleados',
-    '/app/nomina': 'Nómina',
+    '/app/garantias': 'Garantías',
     '/app/movimientos': 'Movimientos',
     '/app/metodosPago': 'Métodos de pago',
     '/app/categoriaMovimientos': 'Categorías de movimiento',
@@ -77,6 +77,8 @@ export class MainLayoutComponent implements OnInit {
           this.pageTitle = 'Editar pedido';
         } else if (url.startsWith('/app/medidas/')) {
           this.pageTitle = 'Medidas';
+        } else if (url.startsWith('/app/nomina/')) {
+          this.pageTitle = 'Nómina';
         } else {
           this.pageTitle = 'Sistema de Gestión';
         }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -28,6 +29,7 @@ export interface GrupoPedido {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    RouterLink,
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
@@ -48,8 +50,10 @@ export class MisItemsComponent implements OnInit {
 
   cambioEstadoId: number | null = null;
 
-  // Filtro por rango de fecha de entrega (calendario, mismo patrón que
-  // items-admin/pedidos-list/movimientos-list/nomina-general).
+  // Filtro por rango de fecha de asignación (calendario, mismo patrón que
+  // items-admin/pedidos-list/movimientos-list/nomina-general) -- el
+  // empleado necesita ver lo que le asignaron en ese rango, no lo que
+  // vence entregar en ese rango (eso ya lo ordena cargarItems()).
   filtroFechaAbierto = false;
   filtroFechaActivo = false;
   fechaInicioCtrl = new FormControl<Date | null>(null);
@@ -95,6 +99,12 @@ export class MisItemsComponent implements OnInit {
     });
   }
 
+  // Para el botón "Mi nómina" -- lleva a /app/nomina/:idEmpleado (mismo
+  // detalle que ve el admin al abrir a un empleado, en modo lectura).
+  get idEmpleadoPropio(): number | null {
+    return this.authService.getIdEmpleado();
+  }
+
   cargarItems(): void {
     const idEmpleado = this.authService.getIdEmpleado();
     if (!idEmpleado) return;
@@ -132,7 +142,7 @@ export class MisItemsComponent implements OnInit {
       const desde = this.inicioDelDia(this.fechaInicioCtrl.value);
       const hasta = this.finDelDia(this.fechaFinCtrl.value);
       res = res.filter((i) => {
-        const f = stringToDate(i.fechaEntrega);
+        const f = stringToDate(i.fechaAsignado);
         if (!f) return false;
         if (desde && f < desde) return false;
         if (hasta && f > hasta) return false;

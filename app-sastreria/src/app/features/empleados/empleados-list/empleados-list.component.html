@@ -56,6 +56,9 @@
         <button class="btn-action" (click)="openDialogMovimiento(e)">
           <mat-icon>payments</mat-icon> Pago
         </button>
+        <button class="btn-action" [routerLink]="['/app/nomina', e.idEmpleado]">
+          <mat-icon>receipt_long</mat-icon> Nómina
+        </button>
         <button class="btn-action" [class.btn-danger]="e.activo" [class.btn-success]="!e.activo"
           (click)="cambiarEstado(e)">
           <mat-icon>{{ e.activo ? 'person_off' : 'person' }}</mat-icon>

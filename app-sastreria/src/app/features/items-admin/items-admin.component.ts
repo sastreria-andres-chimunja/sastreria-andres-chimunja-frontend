@@ -223,6 +223,22 @@ export class ItemsAdminComponent implements OnInit {
     this.aplicarFiltroFecha();
   }
 
+  /** Atajo: filtra por la semana actual, lunes a sábado (para liquidar la
+   * semana completa de una vez, sin contar el domingo -- no se trabaja). */
+  filtrarSemana(): void {
+    const hoy = new Date();
+    // getDay(): 0=domingo, 1=lunes … 6=sábado. Se calcula cuántos días
+    // atrás cae el lunes de esta semana (domingo cuenta como "6 días
+    // después del lunes anterior", no como inicio de semana).
+    const diaSemana = hoy.getDay();
+    const diasDesdeLunes = diaSemana === 0 ? 6 : diaSemana - 1;
+    const lunes = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - diasDesdeLunes);
+    const sabado = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate() + 5);
+    this.fechaInicioCtrl.setValue(lunes);
+    this.fechaFinCtrl.setValue(sabado);
+    this.aplicarFiltroFecha();
+  }
+
   limpiarFiltroFecha(): void {
     this.fechaInicioCtrl.reset();
     this.fechaFinCtrl.reset();

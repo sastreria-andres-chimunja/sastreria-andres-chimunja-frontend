@@ -28,4 +28,7 @@ export class ClienteService {
     const { idCliente } = cliente;
     return this.http.put(`${this.api}/${idCliente}`, cliente);
   }
+  eliminar(idCliente: number) {
+    return this.http.delete(`${this.api}/${idCliente}`);
+  }
 }

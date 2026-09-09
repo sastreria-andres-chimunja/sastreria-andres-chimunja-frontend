@@ -75,6 +75,25 @@
   &.activo { border-color: var(--primary, #1a73e8); color: var(--primary, #1a73e8); background: rgba(26,115,232,.08); }
 }
 
+.btn-fecha-atajo {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary, #757575);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { border-color: var(--primary, #1a73e8); color: var(--primary, #1a73e8); background: rgba(26,115,232,.08); }
+}
+
 .fecha-panel {
   position: absolute;
   top: calc(100% + 6px);

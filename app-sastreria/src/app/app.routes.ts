@@ -9,7 +9,8 @@ import { MetodosPagoListComponent } from './features/metodos-pago/metodos-pago-l
 import { TipoMovimientoListComponent } from './features/tipo-movimiento/tipo-movimiento-list/tipo-movimiento-list.component';
 import { CategoriaMovimientoListComponent } from './features/categorias-movimiento/categoria-movimiento-list/categoria-movimiento-list.component';
 import { RolesListComponent } from './features/roles/roles-list/roles-list.component';
-import { NominaGeneralComponent } from './features/nomina/nomina-general/nomina-general.component';
+import { NominaDetalleDialogComponent } from './features/nomina/nomina-detalle-dialog/nomina-detalle-dialog.component';
+import { GarantiasListComponent } from './features/garantias/garantias-list/garantias-list.component';
 import { LoginComponent } from './features/login/login.component';
 import { PedidosListComponent } from './features/pedidos/pedidos-list/pedidos-list.component';
 import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedido.component';
@@ -44,7 +45,12 @@ export const routes: Routes = [
       { path: 'categoriaMovimientos', component: CategoriaMovimientoListComponent },
       { path: 'roles', component: RolesListComponent },
       { path: 'limite-diario', component: LimiteDiarioComponent },
-      { path: 'nomina', component: NominaGeneralComponent },
+      // Nómina de un empleado puntual -- se llega acá desde "Empleados"
+      // (Admin/Asistente) o desde "Mis ítems" (el propio empleado viendo
+      // su saldo pendiente). Ya no hay un listado general en el menú --
+      // ver punto 8 del pedido del cliente / "Garantías" reemplazándolo.
+      { path: 'nomina/:idEmpleado', component: NominaDetalleDialogComponent },
+      { path: 'garantias', component: GarantiasListComponent },
       // Pedidos
       { path: 'pedidos', component: PedidosListComponent },
       { path: 'pedidos/crear', component: CrearPedidoComponent },

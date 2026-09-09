@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ClienteService } from '../../../core/services/cliente.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Cliente } from '../../../shared/models/Cliente';
 import { CrearClienteComponent } from '../crear-cliente/crear-cliente.component';
 import Swal from 'sweetalert2';
@@ -20,7 +21,18 @@ export class ClientesListComponent implements OnInit {
   clientes: Cliente[] = [];
   busqueda = '';
 
-  constructor(private clienteService: ClienteService, public dialog: MatDialog) {}
+  constructor(
+    private clienteService: ClienteService,
+    private authService: AuthService,
+    public dialog: MatDialog,
+  ) {}
+
+  // Eliminar cliente: irreversible y puede chocar con pedidos/medidas
+  // existentes (ver deleteCliente() en el backend) -- restringido a Admin,
+  // mismo criterio que revertir estado de pedido / eliminar abonos.
+  get puedeEliminar(): boolean {
+    return this.authService.esAdmin();
+  }
 
   ngOnInit() { this.loadClientes(); }
 
@@ -67,5 +79,35 @@ export class ClientesListComponent implements OnInit {
         width: '400px', height: '500px', data: {},
       }).afterClosed().subscribe(() => this.loadClientes());
     }
+  }
+
+  eliminarCliente(c: Cliente, event: Event) {
+    event.stopPropagation();
+    Swal.fire({
+      title: '¿Eliminar cliente?',
+      text: `Se eliminará a ${c.nombres} ${c.apellidos} de forma permanente. Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.clienteService.eliminar(c.idCliente!).subscribe({
+        next: () => {
+          Swal.fire({ title: 'Cliente eliminado', icon: 'success', timer: 1500, showConfirmButton: false });
+          this.loadClientes();
+        },
+        error: (err) => {
+          Swal.fire({
+            title: 'No se pudo eliminar',
+            text: err?.error?.error || 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
+        },
+      });
+    });
   }
 }

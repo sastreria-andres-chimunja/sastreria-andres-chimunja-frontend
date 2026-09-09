@@ -8,8 +8,8 @@
         <p class="dialog-subtitle">Detalle de nómina</p>
       </div>
     </div>
-    <button class="btn-close-dialog" (click)="cerrar()">
-      <mat-icon>close</mat-icon>
+    <button class="btn-close-dialog" (click)="volver()" matTooltip="Volver">
+      <mat-icon>arrow_back</mat-icon>
     </button>
   </div>
 
@@ -151,16 +151,16 @@
               <span class="text-right">Valor ítem</span>
               <span class="text-center">% Comisión</span>
               <span class="text-right">A pagar</span>
-              <span></span>
             </div>
             <div class="mov-row-items" *ngFor="let item of resumen.pendientes">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="!item._esGarantia">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="item._esGarantia">Garantía</span>
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
-              <span class="mov-valor" style="text-align:right">{{ formatCOP(item.valor) }}</span>
-              <div style="display:flex;justify-content:center">
+              <span class="mov-valor" style="text-align:right">{{ item._esGarantia ? '—' : formatCOP(item.valor) }}</span>
+              <div style="display:flex;justify-content:center" *ngIf="!item._esGarantia">
                 <input class="comision-input" type="number" min="0" max="100"
                   [(ngModel)]="item.comisionEmpleado"
                   (focus)="onFocusComision(item)"
@@ -168,16 +168,8 @@
                   [disabled]="!!data.soloLectura"
                   title="% comisión" />
               </div>
+              <span *ngIf="item._esGarantia" class="text-center">—</span>
               <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>
-              <button class="btn-pagar"
-                *ngIf="!data.soloLectura"
-                (click)="pagar(item)"
-                [disabled]="pagandoId === item.idItemPedido"
-                title="Marcar como pagado">
-                <mat-icon *ngIf="pagandoId !== item.idItemPedido">payments</mat-icon>
-                <mat-spinner *ngIf="pagandoId === item.idItemPedido" diameter="14"></mat-spinner>
-                <span *ngIf="pagandoId !== item.idItemPedido">Pagar</span>
-              </button>
             </div>
           </div>
         </div>
@@ -206,7 +198,8 @@
             <div class="mov-row" *ngFor="let item of resumen.pagados">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="!item._esGarantia">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="item._esGarantia">Garantía</span>
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
               <span class="mov-valor income">{{ formatCOP(item.valorEmpleado) }}</span>

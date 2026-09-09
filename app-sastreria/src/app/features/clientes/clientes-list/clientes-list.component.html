@@ -35,6 +35,9 @@
         <button class="btn-action" [routerLink]="['/app/medidas', c.idCliente]">
           <mat-icon>straighten</mat-icon> Medidas
         </button>
+        <button class="btn-action btn-danger" *ngIf="puedeEliminar" (click)="eliminarCliente(c, $event)">
+          <mat-icon>delete</mat-icon> Eliminar
+        </button>
       </div>
     </div>
   </div>

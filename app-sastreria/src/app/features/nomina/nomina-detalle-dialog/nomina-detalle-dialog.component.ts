@@ -1,7 +1,7 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { NominaService } from '../../../core/services/nomina.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
+import { EmpleadoService } from '../../../core/services/empleado.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
 import { dateToString } from '../../../utils/date.utils';
 import Swal from 'sweetalert2';
@@ -23,6 +25,9 @@ export interface NominaDetalleDialogData {
   soloLectura?: boolean;
 }
 
+// Página (no modal, ver punto 8 del pedido del cliente) del detalle de
+// nómina de UN empleado -- se llega acá desde "Empleados" (Admin/Asistente
+// abren cualquier empleado) o, para el propio empleado, desde "Mis ítems".
 @Component({
   selector: 'app-nomina-detalle-dialog',
   standalone: true,
@@ -30,7 +35,6 @@ export interface NominaDetalleDialogData {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatIconModule,
     MatTabsModule,
     MatTooltipModule,
@@ -44,8 +48,9 @@ export interface NominaDetalleDialogData {
 })
 export class NominaDetalleDialogComponent implements OnInit {
   cargando = true;
+  cargandoEmpleado = true;
   resumen: any = null;
-  pagandoId: number | null = null;
+  data: NominaDetalleDialogData = { idEmpleado: 0, nombres: '', apellidos: '' };
   pagandoTodo = false;
   ultimoItemPagado: any = null;
   generandoPDFNomina = false;
@@ -71,15 +76,38 @@ export class NominaDetalleDialogComponent implements OnInit {
   private imagenPromise?: Promise<File>;
 
   constructor(
-    public dialogRef: MatDialogRef<NominaDetalleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: NominaDetalleDialogData,
+    private route: ActivatedRoute,
+    private location: Location,
     private nominaService: NominaService,
     private itemPedidoService: ItemPedidoService,
+    private empleadoService: EmpleadoService,
+    private authService: AuthService,
     private reciboService: ReciboService,
   ) {}
 
   ngOnInit(): void {
+    const idEmpleado = Number(this.route.snapshot.paramMap.get('idEmpleado'));
+    this.data.idEmpleado = idEmpleado;
+    // Solo Admin puede pagar/liquidar -- el propio empleado (u otro rol)
+    // ve su nómina en modo lectura, igual que antes en el modal.
+    this.data.soloLectura = !this.authService.esAdmin();
+
+    this.empleadoService.buscarPorId(idEmpleado).subscribe({
+      next: (resp: any) => {
+        const emp = resp.empleado;
+        this.data.nombres = emp?.nombres ?? '';
+        this.data.apellidos = emp?.apellidos ?? '';
+        this.data.telefono = emp?.telefono;
+        this.cargandoEmpleado = false;
+      },
+      error: () => { this.cargandoEmpleado = false; },
+    });
+
     this.cargarResumen();
+  }
+
+  volver(): void {
+    this.location.back();
   }
 
   toggleFiltroFecha(): void {
@@ -180,23 +208,6 @@ export class NominaDetalleDialogComponent implements OnInit {
     } finally {
       this.enviandoWhatsAppNomina = false;
     }
-  }
-
-  pagar(item: any): void {
-    this.pagandoId = item.idItemPedido;
-    this.ultimoItemPagado   = null;
-    this.avisoPegarImagenNomina = false;
-    this.avisoAdjuntarImagenNomina = false;
-    this.imagenPromise = undefined;
-    this.itemPedidoService.pagar(item.idItemPedido).subscribe({
-      next: (resp: any) => {
-        this.pagandoId = null;
-        this.ultimoItemPagado = resp.item ?? item;
-        this.imagenPromise = this.reciboService.generarImagenBlobNomina(this.nominaReciboData);
-        this.cargarResumen();
-      },
-      error: () => { this.pagandoId = null; },
-    });
   }
 
   /**
@@ -312,5 +323,4 @@ export class NominaDetalleDialogComponent implements OnInit {
     }).format(valor ?? 0);
   }
 
-  cerrar(): void { this.dialogRef.close(); }
 }

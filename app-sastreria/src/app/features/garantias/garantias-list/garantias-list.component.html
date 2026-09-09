@@ -1,0 +1,74 @@
+<div class="main-content">
+  <div class="toolbar-clientes">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" [placeholder]="soloPropia ? 'Buscar cliente...' : 'Buscar cliente o empleado...'" (keyup)="applyFilter($event)" />
+    </div>
+
+    <div class="fecha-filter-wrapper">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha">
+        <mat-icon>date_range</mat-icon>
+      </button>
+
+      <div class="fecha-panel" *ngIf="filtroFechaAbierto">
+        <div class="fecha-panel-header">
+          <p class="fecha-panel-title">Rango de fechas</p>
+          <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="fecha-inputs">
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Desde</mat-label>
+            <input matInput [matDatepicker]="pickerDesdeGar" [formControl]="fechaInicioCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerDesdeGar"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDesdeGar></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="fecha-field">
+            <mat-label>Hasta</mat-label>
+            <input matInput [matDatepicker]="pickerHastaGar" [formControl]="fechaFinCtrl" placeholder="dd/mm/aaaa" readonly />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerHastaGar"></mat-datepicker-toggle>
+            <mat-datepicker #pickerHastaGar></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="fecha-actions">
+          <button class="btn-hoy" (click)="filtrarHoy()">Hoy</button>
+          <button class="btn-limpiar" (click)="limpiarFiltroFecha()">Limpiar</button>
+          <button class="btn-aplicar" (click)="aplicarFiltroFecha()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" (click)="nuevaGarantia()">
+      <mat-icon>add</mat-icon> Nueva garantía
+    </button>
+  </div>
+
+  <div class="garantias-lista" *ngIf="garantiasFiltradas.length > 0; else sinDatos">
+    <div class="garantia-card" *ngFor="let g of garantiasFiltradas">
+      <div class="card-stripe" [class.stripe-pagada]="g.pagado"></div>
+      <div class="card-top">
+        <div class="avatar">{{ getInitials(g.nombreCliente) }}</div>
+        <div class="garantia-info">
+          <p class="garantia-cliente">{{ g.nombreCliente }}</p>
+          <p class="garantia-meta" *ngIf="!soloPropia">
+            <mat-icon>engineering</mat-icon>{{ g.nombreEmpleado }}
+          </p>
+        </div>
+        <span class="estado-badge" [class.badge-pagada]="g.pagado">
+          {{ g.pagado ? 'Pagada' : 'Pendiente' }}
+        </span>
+      </div>
+      <div class="card-bottom">
+        <span class="garantia-fecha">
+          <mat-icon>event</mat-icon>{{ g.fecha }}
+        </span>
+        <span class="garantia-valor">{{ formatCOP(g.valor) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #sinDatos>
+    <div class="no-data">No hay garantías registradas en este rango.</div>
+  </ng-template>
+</div>

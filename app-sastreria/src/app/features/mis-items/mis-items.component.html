@@ -8,13 +8,13 @@
     </div>
 
     <div class="fecha-filter-wrapper">
-      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de entrega">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de asignación">
         <mat-icon>date_range</mat-icon>
       </button>
 
       <div class="fecha-panel" *ngIf="filtroFechaAbierto">
         <div class="fecha-panel-header">
-          <p class="fecha-panel-title">Fecha de entrega</p>
+          <p class="fecha-panel-title">Fecha de asignación</p>
           <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
             <mat-icon>close</mat-icon>
           </button>
@@ -60,6 +60,13 @@
         <span class="chip-valor-monto">{{ formatCOP(ganadoPeriodo) }}</span>
       </div>
     </div>
+
+    <!-- Saldo pendiente real (resta abonos, incluye garantías) -- lleva al
+         mismo detalle de nómina que ve el admin al abrir a un empleado,
+         solo que en modo lectura (ver punto 8 del pedido del cliente). -->
+    <a class="btn-ver-nomina" *ngIf="idEmpleadoPropio" [routerLink]="['/app/nomina', idEmpleadoPropio]" matTooltip="Ver mi nómina: pendiente de pago, abonos y saldo">
+      <mat-icon>receipt_long</mat-icon> Mi nómina
+    </a>
   </div>
 </div>
 

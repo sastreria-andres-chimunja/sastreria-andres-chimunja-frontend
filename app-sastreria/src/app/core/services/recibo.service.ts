@@ -354,6 +354,7 @@ export class ReciboService {
       <div>
         <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
         ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+        <div class="fila">PEDIDO #${data.idPedido}</div>
         <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
       </div>
       <div class="totales">
