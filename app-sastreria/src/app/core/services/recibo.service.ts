@@ -239,6 +239,25 @@ export class ReciboService {
     }
   }
 
+  /**
+   * Dispara window.print() sobre el iframe y lo remueve del DOM recién
+   * cuando el diálogo de impresión realmente se cierra (evento `afterprint`
+   * del propio iframe) — NO en un tiempo fijo. Un setTimeout fijo (usado
+   * antes) borraba el iframe con el diálogo todavía abierto si el usuario
+   * tardaba en elegir la impresora, lo que hacía que Chrome lo cerrara solo
+   * a los pocos segundos sin dejar elegir nada (bug real reportado con la
+   * impresora de etiquetas, que además tarda en "despertar" por USB — ver
+   * pending-work.md). El setTimeout de 60s queda solo como respaldo por si
+   * el navegador no dispara `afterprint` en un iframe oculto.
+   */
+  private imprimirYLimpiarIframe(iframe: HTMLIFrameElement): void {
+    iframe.contentWindow!.focus();
+    iframe.contentWindow!.print();
+    const limpiar = () => { if (document.body.contains(iframe)) document.body.removeChild(iframe); };
+    iframe.contentWindow!.addEventListener('afterprint', limpiar, { once: true });
+    setTimeout(limpiar, 60000);
+  }
+
   private imprimirNavegador(data: ReciboData): void {
     const html = this.generarHtmlTermico(data);
     const iframe = document.createElement('iframe');
@@ -257,9 +276,7 @@ export class ReciboService {
     const ejecutarImpresion = () => {
       if (impreso) return;
       impreso = true;
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-      setTimeout(() => document.body.removeChild(iframe), 1500);
+      this.imprimirYLimpiarIframe(iframe);
     };
 
     const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
@@ -478,9 +495,7 @@ export class ReciboService {
     const ejecutarImpresion = () => {
       if (impreso) return;
       impreso = true;
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-      setTimeout(() => document.body.removeChild(iframe), 1500);
+      this.imprimirYLimpiarIframe(iframe);
     };
 
     const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
@@ -591,9 +606,7 @@ export class ReciboService {
     const ejecutarImpresion = () => {
       if (impreso) return;
       impreso = true;
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-      setTimeout(() => document.body.removeChild(iframe), 1500);
+      this.imprimirYLimpiarIframe(iframe);
     };
 
     const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
@@ -625,9 +638,7 @@ export class ReciboService {
     const ejecutarImpresion = () => {
       if (impreso) return;
       impreso = true;
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-      setTimeout(() => document.body.removeChild(iframe), 1500);
+      this.imprimirYLimpiarIframe(iframe);
     };
 
     const img = iframe.contentDocument!.querySelector<HTMLImageElement>('img');
@@ -1295,11 +1306,7 @@ export class ReciboService {
     iframe.contentDocument!.open();
     iframe.contentDocument!.write(html);
     iframe.contentDocument!.close();
-    setTimeout(() => {
-      iframe.contentWindow!.focus();
-      iframe.contentWindow!.print();
-      setTimeout(() => document.body.removeChild(iframe), 1500);
-    }, 300);
+    setTimeout(() => this.imprimirYLimpiarIframe(iframe), 300);
   }
 
   generarTextoWhatsApp(data: ReciboData): string {
