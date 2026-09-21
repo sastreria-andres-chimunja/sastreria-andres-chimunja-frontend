@@ -447,6 +447,23 @@
 .mov-header-items { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px; gap: 0 6px; }
 .mov-row-items    { display: grid; grid-template-columns: 1fr 80px 78px 78px 78px; gap: 0 6px; }
 
+/* En celular las columnas fijas (fecha/valores) ya no caben junto a la
+   descripción/cliente sin apretarse -- se apilan en una sola columna para
+   que nada quede encimado. */
+@media (max-width: 480px) {
+  .mov-header-row,
+  .mov-row,
+  .mov-header-items,
+  .mov-row-items {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .mov-header-row,
+  .mov-header-items { display: none; }
+  .mov-fecha::before { content: 'Terminado: '; }
+  .text-right, .mov-valor { text-align: left; }
+}
+
 .text-right  { text-align: right; }
 .text-center { text-align: center; }
 
@@ -482,6 +499,15 @@
 .mov-sub {
   font-size: 11px;
   color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Garantías: en rojo para diferenciarlas de un ítem normal a simple vista. */
+.mov-row-garantia .mov-label,
+.mov-row-garantia .mov-sub {
+  color: var(--danger);
 }
 
 .mov-fecha {

@@ -5,10 +5,22 @@
       <div>
         <h2 class="config-title">Límite diario de entregas</h2>
         <p class="config-sub">
-          Monto máximo (suma del total de pedidos) que se puede programar para
-          entregar en un mismo día. Si al crear un pedido se supera este límite
-          para la fecha de entrega elegida, el sistema pedirá cambiar la fecha.
+          Monto máximo (suma del valor de los ítems) que se puede ASIGNAR a
+          empleados en un mismo día -- mide capacidad de trabajo, no fecha de
+          entrega. Si asignar un ítem supera este límite para el día de hoy,
+          el sistema rechaza la asignación.
         </p>
+      </div>
+    </div>
+
+    <div class="cupo-hoy-card" *ngIf="cupo">
+      <div class="cupo-hoy-row">
+        <span>Asignado hoy</span>
+        <strong>{{ formatCOP(cupo.asignadoHoy) }}</strong>
+      </div>
+      <div class="cupo-hoy-row">
+        <span>Disponible hoy</span>
+        <strong [class.cupo-agotado]="cupo.disponible <= 0">{{ formatCOP(cupo.disponible) }}</strong>
       </div>
     </div>
 

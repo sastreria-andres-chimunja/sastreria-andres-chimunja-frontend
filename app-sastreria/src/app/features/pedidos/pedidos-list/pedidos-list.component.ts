@@ -417,6 +417,12 @@ export class PedidosListComponent implements OnInit {
     ).length;
   }
 
+  get valorTerminados(): number {
+    return this.pedidosDelTab
+      .filter((p) => (p.nombreEstado ?? '').toLowerCase().includes('terminad'))
+      .reduce((acc, p) => acc + Number(p.valorTotal ?? 0), 0);
+  }
+
   get porVencer(): number {
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const limite = new Date(hoy); limite.setDate(limite.getDate() + 7);
@@ -447,9 +453,13 @@ export class PedidosListComponent implements OnInit {
   /**
    * Suma del valor total de los pedidos que están visibles con el filtro/
    * búsqueda/tab actual -- excluye los ya Terminados (trabajo ya hecho, no
-   * es "valor pendiente por hacer" del día/rango filtrado).
+   * es "valor pendiente por hacer" del día/rango filtrado). Queda en $0
+   * mientras no haya ningún chip de estado seleccionado (filtroEstado null)
+   * -- a propósito: es una suma "bajo demanda" para un estado puntual, no un
+   * total general de todo lo listado.
    */
   get valorTotalListado(): number {
+    if (this.filtroEstado === null) return 0;
     return this.pedidosFiltrados.reduce((acc, p) => {
       if (this.esTerminado(p)) return acc;
       return acc + Number(p.valorTotal ?? 0);
@@ -499,15 +509,6 @@ export class PedidosListComponent implements OnInit {
 
   saldoPedido(p: Pedido): number {
     return Number(p.valorTotal ?? 0) - Number(p.totalAbonado ?? 0);
-  }
-
-  getInitials(nombre: string): string {
-    return (nombre ?? '??')
-      .split(' ')
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase();
   }
 
   formatCOP(valor: number): string {

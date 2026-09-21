@@ -19,7 +19,6 @@ import { PedidoService } from '../../../core/services/pedido.service';
 import { ItemPedidoService } from '../../../core/services/item-pedido.service';
 import { EstadoService } from '../../../core/services/estado.service';
 import { TipoPedidoService } from '../../../core/services/tipo-pedido.service';
-import { LimiteDiarioService } from '../../../core/services/limite-diario.service';
 import { ImagenService } from '../../../core/services/imagen.service';
 import { MedidaService } from '../../../core/services/medida.service';
 import { EmpleadoService } from '../../../core/services/empleado.service';
@@ -35,6 +34,7 @@ import { Medida } from '../../../shared/models/Medida';
 import { Pedido } from '../../../shared/models/Pedido';
 
 import { dateToString, stringToDate } from '../../../utils/date.utils';
+import { PAISES_INDICATIVO } from '../../../utils/paises-indicativo';
 import {
   ItemPedidoDialogComponent,
   ItemDialogData,
@@ -82,11 +82,8 @@ export class CrearPedidoComponent implements OnInit {
   private tokenPublicoActual?: string;
   guardando = false;
 
-  // Snapshot al cargar en modo edición: el límite diario solo se evalúa si
-  // cambia la fecha de entrega o el valor total (ítems), no en cambios de
-  // estado ni pagos.
-  private fechaEntregaOriginal: string | null = null;
-  private valorTotalOriginal = 0;
+  // Snapshot al cargar en modo edición, para saber si el cambio de estado
+  // actual realmente está pasando a "Entregado" (y no ya lo estaba).
   private idEstadoOriginal: number | null = null;
 
   // Datos de apoyo
@@ -137,7 +134,6 @@ export class CrearPedidoComponent implements OnInit {
     private itemService: ItemPedidoService,
     private estadoService: EstadoService,
     private tipoPedidoService: TipoPedidoService,
-    private limiteDiarioService: LimiteDiarioService,
     private imagenService: ImagenService,
     private medidaService: MedidaService,
     private empleadoService: EmpleadoService,
@@ -173,12 +169,15 @@ export class CrearPedidoComponent implements OnInit {
     });
   }
 
+  paises = PAISES_INDICATIVO;
+
   private buildClienteForm(): void {
     this.clienteForm = this.fb.group({
-      nombres:   ['', Validators.required],
-      apellidos: ['', Validators.required],
-      cedula:    [''],
-      telefono:  [''],
+      nombres:    ['', Validators.required],
+      apellidos:  ['', Validators.required],
+      cedula:     [''],
+      indicativo: ['57', Validators.required],
+      telefono:   [''],
     });
   }
 
@@ -239,7 +238,7 @@ export class CrearPedidoComponent implements OnInit {
   abrirFormCrearCliente(): void {
     this.mostrarSugerencias = false;
     this.mostrarFormCrearCliente = true;
-    this.clienteForm.reset();
+    this.clienteForm.reset({ indicativo: '57' });
     if (this.clienteQuery.trim()) {
       const partes = this.clienteQuery.trim().split(' ');
       this.clienteForm.patchValue({
@@ -256,7 +255,11 @@ export class CrearPedidoComponent implements OnInit {
   guardarNuevoCliente(): void {
     if (this.clienteForm.invalid) { this.clienteForm.markAllAsTouched(); return; }
     this.creandoCliente = true;
-    this.clienteService.crear(this.clienteForm.value).subscribe({
+    // Mismo criterio que crear-cliente.component.ts: el teléfono se guarda
+    // concatenado con el indicativo en un solo campo.
+    const { indicativo, telefono, ...resto } = this.clienteForm.value;
+    const payload = { ...resto, telefono: `${indicativo}${(telefono ?? '').replace(/\D/g, '')}` };
+    this.clienteService.crear(payload).subscribe({
       next: (r: any) => {
         const c: Cliente = r.cliente;
         this.seleccionarCliente(c);
@@ -283,8 +286,6 @@ export class CrearPedidoComponent implements OnInit {
         fechaEntrega:  stringToDate(p.fechaEntrega),
         valorTotal:    p.valorTotal,
       });
-      this.fechaEntregaOriginal = p.fechaEntrega;
-      this.valorTotalOriginal   = Number(p.valorTotal ?? 0);
       this.idEstadoOriginal     = p.idEstado;
       this.tokenPublicoActual   = p.tokenPublico;
       this.clienteQuery = p.nombreCliente ?? '';
@@ -620,37 +621,6 @@ export class CrearPedidoComponent implements OnInit {
     }
 
     const fv = this.form.getRawValue();
-
-    // Límite diario de entregas: solo se evalúa al crear un pedido nuevo, o al
-    // editar si cambia la fecha de entrega o el valor total (ítems agregados/
-    // quitados). Cambios de estado o pagos no deben verse afectados por esto.
-    const fechaEntregaStr = dateToString(fv.fechaEntrega);
-    const fechaCambio = this.isEdit && fechaEntregaStr !== this.fechaEntregaOriginal;
-    const totalCambio = this.isEdit && Number(fv.valorTotal ?? 0) !== this.valorTotalOriginal;
-    if (!this.isEdit || fechaCambio || totalCambio) {
-      const [limiteResp, programadoResp]: [any, any] = await Promise.all([
-        this.limiteDiarioService.obtener().toPromise(),
-        this.pedidoService.getValorProgramado(fechaEntregaStr, this.idPedido).toPromise(),
-      ]);
-      const limite = Number(limiteResp?.limiteDiario?.monto ?? Infinity);
-      const yaProgramado = Number(programadoResp?.valorProgramado ?? 0);
-      const totalDia = yaProgramado + Number(fv.valorTotal ?? 0);
-      if (totalDia > limite) {
-        const confirmacion = await Swal.fire({
-          icon: 'warning',
-          title: 'Límite diario superado',
-          html:
-            `Se supera el límite diario de entregas para el <b>${fechaEntregaStr}</b> ` +
-            `(máximo ${this.formatCOP(limite)}, ya hay ${this.formatCOP(yaProgramado)} programados).<br><br>` +
-            `¿Deseas crear el pedido de todas formas?`,
-          showCancelButton: true,
-          confirmButtonText: 'Sí, crear de todas formas',
-          cancelButtonText: 'Cambiar fecha',
-          confirmButtonColor: '#d32f2f',
-        });
-        if (!confirmacion.isConfirmed) return;
-      }
-    }
 
     // Si al editar el pedido el <select> "Estado del pedido" pasa
     // directamente a Entregado (sin pasar por los ítems) y queda saldo

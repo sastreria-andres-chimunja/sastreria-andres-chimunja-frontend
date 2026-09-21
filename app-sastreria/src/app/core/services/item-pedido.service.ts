@@ -58,4 +58,8 @@ export class ItemPedidoService {
   asignarEmpleado(id: number, idEmpleado: number) {
     return this.http.put<any>(`${this.api}/${id}/asignar`, { idEmpleado });
   }
+
+  getCupoDia() {
+    return this.http.get<{ limite: number; asignadoHoy: number; disponible: number }>(`${this.api}/cupo-dia`);
+  }
 }

@@ -139,6 +139,18 @@ body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; 
   caret-color: var(--primary) !important;
 }
 
+/* ── Letra más grande en todos los inputs/selects de la app ──── */
+.mat-mdc-form-field .mdc-text-field__input,
+.mat-mdc-form-field .mat-mdc-select-value,
+.mat-mdc-form-field textarea.mat-mdc-input-element {
+  font-size: 16px !important;
+}
+
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mdc-notched-outline__notch .mdc-floating-label {
+  font-size: 15px !important;
+}
+
 .dark-mode .mat-mdc-floating-label {
   color: var(--text-secondary) !important;
 }

@@ -1,0 +1,48 @@
+<div class="balance-dialog">
+  <div class="balance-header">
+    <div class="balance-title">
+      <mat-icon>point_of_sale</mat-icon>
+      <span>Balance del día</span>
+    </div>
+    <button class="btn-cerrar" (click)="cerrar()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <div class="dia-selector">
+    <button class="btn-dia" (click)="cambiarDia(-1)" matTooltip="Día anterior">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <div class="dia-actual">
+      <span>{{ fechaStr || '—' }}</span>
+      <button class="btn-hoy-chip" *ngIf="!esHoy()" (click)="hoy()">Hoy</button>
+    </div>
+    <button class="btn-dia" (click)="cambiarDia(1)" matTooltip="Día siguiente">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="balance-body">
+    <div class="balance-loading" *ngIf="cargando">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <ng-container *ngIf="!cargando">
+      <div class="empty-state" *ngIf="filas.length === 0">
+        <mat-icon>inbox</mat-icon>
+        <p>Sin ingresos registrados este día</p>
+      </div>
+
+      <div class="metodo-list" *ngIf="filas.length > 0">
+        <div class="metodo-row" *ngFor="let f of filas">
+          <span class="metodo-nombre">{{ f.nombreMetodoPago }}</span>
+          <span class="metodo-cantidad">{{ f.cantidad }} mov.</span>
+          <span class="metodo-total">{{ formatCOP(f.total) }}</span>
+        </div>
+      </div>
+
+      <div class="balance-total-row">
+        <span>Total del día</span>
+        <span class="balance-total-valor">{{ formatCOP(total) }}</span>
+      </div>
+    </ng-container>
+  </div>
+</div>

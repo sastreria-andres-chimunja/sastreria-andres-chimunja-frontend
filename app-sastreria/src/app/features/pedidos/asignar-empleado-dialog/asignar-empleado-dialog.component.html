@@ -13,6 +13,11 @@
   </div>
 
   <div class="dialog-body">
+    <div class="cupo-banner" *ngIf="cupo" [class.cupo-agotado]="cupo.disponible <= 0">
+      <mat-icon>speed</mat-icon>
+      <span>Cupo disponible hoy: <strong>{{ formatCOP(cupo.disponible) }}</strong> de {{ formatCOP(cupo.limite) }}</span>
+    </div>
+
     <p class="ayuda-texto" *ngIf="data.items.length > 0">
       Se asignará el empleado seleccionado a los {{ data.items.length }} ítem(s) de este pedido.
     </p>

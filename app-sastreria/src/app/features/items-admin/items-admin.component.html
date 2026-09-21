@@ -216,9 +216,31 @@
             </div>
           </ng-template>
 
-          <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
-          <div class="card-actions" *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente">
+          <!-- Acciones -->
+          <div class="card-actions">
+            <!-- Marcar terminado (cuando está Asignado) -->
+            <button class="btn-terminado"
+              *ngIf="estadoClase(item) === 'asignado'"
+              [disabled]="cambioEstadoId === item.idItemPedido"
+              (click)="marcarTerminado(item)">
+              <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
+              <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">check_circle</mat-icon>
+              <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Marcar terminado' }}</span>
+            </button>
+
+            <!-- Reabrir (cuando está Terminado) -->
+            <button class="btn-reabrir"
+              *ngIf="estadoClase(item) === 'terminado'"
+              [disabled]="cambioEstadoId === item.idItemPedido"
+              (click)="reabrir(item)">
+              <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
+              <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">undo</mat-icon>
+              <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
+            </button>
+
+            <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
             <button class="btn-recordatorio-item"
+              *ngIf="estadoClase(item) === 'terminado' && item.telefonoCliente"
               matTooltip="Avisar por WhatsApp que la prenda está lista"
               (click)="enviarRecordatorioItem(item)">
               <mat-icon>notifications_active</mat-icon>

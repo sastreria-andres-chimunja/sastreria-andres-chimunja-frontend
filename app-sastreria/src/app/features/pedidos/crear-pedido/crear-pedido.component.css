@@ -143,6 +143,10 @@
 
 .cc-field { width: 100%; }
 
+.cc-telefono-row { display: flex; gap: 8px; }
+.cc-indicativo-field { flex: 0 0 92px; }
+.cc-telefono-field { flex: 1; min-width: 0; }
+
 .cc-actions {
   display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;
 }

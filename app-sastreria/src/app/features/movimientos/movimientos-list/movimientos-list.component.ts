@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CrearMovimientoComponent } from '../crear-movimiento/crear-movimiento.component';
+import { BalanceDiaDialogComponent } from '../balance-dia-dialog/balance-dia-dialog.component';
 import { dateToString } from '../../../utils/date.utils';
 
 type TabCategoria = 'pedidos' | 'nomina' | 'gastos' | 'creditos' | 'transferencias';
@@ -126,6 +127,15 @@ export class MovimientosListComponent implements OnInit {
       autoFocus: false,
     });
     dialogRef.afterClosed().subscribe(() => this.loadMovimientos());
+  }
+
+  abrirBalanceDia(): void {
+    this.dialog.open(BalanceDiaDialogComponent, {
+      width: '420px',
+      maxHeight: '90vh',
+      panelClass: 'nomina-dialog-panel',
+      autoFocus: false,
+    });
   }
 
   get movimientosFiltrados(): Movimiento[] {

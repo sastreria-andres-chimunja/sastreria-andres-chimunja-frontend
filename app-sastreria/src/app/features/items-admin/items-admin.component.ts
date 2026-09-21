@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ItemPedidoService } from '../../core/services/item-pedido.service';
 import { EmpleadoService } from '../../core/services/empleado.service';
+import { EstadoService } from '../../core/services/estado.service';
 import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
 import { stringToDate } from '../../utils/date.utils';
@@ -75,9 +76,17 @@ export class ItemsAdminComponent implements OnInit {
   itemGaleria: any | null = null;
   fotoActivaIdx = 0;
 
+  // Marcar terminado / reabrir directo desde esta vista -- igual que puede
+  // hacerlo el operario en "Mis ítems", pero aquí el admin puede accionar
+  // el ítem de CUALQUIER empleado.
+  cambioEstadoId: number | null = null;
+  private idEstadoAsignado: number | null = null;
+  private idEstadoTerminado: number | null = null;
+
   constructor(
     private itemPedidoService: ItemPedidoService,
     private empleadoService: EmpleadoService,
+    private estadoService: EstadoService,
     private reciboService: ReciboService,
     private imagenService: ImagenService,
   ) {}
@@ -89,6 +98,34 @@ export class ItemsAdminComponent implements OnInit {
       // ya inactivo, sigue viéndose en "Todos" (o buscando), solo deja de
       // ser un valor elegible del selector.
       this.empleados = (r.empleados ?? []).filter((e: any) => e.activo);
+    });
+    this.estadoService.listar().subscribe((res: any) => {
+      const estados: any[] = Array.isArray(res) ? res : (res?.estados ?? []);
+      this.idEstadoAsignado = estados.find((e) => e.nombre.toLowerCase().includes('asignad'))?.idEstado ?? null;
+      this.idEstadoTerminado = estados.find((e) => e.nombre.toLowerCase() === 'terminado')?.idEstado ?? null;
+    });
+  }
+
+  marcarTerminado(item: any): void {
+    if (!this.idEstadoTerminado) return;
+    this.cambiarEstado(item, this.idEstadoTerminado, 'Terminado');
+  }
+
+  reabrir(item: any): void {
+    if (!this.idEstadoAsignado) return;
+    this.cambiarEstado(item, this.idEstadoAsignado, 'Asignado');
+  }
+
+  private cambiarEstado(item: any, idEstado: number, nombreEstado: string): void {
+    this.cambioEstadoId = item.idItemPedido;
+    this.itemPedidoService.actualizarEstado(item.idItemPedido, idEstado).subscribe({
+      next: (r: any) => {
+        item.idEstado = r.item?.idEstado ?? idEstado;
+        item.nombreEstado = r.item?.nombreEstado ?? nombreEstado;
+        this.cambioEstadoId = null;
+        this.aplicarFiltro();
+      },
+      error: () => { this.cambioEstadoId = null; },
     });
   }
 
@@ -158,9 +195,16 @@ export class ItemsAdminComponent implements OnInit {
     return Array.from(mapa.values());
   }
 
+  /**
+   * Cerrado por defecto -- antes se auto-expandía con CUALQUIER filtro
+   * activo (incluido elegir un empleado puntual), lo que en la práctica
+   * significaba que casi siempre aparecía todo expandido. Mismo criterio
+   * que "Mis ítems": solo se auto-expande cuando hay texto de búsqueda
+   * (ahí sí tiene sentido mostrar en qué pedido cayó el resultado).
+   */
   estaExpandido(idPedido: number): boolean {
     const manual = this.pedidosExpandidosManual.get(idPedido);
-    return manual !== undefined ? manual : this.hayFiltrosActivos;
+    return manual !== undefined ? manual : !!this.busqueda.trim();
   }
 
   toggleGrupo(idPedido: number): void {

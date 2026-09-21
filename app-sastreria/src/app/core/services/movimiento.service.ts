@@ -26,6 +26,10 @@ export class MovimientoService {
     return this.http.get(this.api, { params });
   }
 
+  balanceDia(fecha: string) {
+    return this.http.get(`${this.api}/balance-dia`, { params: { fecha } });
+  }
+
   actualizar(movimiento: Movimiento) {
     const { idMovimiento } = movimiento;
     return this.http.put(`${this.api}/${idMovimiento}`, movimiento);

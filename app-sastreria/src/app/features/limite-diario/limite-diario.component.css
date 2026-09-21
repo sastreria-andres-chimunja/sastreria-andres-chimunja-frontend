@@ -38,6 +38,31 @@
   margin: 0 0 6px;
 }
 
+.cupo-hoy-card {
+  background: var(--bg, #f5f5f5);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cupo-hoy-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: var(--text-secondary, #616161);
+}
+
+.cupo-hoy-row strong {
+  color: var(--success, #2A7A2A);
+}
+
+.cupo-hoy-row strong.cupo-agotado {
+  color: var(--danger, #C0392B);
+}
+
 .config-sub {
   font-size: 13px;
   color: var(--text-secondary, #757575);

@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import Swal from 'sweetalert2';
 
 import { LimiteDiarioService } from '../../core/services/limite-diario.service';
+import { ItemPedidoService } from '../../core/services/item-pedido.service';
 
 @Component({
   selector: 'app-limite-diario',
@@ -28,9 +29,15 @@ export class LimiteDiarioComponent implements OnInit {
   cargando = false;
   guardando = false;
 
+  // Cuánto se lleva ASIGNADO hoy (no por fecha de entrega) -- el cupo real
+  // se descuenta cuando se asigna trabajo a un empleado, ver
+  // itemPedido.repository.js::getCupoDia().
+  cupo: { limite: number; asignadoHoy: number; disponible: number } | null = null;
+
   constructor(
     private fb: FormBuilder,
     private limiteDiarioService: LimiteDiarioService,
+    private itemPedidoService: ItemPedidoService,
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +45,14 @@ export class LimiteDiarioComponent implements OnInit {
       monto: [null, [Validators.required, Validators.min(0)]],
     });
     this.cargar();
+    this.cargarCupo();
+  }
+
+  cargarCupo(): void {
+    this.itemPedidoService.getCupoDia().subscribe({
+      next: (r) => { this.cupo = r; },
+      error: () => { this.cupo = null; },
+    });
   }
 
   cargar(): void {
@@ -57,6 +72,7 @@ export class LimiteDiarioComponent implements OnInit {
     this.limiteDiarioService.actualizar(this.form.value.monto).subscribe({
       next: () => {
         this.guardando = false;
+        this.cargarCupo();
         Swal.fire({
           title: '¡Guardado!',
           text: 'El límite diario de entregas se actualizó correctamente.',

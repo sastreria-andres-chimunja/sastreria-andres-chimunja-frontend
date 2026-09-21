@@ -152,10 +152,10 @@
               <span class="text-center">% Comisión</span>
               <span class="text-right">A pagar</span>
             </div>
-            <div class="mov-row-items" *ngFor="let item of resumen.pendientes">
+            <div class="mov-row-items" [class.mov-row-garantia]="item._esGarantia" *ngFor="let item of resumen.pendientes">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub" *ngIf="!item._esGarantia">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="!item._esGarantia">{{ item.nombreCliente }} · Pedido #{{ item.idPedido }} · Ítem #{{ item.idItemPedido }}</span>
                 <span class="mov-sub" *ngIf="item._esGarantia">Garantía</span>
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
@@ -194,10 +194,10 @@
               <span>Terminado</span>
               <span class="text-right">Valor</span>
             </div>
-            <div class="mov-row" *ngFor="let item of resumen.pagados">
+            <div class="mov-row" [class.mov-row-garantia]="item._esGarantia" *ngFor="let item of resumen.pagados">
               <div class="mov-desc">
                 <span class="mov-label">{{ item.descripcion || 'Sin descripción' }}</span>
-                <span class="mov-sub" *ngIf="!item._esGarantia">Pedido #{{ item.idPedido }}</span>
+                <span class="mov-sub" *ngIf="!item._esGarantia">{{ item.nombreCliente }} · Pedido #{{ item.idPedido }} · Ítem #{{ item.idItemPedido }}</span>
                 <span class="mov-sub" *ngIf="item._esGarantia">Garantía</span>
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
