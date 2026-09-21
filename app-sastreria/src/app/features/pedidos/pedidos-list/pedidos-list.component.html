@@ -58,6 +58,16 @@
           <div class="resumen-valor valor-valor">{{ formatCOP(valorTotalListado) }}</div>
         </div>
       </div>
+
+      <div class="valor-listado-banner cupo-banner" *ngIf="cupo"
+        [class.cupo-agotado]="cupo.disponible <= 0"
+        matTooltip="Cuánto trabajo se le ha asignado a empleados hoy, y cuánto cupo diario queda disponible para seguir asignando">
+        <div class="resumen-icon-circle cupo-icon"><mat-icon>speed</mat-icon></div>
+        <div class="resumen-info">
+          <div class="resumen-label">Asignado hoy / Disponible</div>
+          <div class="resumen-valor valor-valor">{{ formatCOP(cupo.asignadoHoy) }} / {{ formatCOP(cupo.disponible) }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

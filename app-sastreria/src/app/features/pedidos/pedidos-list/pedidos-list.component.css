@@ -140,6 +140,9 @@
   order: 4;
   flex-basis: 100%;
   margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .valor-listado-banner {
@@ -203,6 +206,10 @@
 .entregado-icon { background: #e8f5e9; color: var(--success); }
 .no-realizado-icon { background: #e5e7eb; color: #1f2937; }
 .valor-icon         { background: #e6f4e6; color: var(--success); }
+.cupo-icon          { background: rgba(24,95,165,.12); color: var(--primary); }
+
+.cupo-banner.cupo-agotado .cupo-icon { background: rgba(192,57,43,.12); color: var(--danger); }
+.cupo-banner.cupo-agotado .resumen-valor { color: var(--danger); }
 
 .resumen-info { display: flex; flex-direction: column; gap: 2px; }
 

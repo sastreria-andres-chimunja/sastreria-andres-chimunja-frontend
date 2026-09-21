@@ -59,6 +59,7 @@ export class PedidosListComponent implements OnInit {
 
   metodosPago: any[] = [];
   empleados: Empleado[] = [];
+  cupo: { limite: number; asignadoHoy: number; disponible: number } | null = null;
 
   resumenVisible = true;
   toggleResumen(): void { this.resumenVisible = !this.resumenVisible; }
@@ -97,6 +98,14 @@ export class PedidosListComponent implements OnInit {
       // empleado" (elegir a quién asignarle trabajo nuevo), no tiene
       // sentido ofrecer empleados inactivos ahí.
       this.empleados = (r.empleados ?? []).filter((e: Empleado) => e.activo);
+    });
+    this.cargarCupo();
+  }
+
+  cargarCupo(): void {
+    this.itemPedidoService.getCupoDia().subscribe({
+      next: (r) => { this.cupo = r; },
+      error: () => { this.cupo = null; },
     });
   }
 
@@ -292,7 +301,7 @@ export class PedidosListComponent implements OnInit {
         autoFocus: false,
       });
       ref.afterClosed().subscribe((asignado) => {
-        if (asignado) this.cargarPedidos();
+        if (asignado) { this.cargarPedidos(); this.cargarCupo(); }
       });
     });
   }
