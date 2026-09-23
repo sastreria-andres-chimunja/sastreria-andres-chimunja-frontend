@@ -145,6 +145,11 @@
   gap: 10px;
 }
 
+/* Solo tiene efecto en mobile (ver media query) -- en desktop no debe ni
+   participar del layout flex de .top-actions (si no, insertaría un gap
+   vacío de más entre "Nuevo pedido" y la fila de Valor listado/Cupo). */
+.mobile-quiebre-fila { display: none; }
+
 .valor-listado-banner {
   display: flex;
   align-items: center;
@@ -217,12 +222,6 @@
   font-size: 9px; font-weight: 700; letter-spacing: 0.07em;
   text-transform: uppercase; color: var(--text-muted); white-space: nowrap;
 }
-
-/* Versión corta del label ("Valor"/"Cupo hoy") -- solo se usa en mobile
-   (ver media query) para que las tarjetas de Valor listado/Cupo quepan
-   compactas junto al botón de calendario en vez de apilarse enteras y
-   empujar el resto de la pantalla hacia abajo. */
-.resumen-label-corta { display: none; }
 
 .resumen-valor {
   font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1;
@@ -605,28 +604,32 @@
   .resumen-row { grid-template-columns: repeat(2, 1fr); }
   /* Buscador en su propia línea (ancho completo) */
   .search-box { flex-basis: 100%; }
-  /* Filtro de fecha y "Valor listado"/"Cupo" comparten la misma fila,
-     arriba junto al buscador -- antes cada tarjeta ocupaba su ancho
-     "natural" (fit-content) con el label completo, que casi nunca cabía
-     junto al botón de calendario y terminaba empujándose a filas propias
-     completas, ocupando mucho espacio vertical. Con flex:1/min-width:0 se
-     encogen para compartir el espacio disponible, y el label corto (ver
-     .resumen-label-corta) evita que el texto se desborde al encogerse. */
-  .valor-listado-row {
-    order: 3; flex-basis: auto; margin-top: 0;
-    flex: 1; min-width: 0;
+  /* "Cupo" comparte fila con el botón de calendario (pedido explícito del
+     cliente, con boceto a mano: calendario + "Asignado hoy/Disponible" en
+     una fila, "Valor listado" solo en la fila siguiente). display:contents
+     en el wrapper lo saca de la jerarquía de cajas -- sus dos hijos pasan
+     a ser ítems flex directos de .top-actions, así cada uno puede ir a su
+     propia fila con su propio "order", en vez de moverse siempre juntos
+     como un solo bloque. */
+  .valor-listado-row { display: contents; }
+
+  .cupo-banner {
+    order: 1; flex: 1; min-width: 0;
+    .resumen-info  { min-width: 0; }
+    .resumen-valor,
+    .resumen-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   }
-  .valor-listado-banner {
-    flex: 1; min-width: 0; width: auto;
-    padding: 6px 10px; gap: 6px;
-  }
-  .valor-listado-banner .resumen-icon-circle { width: 24px; height: 24px; }
-  .valor-listado-banner .resumen-icon-circle mat-icon { font-size: 13px; width: 13px; height: 13px; }
-  .valor-listado-banner .resumen-valor {
-    font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .resumen-label-full  { display: none; }
-  .resumen-label-corta { display: block; font-size: 8px; }
+
+  /* Ítem invisible con flex-basis:100% -- únca forma confiable de obligar
+     un salto de línea entre ítems flex sin que el elemento SIGUIENTE
+     también quede estirado a lo ancho completo (flex-basis:100% en el
+     propio "Valor listado" sí forzaba la línea nueva, pero también lo
+     estiraba de pared a pared -- acá no comparte layout con el contenido). */
+  .mobile-quiebre-fila { display: block; order: 2; flex-basis: 100%; height: 0; }
+
+  /* "Valor listado" queda solo, en su propia fila, sin estirarse (tamaño
+     ajustado al contenido, como en el boceto). */
+  .valor-total-banner { order: 3; flex: 0 0 auto; margin-top: 8px; }
 
   /* "Nuevo pedido" en su propia línea al final */
   .btn-primary { width: 100%; flex-basis: 100%; justify-content: center; order: 4; }
