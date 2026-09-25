@@ -215,6 +215,8 @@
 
 .cupo-banner.cupo-agotado .cupo-icon { background: rgba(192,57,43,.12); color: var(--danger); }
 .cupo-banner.cupo-agotado .resumen-valor { color: var(--danger); }
+.cupo-valor .nw { white-space: nowrap; }
+.label-mobile { display: none; }
 
 .resumen-info { display: flex; flex-direction: column; gap: 2px; }
 
@@ -602,34 +604,28 @@
 
 @media (max-width: 600px) {
   .resumen-row { grid-template-columns: repeat(2, 1fr); }
-  /* Buscador en su propia línea (ancho completo) */
-  .search-box { flex-basis: 100%; }
-  /* "Cupo" comparte fila con el botón de calendario (pedido explícito del
-     cliente, con boceto a mano: calendario + "Asignado hoy/Disponible" en
-     una fila, "Valor listado" solo en la fila siguiente). display:contents
-     en el wrapper lo saca de la jerarquía de cajas -- sus dos hijos pasan
-     a ser ítems flex directos de .top-actions, así cada uno puede ir a su
-     propia fila con su propio "order", en vez de moverse siempre juntos
-     como un solo bloque. */
+  /* Fila 1: buscador + botón de calendario. */
+  .search-box { min-width: 0; }
+  /* Fila 2: "Valor listado" + "Cupo / Libre" juntos. display:contents en
+     el wrapper lo saca de la jerarquía de cajas -- sus hijos pasan a ser
+     ítems flex directos de .top-actions y se ubican con su propio "order". */
   .valor-listado-row { display: contents; }
 
-  .cupo-banner {
-    order: 1; flex: 1; min-width: 0;
-    .resumen-info  { min-width: 0; }
-    .resumen-valor,
-    .resumen-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  }
+  /* Ítem invisible con flex-basis:100% -- única forma confiable de obligar
+     un salto de línea entre ítems flex sin estirar el elemento siguiente
+     de pared a pared. Separa el calendario de las dos tarjetas. */
+  .mobile-quiebre-fila { display: block; order: 1; flex-basis: 100%; height: 0; }
 
-  /* Ítem invisible con flex-basis:100% -- únca forma confiable de obligar
-     un salto de línea entre ítems flex sin que el elemento SIGUIENTE
-     también quede estirado a lo ancho completo (flex-basis:100% en el
-     propio "Valor listado" sí forzaba la línea nueva, pero también lo
-     estiraba de pared a pared -- acá no comparte layout con el contenido). */
-  .mobile-quiebre-fila { display: block; order: 2; flex-basis: 100%; height: 0; }
+  .valor-listado-banner { padding: 8px 10px; gap: 8px; }
+  .valor-listado-banner .resumen-icon-circle { width: 30px; height: 30px; }
+  .valor-listado-banner .valor-valor { font-size: 14px; }
 
-  /* "Valor listado" queda solo, en su propia fila, sin estirarse (tamaño
-     ajustado al contenido, como en el boceto). */
-  .valor-total-banner { order: 3; flex: 0 0 auto; margin-top: 8px; }
+  .valor-total-banner { order: 2; flex: 0 1 auto; min-width: 0; }
+  .cupo-banner        { order: 3; flex: 1 1 0; min-width: 0; }
+  .cupo-banner .resumen-info { min-width: 0; }
+
+  .label-desktop { display: none; }
+  .label-mobile  { display: inline; }
 
   /* "Nuevo pedido" en su propia línea al final */
   .btn-primary { width: 100%; flex-basis: 100%; justify-content: center; order: 4; }
