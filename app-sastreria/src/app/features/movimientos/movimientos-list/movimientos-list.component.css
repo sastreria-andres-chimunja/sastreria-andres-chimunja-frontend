@@ -52,7 +52,7 @@
 .search-box input {
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: 17px;
   color: var(--text-primary);
   background: transparent;
   width: 100%;

@@ -143,7 +143,7 @@ body { margin: 0; font-family: 'DM Sans', Roboto, 'Helvetica Neue', sans-serif; 
 .mat-mdc-form-field .mdc-text-field__input,
 .mat-mdc-form-field .mat-mdc-select-value,
 .mat-mdc-form-field textarea.mat-mdc-input-element {
-  font-size: 16px !important;
+  font-size: 20px !important;
 }
 
 .mat-mdc-form-field .mdc-floating-label,
