@@ -476,12 +476,19 @@ export class ReciboService {
 </html>`;
   }
 
-  /** Igual que imprimirTicket(), pero para el ticket informativo (sin valores) -- misma ruta directa por el navegador, sin QZ Tray. */
+  /**
+   * Descarga el ticket informativo (sin valores) como PDF -- ver nota en
+   * imprimirTicket() sobre por qué se reemplazó la impresión directa.
+   */
   async imprimirTicketInformativo(data: ReciboData): Promise<void> {
-    this.imprimirTicketInformativoHtmlNavegador(data);
+    await this.descargarPDFTicketInformativo(data);
   }
 
-  /** Mismo patrón que imprimirTicketHtmlNavegador(), usando la plantilla sin valores. */
+  /**
+   * Mismo patrón que imprimirTicketHtmlNavegador(), usando la plantilla sin
+   * valores. SIN USO desde que imprimirTicketInformativo() pasó a descargar
+   * PDF (ver nota ahí) -- reservado por si se vuelve a la impresión directa.
+   */
   private imprimirTicketInformativoHtmlNavegador(data: ReciboData): void {
     const html = this.generarHtmlTicketInformativo(data);
     const iframe = document.createElement('iframe');
@@ -509,22 +516,85 @@ export class ReciboService {
   }
 
   /**
-   * Imprime el ticket adhesivo directo por el diálogo de impresión del
-   * navegador/Windows — SIN pasar por QZ Tray. Se descubrió que esta
-   * impresora (SAT TT460, 203 dpi) usa protocolo ZPL, no ESC/POS: todo el
-   * intento anterior con QZ Tray le mandaba comandos en el protocolo
-   * equivocado. Además, Windows ya tiene instalado el driver real del
-   * fabricante (via BarTender) — a diferencia de las pruebas iniciales, que
-   * asumían un driver genérico "Generic/Text Only" sin soporte real de
-   * imágenes. Por eso ya no se pre-convierte la imagen a blanco/negro puro
-   * nosotros mismos (ver generarImagenTicket(), ahora sin uso aquí): ese
-   * umbral duro le quitaba al driver correcto toda la información de gris
-   * que necesita para tramar bien la imagen a la resolución real del
-   * cabezal — se imprime el HTML tal cual, dejando que el driver haga esa
-   * conversión (para lo que está diseñado).
+   * Descarga el ticket adhesivo como PDF (100mm x 50mm) en vez de mandarlo
+   * directo al diálogo de impresión -- a pedido del cliente (2026-10-10):
+   * así puede revisar/guardar el archivo y elegir la impresora desde su
+   * propio visor de PDF en vez de desde el diálogo de impresión del
+   * navegador (que YA dejaba elegir impresora, pero el cliente prefirió
+   * tener un PDF como paso intermedio).
+   *
+   * imprimirTicketHtmlNavegador() (impresión directa, la que se usaba
+   * antes) y generarImagenTicket() (versión con umbral duro a blanco/negro
+   * puro, abandonada porque le quitaba al driver la información de gris
+   * que necesita para tramar bien) quedan SIN USO pero NO se borraron --
+   * quedan reservadas por si el cliente prefiere volver a la impresión
+   * directa, bastaría con que este método vuelva a llamar
+   * imprimirTicketHtmlNavegador() en vez de descargarPDFTicket().
    */
   async imprimirTicket(data: ReciboData): Promise<void> {
-    this.imprimirTicketHtmlNavegador(data);
+    await this.descargarPDFTicket(data);
+  }
+
+  /** Genera el ticket adhesivo (con valores) como PDF de 100mm x 50mm y lo descarga. */
+  async descargarPDFTicket(data: ReciboData): Promise<void> {
+    const html = this.generarHtmlTicketAdhesivo(data);
+    await this.descargarTicketComoPDF(html, `ticket-pedido-${String(data.idPedido).padStart(4, '0')}.pdf`);
+  }
+
+  /** Genera el ticket informativo (sin valores) como PDF de 100mm x 50mm y lo descarga. */
+  async descargarPDFTicketInformativo(data: ReciboData): Promise<void> {
+    const html = this.generarHtmlTicketInformativo(data);
+    await this.descargarTicketComoPDF(html, `ticket-informativo-pedido-${String(data.idPedido).padStart(4, '0')}.pdf`);
+  }
+
+  /**
+   * Renderiza el HTML de un ticket (100mm x 50mm) a imagen y lo mete en un
+   * PDF del mismo tamaño exacto, que se descarga directo. SIN forzar
+   * blanco/negro puro (a diferencia de generarImagenTicket()) -- mismo
+   * criterio que generarPDFBlob() para la factura A4: se deja la imagen en
+   * escala de grises/color real para que el driver de la impresora (o el
+   * visor de PDF al imprimir) haga su propio tramado, que es lo que mejor
+   * resultado dio con esta impresora (ver nota histórica en
+   * imprimirTicket()).
+   */
+  private async descargarTicketComoPDF(html: string, nombreArchivo: string): Promise<void> {
+    const wrapper = document.createElement('div');
+    // width/height/display duplicados a propósito (mismo motivo que en
+    // generarImagenTicket()): el CSS del ticket trae
+    // "body { width:100mm; height:50mm; display:flex; ... }", que no aplica
+    // a este <div> envoltorio por no ser un <body> real.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;overflow:hidden;background:#fff;box-sizing:border-box;';
+
+    const parser  = new DOMParser();
+    const docHtml = parser.parseFromString(html, 'text/html');
+    wrapper.innerHTML = Array.from(docHtml.querySelectorAll('style')).map(s => s.outerHTML).join('')
+      + docHtml.body.innerHTML;
+    document.body.appendChild(wrapper);
+
+    await this.esperarImagen(wrapper);
+
+    try {
+      const [{ jsPDF }, html2canvasModule] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas'),
+      ]);
+      const canvas = await html2canvasModule.default(wrapper, {
+        scale: 3, useCORS: true, logging: false, backgroundColor: '#ffffff',
+      });
+      document.body.removeChild(wrapper);
+
+      const imgData = canvas.toDataURL('image/png');
+      // format como [100, 50] + orientation 'landscape' -- verificado que
+      // jsPDF normaliza a ancho=100mm/alto=50mm exactos con esta
+      // combinación (sin esto, el orden del array y la orientación pueden
+      // terminar intercambiados).
+      const pdf = new jsPDF({ unit: 'mm', format: [100, 50], orientation: 'landscape' });
+      pdf.addImage(imgData, 'PNG', 0, 0, 100, 50);
+      pdf.save(nombreArchivo);
+    } catch (err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      throw err;
+    }
   }
 
   /** Renderiza generarHtmlTicketAdhesivo() a una imagen con umbral duro a blanco/negro puro (sin gris). */
@@ -619,7 +689,13 @@ export class ReciboService {
     }
   }
 
-  /** Respaldo: imprime el HTML del ticket directo (sin pasar por imagen), por si falla el render a imagen. */
+  /**
+   * Imprime el HTML del ticket directo por el diálogo de impresión del
+   * navegador, sin pasar por PDF. SIN USO desde que imprimirTicket() pasó
+   * a descargar PDF (ver nota ahí) -- reservado por si se vuelve a la
+   * impresión directa, que fue la que mejor calidad dio con el driver real
+   * de la impresora instalado en Windows.
+   */
   private imprimirTicketHtmlNavegador(data: ReciboData): void {
     const html = this.generarHtmlTicketAdhesivo(data);
     const iframe = document.createElement('iframe');
