@@ -559,11 +559,18 @@ export class ReciboService {
    */
   private async descargarTicketComoPDF(html: string, nombreArchivo: string): Promise<void> {
     const wrapper = document.createElement('div');
-    // width/height/display duplicados a propósito (mismo motivo que en
-    // generarImagenTicket()): el CSS del ticket trae
-    // "body { width:100mm; height:50mm; display:flex; ... }", que no aplica
-    // a este <div> envoltorio por no ser un <body> real.
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;overflow:hidden;background:#fff;box-sizing:border-box;';
+    // width/height/display/flex-direction duplicados a propósito (mismo
+    // motivo que en generarImagenTicket()): el CSS del ticket trae
+    // "body { width:100mm; height:50mm; display:flex; flex-direction:column; ... }",
+    // que no aplica a este <div> envoltorio por no ser un <body> real.
+    // Sin "flex-direction:column" (bug real, encontrado 2026-10-10 con una
+    // captura del cliente y reproducido con Puppeteer antes de corregir):
+    // el wrapper queda en "row" por default, así que el título
+    // ("SASTRERÍA...") y el bloque de datos (.fila-row) se acomodan uno al
+    // lado del otro en vez de uno encima del otro -- el bloque de datos
+    // queda aplastado en el poco ancho que sobra y el texto se ve
+    // partido letra por letra, desbordado fuera de la página.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;flex-direction:column;overflow:hidden;background:#fff;box-sizing:border-box;';
 
     const parser  = new DOMParser();
     const docHtml = parser.parseFromString(html, 'text/html');
@@ -607,8 +614,11 @@ export class ReciboService {
     // "body { width:100mm; height:50mm; display:flex; ... }", que no aplica
     // a este <div> envoltorio por no ser un <body> real — sin duplicar
     // display:flex aquí, el logo se cae debajo del texto en vez de quedar
-    // al lado (columna derecha).
-    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;overflow:hidden;background:#fff;box-sizing:border-box;';
+    // al lado (columna derecha). flex-direction:column igual de necesario
+    // (mismo bug real encontrado y corregido 2026-10-10 en
+    // descargarTicketComoPDF(), ver nota ahí) -- esta función queda sin
+    // uso, pero se corrige igual por si se revive.
+    wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:100mm;height:50mm;display:flex;flex-direction:column;overflow:hidden;background:#fff;box-sizing:border-box;';
 
     const parser  = new DOMParser();
     const docHtml = parser.parseFromString(html, 'text/html');
