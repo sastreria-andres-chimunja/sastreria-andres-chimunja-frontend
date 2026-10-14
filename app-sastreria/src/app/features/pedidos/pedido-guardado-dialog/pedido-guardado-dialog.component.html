@@ -59,13 +59,12 @@
     <button class="btn-print" (click)="imprimir()" *ngIf="data.items !== undefined">
       <mat-icon>print</mat-icon> Imprimir
     </button>
-    <button class="btn-print" (click)="imprimirTicket()" *ngIf="data.items !== undefined"
-      matTooltip="Descarga el ticket adhesivo en PDF (100mm x 50mm) para imprimirlo eligiendo la impresora">
-      <mat-icon>download</mat-icon> Descargar ticket
+    <button class="btn-print" (click)="imprimirTicket()" *ngIf="data.items !== undefined">
+      <mat-icon>local_offer</mat-icon> Imprimir ticket
     </button>
     <button class="btn-print" (click)="imprimirTicketInformativo()" *ngIf="data.items !== undefined"
-      matTooltip="Ticket sin valores del pedido -- PDF (100mm x 50mm)">
-      <mat-icon>download</mat-icon> Descargar informativo
+      matTooltip="Ticket sin valores del pedido">
+      <mat-icon>info</mat-icon> Ticket informativo
     </button>
     <button class="btn-aceptar" (click)="aceptar()">
       <mat-icon>check</mat-icon> Aceptar

@@ -477,18 +477,16 @@ export class ReciboService {
   }
 
   /**
-   * Descarga el ticket informativo (sin valores) como PDF -- ver nota en
-   * imprimirTicket() sobre por qué se reemplazó la impresión directa.
+   * Imprime el ticket informativo (sin valores) directo por el diálogo de
+   * impresión del navegador -- ver nota en imprimirTicket() sobre por qué
+   * se volvió a este flujo (2026-10-14) después de probar la descarga de
+   * PDF.
    */
   async imprimirTicketInformativo(data: ReciboData): Promise<void> {
-    await this.descargarPDFTicketInformativo(data);
+    this.imprimirTicketInformativoHtmlNavegador(data);
   }
 
-  /**
-   * Mismo patrón que imprimirTicketHtmlNavegador(), usando la plantilla sin
-   * valores. SIN USO desde que imprimirTicketInformativo() pasó a descargar
-   * PDF (ver nota ahí) -- reservado por si se vuelve a la impresión directa.
-   */
+  /** Mismo patrón que imprimirTicketHtmlNavegador(), usando la plantilla sin valores. */
   private imprimirTicketInformativoHtmlNavegador(data: ReciboData): void {
     const html = this.generarHtmlTicketInformativo(data);
     const iframe = document.createElement('iframe');
@@ -516,32 +514,43 @@ export class ReciboService {
   }
 
   /**
-   * Descarga el ticket adhesivo como PDF (100mm x 50mm) en vez de mandarlo
-   * directo al diálogo de impresión -- a pedido del cliente (2026-10-10):
-   * así puede revisar/guardar el archivo y elegir la impresora desde su
-   * propio visor de PDF en vez de desde el diálogo de impresión del
-   * navegador (que YA dejaba elegir impresora, pero el cliente prefirió
-   * tener un PDF como paso intermedio).
+   * Imprime el ticket adhesivo directo por el diálogo de impresión del
+   * navegador/Windows -- mismo patrón que imprimirNavegador() (recibo
+   * térmico), unificado a propósito (2026-10-14).
    *
-   * imprimirTicketHtmlNavegador() (impresión directa, la que se usaba
-   * antes) y generarImagenTicket() (versión con umbral duro a blanco/negro
-   * puro, abandonada porque le quitaba al driver la información de gris
-   * que necesita para tramar bien) quedan SIN USO pero NO se borraron --
-   * quedan reservadas por si el cliente prefiere volver a la impresión
-   * directa, bastaría con que este método vuelva a llamar
-   * imprimirTicketHtmlNavegador() en vez de descargarPDFTicket().
+   * Historial: se probó reemplazar esto por descarga de PDF (2026-10-10,
+   * a pedido del cliente, pensando que así podría elegir la impresora) --
+   * pero en la primera prueba real con la impresora física el cliente
+   * reportó que SEGUÍA sin poder elegir impresora al imprimir el PDF
+   * descargado (probablemente por cómo el visor de PDF/sistema operativo
+   * maneja el archivo descargado, fuera del control de esta app). Como la
+   * impresión directa YA dejaba elegir impresora desde el diálogo nativo
+   * del navegador (eso nunca fue el problema real) y además es un paso
+   * menos, se volvió a este flujo. descargarPDFTicket()/
+   * descargarPDFTicketInformativo() (la descarga de PDF) y
+   * generarImagenTicket() (versión con umbral duro a blanco/negro puro,
+   * abandonada por una razón distinta -- ver su propio comentario) quedan
+   * reservadas sin uso por si hace falta retomarlas.
    */
   async imprimirTicket(data: ReciboData): Promise<void> {
-    await this.descargarPDFTicket(data);
+    this.imprimirTicketHtmlNavegador(data);
   }
 
-  /** Genera el ticket adhesivo (con valores) como PDF de 100mm x 50mm y lo descarga. */
+  /**
+   * Genera el ticket adhesivo (con valores) como PDF de 100mm x 50mm y lo
+   * descarga. SIN USO desde que imprimirTicket() volvió a la impresión
+   * directa (ver nota ahí, 2026-10-14) -- reservado por si se retoma.
+   */
   async descargarPDFTicket(data: ReciboData): Promise<void> {
     const html = this.generarHtmlTicketAdhesivo(data);
     await this.descargarTicketComoPDF(html, `ticket-pedido-${String(data.idPedido).padStart(4, '0')}.pdf`);
   }
 
-  /** Genera el ticket informativo (sin valores) como PDF de 100mm x 50mm y lo descarga. */
+  /**
+   * Genera el ticket informativo (sin valores) como PDF de 100mm x 50mm y
+   * lo descarga. SIN USO desde que imprimirTicketInformativo() volvió a la
+   * impresión directa (ver nota en imprimirTicket(), 2026-10-14).
+   */
   async descargarPDFTicketInformativo(data: ReciboData): Promise<void> {
     const html = this.generarHtmlTicketInformativo(data);
     await this.descargarTicketComoPDF(html, `ticket-informativo-pedido-${String(data.idPedido).padStart(4, '0')}.pdf`);
@@ -701,10 +710,9 @@ export class ReciboService {
 
   /**
    * Imprime el HTML del ticket directo por el diálogo de impresión del
-   * navegador, sin pasar por PDF. SIN USO desde que imprimirTicket() pasó
-   * a descargar PDF (ver nota ahí) -- reservado por si se vuelve a la
-   * impresión directa, que fue la que mejor calidad dio con el driver real
-   * de la impresora instalado en Windows.
+   * navegador, sin pasar por PDF -- la que mejor calidad dio con el driver
+   * real de la impresora instalado en Windows, y la que usa imprimirTicket()
+   * de nuevo desde 2026-10-14 (ver nota ahí).
    */
   private imprimirTicketHtmlNavegador(data: ReciboData): void {
     const html = this.generarHtmlTicketAdhesivo(data);
