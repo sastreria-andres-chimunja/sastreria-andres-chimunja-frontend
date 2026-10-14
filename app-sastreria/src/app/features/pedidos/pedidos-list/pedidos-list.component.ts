@@ -271,13 +271,18 @@ export class PedidosListComponent implements OnInit {
         fechaEntrega:     p.fechaEntrega ?? undefined,
         tokenPublico:     p.tokenPublico,
       };
-      this.dialog.open(PagarItemDialogComponent, {
+      const ref = this.dialog.open(PagarItemDialogComponent, {
         data,
         maxWidth:   '95vw',
         maxHeight:  '92vh',
         panelClass: 'nomina-dialog-panel',
         autoFocus:  false,
       });
+      // Sin esto, registrar o eliminar un abono ahí adentro no se reflejaba
+      // en la tarjeta del pedido hasta recargar la página a mano -- el
+      // saldo/abono quedaban desactualizados en la lista aunque el cambio
+      // ya estuviera guardado (y visible en Movimientos, etc.).
+      ref.afterClosed().subscribe(() => this.cargarPedidos());
     });
   }
 

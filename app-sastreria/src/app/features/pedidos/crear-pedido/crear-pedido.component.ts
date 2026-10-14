@@ -462,11 +462,13 @@ export class CrearPedidoComponent implements OnInit {
       autoFocus:  false,
     });
 
-    ref.afterClosed().subscribe((result: any) => {
-      if (result?.totalAbonado !== undefined) {
-        this.totalAbonado = result.totalAbonado;
-      }
-    });
+    // No basta con leer result?.totalAbonado -- si el diálogo se cierra
+    // por fuera del botón "Cerrar" (click en el fondo, Escape), ese
+    // resultado llega undefined y el saldo se quedaba desactualizado en
+    // esta vista aunque el abono ya se hubiera borrado/registrado. Se
+    // vuelve a pedir los abonos directo al backend, sin depender de cómo
+    // se cerró el diálogo.
+    ref.afterClosed().subscribe(() => this.cargarAbonos());
   }
 
   private async guardarItemDirecto(result: ItemDialogResult, itemOriginal?: any): Promise<void> {
