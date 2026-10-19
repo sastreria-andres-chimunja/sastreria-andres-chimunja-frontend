@@ -72,7 +72,7 @@ export class ReciboService {
             <span class="item-desc">${it.descripcion.toUpperCase()}</span>
             <span class="item-val">${this.formatCOP(it.valor)}</span>
           </div>`).join('\n')
-          : `<div style="font-size:9.5px;font-weight:700;text-align:center;padding:2px 0">Sin ítems registrados</div>`)
+          : `<div style="font-size:14px;font-weight:700;text-align:center;padding:3px 0">Sin ítems registrados</div>`)
       : `<div class="item-row">
           <span class="item-num">1.</span>
           <span class="item-desc">ABONO AL PEDIDO${data.metodoPago ? ' – ' + data.metodoPago.toUpperCase() : ''}</span>
@@ -95,32 +95,72 @@ export class ReciboService {
      * gris/débil aunque el umbral de blanco/negro ya fuera puro. Trazos más
      * gruesos y letra más grande sobreviven mejor esa reducción.
      */
+
+    /*
+     * ── Estilo de ANTES de ampliar la letra (2026-10-19), dejado como
+     * referencia comentada por si hay que revertir -- mismo diseño, solo
+     * más chico. Para volver: comentar el bloque de abajo ("Estilo
+     * ampliado") y descomentar este.
+     *
+     * body {
+     *   font-family: 'Arial', 'Helvetica', sans-serif;
+     *   font-weight: 700;
+     *   font-size: 10.5px;
+     *   width: 68mm;
+     *   padding: 2mm 5mm 4mm;
+     *   color: #000;
+     *   background: #fff;
+     * }
+     * .c  { text-align: center; }
+     * .b  { font-weight: 700; }
+     * .hr-s { border-top: 2px solid #000; margin: 3px 0; }
+     * .hr-d { border-top: 1.5px solid #000; margin: 2px 0; }
+     * .logo { width: 38mm; height: auto; display: block; margin: 0 auto; }
+     * .h-info { font-size: 8.5px; }
+     * .doc-title { font-size: 12.5px; font-weight: 700; letter-spacing: 1px; }
+     * .field     { display: flex; gap: 3px; margin: 2px 0; font-size: 9.5px; }
+     * .field-lbl { font-weight: 700; min-width: 52px; flex-shrink: 0; }
+     * .tbl-hdr  { display: flex; justify-content: space-between; font-weight: 700; font-size: 9.5px; }
+     * .item-row { display: flex; align-items: flex-start; gap: 2px; font-size: 9.5px; margin: 2.5px 0; }
+     * .item-num  { flex: 0 0 auto; font-weight: 700; }
+     * .item-desc { flex: 1; word-break: break-word; }
+     * .item-val  { flex: 0 0 auto; font-weight: 700; min-width: 46px; text-align: right; }
+     * .total-row { display: flex; justify-content: space-between; font-size: 10px; margin: 2px 0; }
+     * .total-saldo { font-size: 12px; font-weight: 700; }
+     * .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
+     */
+
+    /* ── Estilo ampliado (2026-10-19): mismo diseño de siempre, letra
+       bastante más grande -- el recibo sale más largo (la altura de la
+       página ya era "auto", así que simplemente se alarga solo, no hace
+       falta tocar eso) a propósito, a pedido del cliente. Ancho (68mm,
+       el físico del rollo) y padding horizontal NO se tocan. */
     body {
       font-family: 'Arial', 'Helvetica', sans-serif;
       font-weight: 700;
-      font-size: 10.5px;
+      font-size: 15.5px;
       width: 68mm;
-      padding: 2mm 5mm 4mm;
+      padding: 3mm 5mm 6mm;
       color: #000;
       background: #fff;
     }
     .c  { text-align: center; }
     .b  { font-weight: 700; }
-    .hr-s { border-top: 2px solid #000; margin: 3px 0; }
-    .hr-d { border-top: 1.5px solid #000; margin: 2px 0; }
-    .logo { width: 38mm; height: auto; display: block; margin: 0 auto; }
-    .h-info { font-size: 8.5px; }
-    .doc-title { font-size: 12.5px; font-weight: 700; letter-spacing: 1px; }
-    .field     { display: flex; gap: 3px; margin: 2px 0; font-size: 9.5px; }
-    .field-lbl { font-weight: 700; min-width: 52px; flex-shrink: 0; }
-    .tbl-hdr  { display: flex; justify-content: space-between; font-weight: 700; font-size: 9.5px; }
-    .item-row { display: flex; align-items: flex-start; gap: 2px; font-size: 9.5px; margin: 2.5px 0; }
+    .hr-s { border-top: 2.5px solid #000; margin: 4px 0; }
+    .hr-d { border-top: 2px solid #000; margin: 3px 0; }
+    .logo { width: 46mm; height: auto; display: block; margin: 0 auto; }
+    .h-info { font-size: 12.5px; }
+    .doc-title { font-size: 18px; font-weight: 700; letter-spacing: 1.3px; }
+    .field     { display: flex; gap: 4px; margin: 3px 0; font-size: 14px; }
+    .field-lbl { font-weight: 700; min-width: 76px; flex-shrink: 0; }
+    .tbl-hdr  { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
+    .item-row { display: flex; align-items: flex-start; gap: 3px; font-size: 14px; margin: 3.5px 0; }
     .item-num  { flex: 0 0 auto; font-weight: 700; }
     .item-desc { flex: 1; word-break: break-word; }
-    .item-val  { flex: 0 0 auto; font-weight: 700; min-width: 46px; text-align: right; }
-    .total-row { display: flex; justify-content: space-between; font-size: 10px; margin: 2px 0; }
-    .total-saldo { font-size: 12px; font-weight: 700; }
-    .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
+    .item-val  { flex: 0 0 auto; font-weight: 700; min-width: 68px; text-align: right; }
+    .total-row { display: flex; justify-content: space-between; font-size: 14.5px; margin: 3px 0; }
+    .total-saldo { font-size: 17.5px; font-weight: 700; }
+    .footer { font-size: 14px; font-weight: 700; text-align: center; margin-top: 5px; line-height: 1.4; }
     @media print {
       @page { margin: 0; size: 68mm auto; }
       body  { width: 68mm; }
@@ -143,7 +183,7 @@ export class ReciboService {
   <div class="hr-s"></div>
 
   <div class="field"><span class="field-lbl">NO.:</span><span>${noOrden}</span></div>
-  <div class="field"><span class="field-lbl" style="min-width:70px">FECHA ENTREGA:</span><span>${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}</span></div>
+  <div class="field"><span class="field-lbl" style="min-width:102px">FECHA ENTREGA:</span><span>${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}</span></div>
   <div class="field"><span class="field-lbl">CLIENTE:</span><span>${data.nombreCliente.toUpperCase()}</span></div>
   ${data.telefonoCliente ? `<div class="field"><span class="field-lbl">TEL:</span><span>${data.telefonoCliente}</span></div>` : ''}
 
