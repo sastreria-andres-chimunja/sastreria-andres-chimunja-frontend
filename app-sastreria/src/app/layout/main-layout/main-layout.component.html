@@ -80,6 +80,15 @@
         <mat-icon matListItemIcon>trending_up</mat-icon>
         <span matListItemTitle class="nav-label">Movimientos</span>
       </a>
+      <a
+        mat-list-item
+        routerLink="/app/creditos"
+        routerLinkActive="active"
+        *ngIf="authService.esAdmin() || authService.esAsistente()"
+      >
+        <mat-icon matListItemIcon>credit_card</mat-icon>
+        <span matListItemTitle class="nav-label">Créditos</span>
+      </a>
     </mat-nav-list>
 
     <!-- Administración (solo admin) -->

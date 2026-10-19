@@ -1,0 +1,56 @@
+<div class="main-content">
+  <div class="toolbar-clientes">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Buscar cliente o # pedido..." (keyup)="onBusqueda($event)" />
+    </div>
+
+    <button class="btn-refresh" (click)="cargar()" matTooltip="Actualizar">
+      <mat-icon>refresh</mat-icon>
+    </button>
+
+    <div class="chip-total" *ngIf="creditosFiltrados.length > 0">
+      <mat-icon class="chip-icon">credit_card</mat-icon>
+      <div class="chip-textos">
+        <span class="chip-label">Total pendiente</span>
+        <span class="chip-monto">{{ formatCOP(totalCreditos) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="creditos-lista" *ngIf="!cargando && creditosFiltrados.length > 0">
+    <div class="credito-card" *ngFor="let c of creditosFiltrados">
+      <div class="card-stripe"></div>
+      <div class="card-top">
+        <div class="avatar">{{ getInitials(c.nombreClienteReferencia || '') }}</div>
+        <div class="credito-info">
+          <p class="credito-cliente">{{ c.nombreClienteReferencia || 'Sin cliente' }}</p>
+          <p class="credito-meta" *ngIf="c.tipoReferencia === 'pedido'">
+            <mat-icon>receipt_long</mat-icon>Pedido #{{ c.idReferencia }}
+          </p>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="credito-fecha">
+          <mat-icon>event</mat-icon>{{ c.fecha }}
+        </span>
+        <span class="credito-valor">{{ formatCOP(c.valor) }}</span>
+      </div>
+      <div class="card-footer">
+        <button class="btn-pagar" (click)="pagarCredito(c)">
+          <mat-icon>paid</mat-icon> Pagar / dar de baja
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="cargando">
+    <mat-icon class="spin">autorenew</mat-icon>
+    <p>Cargando créditos...</p>
+  </div>
+
+  <div class="no-data" *ngIf="!cargando && creditosFiltrados.length === 0">
+    <mat-icon class="no-data-icon">check_circle</mat-icon>
+    <p>No hay créditos pendientes.</p>
+  </div>
+</div>

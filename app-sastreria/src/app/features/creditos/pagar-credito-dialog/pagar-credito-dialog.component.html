@@ -1,0 +1,65 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>paid</mat-icon>
+  Pagar crédito
+</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="credito-resumen">
+    <div class="credito-fila">
+      <span class="credito-label">Cliente</span>
+      <span class="credito-valor">{{ credito.nombreClienteReferencia || 'Sin cliente' }}</span>
+    </div>
+    <div class="credito-fila" *ngIf="credito.tipoReferencia === 'pedido'">
+      <span class="credito-label">Pedido</span>
+      <span class="credito-valor">#{{ credito.idReferencia }}</span>
+    </div>
+    <div class="credito-fila">
+      <span class="credito-label">Fecha del crédito</span>
+      <span class="credito-valor">{{ credito.fecha }}</span>
+    </div>
+    <div class="credito-fila credito-monto">
+      <span class="credito-label">Valor a pagar</span>
+      <span class="credito-valor">{{ formatCOP(credito.valor) }}</span>
+    </div>
+  </div>
+
+  <p class="dialog-subtitle">
+    ¿Con qué método se está cobrando este crédito? Al confirmar, queda registrado como pagado y deja de aparecer como pendiente.
+  </p>
+
+  <div class="form-wrapper">
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Método de pago</mat-label>
+        <mat-icon matPrefix>payments</mat-icon>
+        <mat-select formControlName="idMetodoPago">
+          <mat-option *ngFor="let m of metodosPago" [value]="m.idMetodoPago">{{ m.nombreMetodoPago }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('idMetodoPago')?.hasError('required')">
+          Elige el método de pago
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+</mat-dialog-content>
+
+<!-- Loading overlay sobre el dialog completo -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p class="loading-text">Registrando pago...</p>
+</div>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="isLoading">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="confirmar()"
+    [disabled]="isLoading || form.invalid"
+  >
+    <mat-icon>check</mat-icon>
+    Dar de baja
+  </button>
+</mat-dialog-actions>

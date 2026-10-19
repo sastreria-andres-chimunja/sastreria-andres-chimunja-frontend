@@ -12,6 +12,7 @@ import { RolesListComponent } from './features/roles/roles-list/roles-list.compo
 import { NominaGeneralComponent } from './features/nomina/nomina-general/nomina-general.component';
 import { NominaDetalleDialogComponent } from './features/nomina/nomina-detalle-dialog/nomina-detalle-dialog.component';
 import { GarantiasListComponent } from './features/garantias/garantias-list/garantias-list.component';
+import { CreditosListComponent } from './features/creditos/creditos-list/creditos-list.component';
 import { LoginComponent } from './features/login/login.component';
 import { PedidosListComponent } from './features/pedidos/pedidos-list/pedidos-list.component';
 import { CrearPedidoComponent } from './features/pedidos/crear-pedido/crear-pedido.component';
@@ -41,6 +42,7 @@ export const routes: Routes = [
       { path: 'medidas/:id', component: MedidasListComponent },
       { path: 'empleados', component: EmpleadosListComponent },
       { path: 'movimientos', component: MovimientosListComponent },
+      { path: 'creditos', component: CreditosListComponent },
       { path: 'metodosPago', component: MetodosPagoListComponent },
       { path: 'tipoMovimientos', component: TipoMovimientoListComponent },
       { path: 'categoriaMovimientos', component: CategoriaMovimientoListComponent },

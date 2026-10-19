@@ -38,4 +38,12 @@ export class MovimientoService {
   eliminar(idMovimiento: number) {
     return this.http.delete(`${this.api}/${idMovimiento}`);
   }
+
+  listarCreditosPendientes() {
+    return this.http.get(`${this.api}/creditos`);
+  }
+
+  pagarCredito(idMovimiento: number, idMetodoPago: number) {
+    return this.http.put(`${this.api}/creditos/${idMovimiento}/pagar`, { idMetodoPago });
+  }
 }
