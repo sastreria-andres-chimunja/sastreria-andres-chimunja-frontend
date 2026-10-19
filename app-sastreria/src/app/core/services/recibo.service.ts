@@ -130,17 +130,22 @@ export class ReciboService {
      * .footer { font-size: 9.5px; font-weight: 700; text-align: center; margin-top: 3px; line-height: 1.4; }
      */
 
-    /* ── Estilo ampliado (2026-10-19, +4px más el mismo día): mismo diseño
-       de siempre, letra bastante más grande -- el recibo sale más largo
-       (la altura de la página ya era "auto", así que simplemente se
-       alarga solo, no hace falta tocar eso) a propósito, a pedido del
-       cliente. Ancho (68mm, el físico del rollo) y padding horizontal NO
-       se tocan. */
+    /* ── Estilo ampliado (2026-10-19, +4px más el mismo día, y ensanchado
+       hacia los lados ese mismo día): mismo diseño de siempre, letra
+       bastante más grande -- el recibo sale más largo (la altura de la
+       página ya era "auto", así que simplemente se alarga solo, no hace
+       falta tocar eso) a propósito, a pedido del cliente. Ancho subido de
+       68mm a 78mm -- ya se había confirmado con impresiones reales (ver
+       generarImagenTermica()/generarPDFBlob() más abajo, que ya usan
+       78mm) que a 78mm sigue sobrando papel a los lados, así que hay
+       margen de sobra sin recortarse. Con más ancho, campos como "FECHA
+       ENTREGA: 26-OCT-2026" entran en una sola línea en vez de partirse
+       feo en dos (ver captura real del cliente). */
     body {
       font-family: 'Arial', 'Helvetica', sans-serif;
       font-weight: 700;
       font-size: 19.5px;
-      width: 68mm;
+      width: 78mm;
       padding: 4mm 5mm 7mm;
       color: #000;
       background: #fff;
@@ -149,7 +154,7 @@ export class ReciboService {
     .b  { font-weight: 700; }
     .hr-s { border-top: 3px solid #000; margin: 5px 0; }
     .hr-d { border-top: 2.5px solid #000; margin: 4px 0; }
-    .logo { width: 50mm; height: auto; display: block; margin: 0 auto; }
+    .logo { width: 54mm; height: auto; display: block; margin: 0 auto; }
     .h-info { font-size: 16.5px; }
     .doc-title { font-size: 22px; font-weight: 700; letter-spacing: 1.3px; }
     .field     { display: flex; gap: 4px; margin: 4px 0; font-size: 18px; }
@@ -171,8 +176,8 @@ export class ReciboService {
     .total-saldo { font-size: 21.5px; font-weight: 700; }
     .footer { font-size: 18px; font-weight: 700; text-align: center; margin-top: 6px; line-height: 1.4; }
     @media print {
-      @page { margin: 0; size: 68mm auto; }
-      body  { width: 68mm; }
+      @page { margin: 0; size: 78mm auto; }
+      body  { width: 78mm; }
     }
   </style>
 </head>
