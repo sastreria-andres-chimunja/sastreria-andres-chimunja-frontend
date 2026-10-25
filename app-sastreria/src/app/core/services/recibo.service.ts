@@ -173,7 +173,13 @@ export class ReciboService {
     .total-row { display: flex; justify-content: space-between; font-size: 18.5px; margin: 4px 0; }
     .total-saldo { font-size: 21.5px; font-weight: 700; }
     .footer { font-size: 18px; font-weight: 700; text-align: center; margin-top: 6px; line-height: 1.4; }
+    /* Red de seguridad si el driver igual parte la factura en páginas:
+       ninguna fila, total ni el pie se corta por la mitad. */
+    .item-row, .total-row, .field, .footer { break-inside: avoid; page-break-inside: avoid; }
     @media print {
+      /* El alto real se calcula al imprimir (ver ajustarAltoPagina()):
+         Chrome no soporta "auto" como alto de @page y caía al alto de papel
+         del driver, partiendo las facturas largas en dos pedazos. */
       @page { margin: 0; size: 86mm auto; }
       body  { width: 86mm; }
     }
@@ -310,6 +316,21 @@ export class ReciboService {
     setTimeout(limpiar, 60000);
   }
 
+  /**
+   * Fija el alto de la página de impresión al alto real del contenido (ya
+   * con el logo cargado), para que la factura salga en una sola tira sin
+   * importar cuántos ítems tenga. Con "size: 86mm auto" Chrome usaba el alto
+   * de papel por defecto del driver ("TIRILLA") y las facturas largas salían
+   * partidas en dos (reportado con fotos reales, pedidos #343 y #1352).
+   */
+  private ajustarAltoPagina(doc: Document): void {
+    const altoPx = Math.ceil(doc.body.getBoundingClientRect().height);
+    const altoMm = Math.ceil(altoPx * 25.4 / 96) + 2;
+    const style = doc.createElement('style');
+    style.textContent = `@page { margin: 0; size: 86mm ${altoMm}mm; }`;
+    doc.head.appendChild(style);
+  }
+
   private imprimirNavegador(data: ReciboData): void {
     const html = this.generarHtmlTermico(data);
     const iframe = document.createElement('iframe');
@@ -328,6 +349,7 @@ export class ReciboService {
     const ejecutarImpresion = () => {
       if (impreso) return;
       impreso = true;
+      this.ajustarAltoPagina(iframe.contentDocument!);
       this.imprimirYLimpiarIframe(iframe);
     };
 
