@@ -43,6 +43,10 @@ export class MovimientoService {
     return this.http.get(`${this.api}/creditos`);
   }
 
+  reversarCredito(idMovimiento: number) {
+    return this.http.post<any>(`${this.api}/creditos/${idMovimiento}/reversar`, {});
+  }
+
   pagarCredito(idMovimiento: number, idMetodoPago: number) {
     return this.http.put(`${this.api}/creditos/${idMovimiento}/pagar`, { idMetodoPago });
   }

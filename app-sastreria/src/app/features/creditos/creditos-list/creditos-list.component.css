@@ -226,3 +226,25 @@
   .toolbar-clientes { flex-wrap: wrap; }
   .chip-total { margin-left: 0; }
 }
+
+.card-footer { gap: 8px; }
+
+.btn-reversar {
+  background: transparent;
+  border: 1px solid #d97706;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d97706;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.13s;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+
+  &:hover { background: #d97706; color: #fff; }
+}

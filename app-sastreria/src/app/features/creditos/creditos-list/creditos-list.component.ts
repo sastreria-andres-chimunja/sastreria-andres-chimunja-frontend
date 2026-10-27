@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MovimientoService } from '../../../core/services/movimiento.service';
 import { Movimiento } from '../../../shared/models/Movimiento';
 import { PagarCreditoDialogComponent } from '../pagar-credito-dialog/pagar-credito-dialog.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-creditos-list',
@@ -63,6 +64,53 @@ export class CreditosListComponent implements OnInit {
       autoFocus: false,
     }).afterClosed().subscribe((ok) => {
       if (ok) this.cargar();
+    });
+  }
+
+  /**
+   * Deshace un crédito todavía sin pagar. Si salió de entregar el pedido,
+   * el backend devuelve el pedido a Terminado con el saldo pendiente otra
+   * vez (mismo "Revertir" de la Hoja de trabajo); si era un abono manual
+   * con método Crédito, solo borra ese movimiento.
+   */
+  reversarCredito(credito: Movimiento): void {
+    const esDeEntrega = !!credito.autoGenerado && credito.tipoReferencia === 'pedido';
+    Swal.fire({
+      title: '¿Reversar este crédito?',
+      html:
+        `Crédito de <b>${credito.nombreClienteReferencia || 'Sin cliente'}</b> por <b>${this.formatCOP(credito.valor)}</b>.<br><br>` +
+        (esDeEntrega
+          ? `El pedido #${credito.idReferencia} volverá a <b>Terminado</b> y el saldo quedará pendiente otra vez, para entregarlo de nuevo con el método de pago correcto.`
+          : 'Se eliminará este movimiento de crédito.'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d97706',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Sí, reversar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.movimientoService.reversarCredito(credito.idMovimiento!).subscribe({
+        next: () => {
+          this.cargar();
+          Swal.fire({
+            title: 'Crédito reversado',
+            text: esDeEntrega
+              ? `El pedido #${credito.idReferencia} volvió a Terminado.`
+              : 'El movimiento de crédito se eliminó.',
+            icon: 'success',
+            confirmButtonColor: '#2563eb',
+          });
+        },
+        error: (err) => {
+          Swal.fire({
+            title: 'No se pudo reversar',
+            text: err?.error?.error ?? 'Ocurrió un error inesperado.',
+            icon: 'error',
+            confirmButtonColor: '#d33',
+          });
+        },
+      });
     });
   }
 

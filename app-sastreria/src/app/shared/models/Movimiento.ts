@@ -17,4 +17,6 @@ export class Movimiento {
   esCredito?: boolean;
   /** Crédito que ya tiene su movimiento de pago (tipoReferencia="credito"). */
   creditoPagado?: boolean;
+  /** Abono consolidado solo al marcar el pedido como Entregado. */
+  autoGenerado?: boolean;
 }
