@@ -569,3 +569,15 @@
   .resumen-row { grid-template-columns: repeat(2, 1fr); }
   .resumen-card.balance { grid-column: 1 / -1; }
 }
+
+.credito-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #fff3e0;
+  color: #e65100;
+}
+.credito-badge.credito-pagado { background: #e8f5e9; color: #2e7d32; }

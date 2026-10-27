@@ -13,4 +13,8 @@ export class Movimiento {
   nombreCategoriaMovimiento?: string;
   nombreMetodoPago?: string;
   nombreClienteReferencia?: string;
+  /** Método "Crédito": se ve en la lista pero no suma al cuadre. */
+  esCredito?: boolean;
+  /** Crédito que ya tiene su movimiento de pago (tipoReferencia="credito"). */
+  creditoPagado?: boolean;
 }

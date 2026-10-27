@@ -152,6 +152,11 @@
           <mat-icon style="font-size:12px;width:12px;height:12px;">credit_card</mat-icon>
           {{ mov['nombreMetodoPago'] }}
         </span>
+        <span class="credito-badge" *ngIf="mov.esCredito"
+          [class.credito-pagado]="mov.creditoPagado"
+          matTooltip="Los créditos no suman al cuadre; suma el pago, el día en que se cobra">
+          {{ mov.creditoPagado ? 'Crédito pagado' : 'Crédito pendiente' }} · no suma al cuadre
+        </span>
         <span class="cliente-badge" *ngIf="mov.nombreClienteReferencia">
           <mat-icon style="font-size:12px;width:12px;height:12px;">person</mat-icon>
           {{ mov.nombreClienteReferencia }}

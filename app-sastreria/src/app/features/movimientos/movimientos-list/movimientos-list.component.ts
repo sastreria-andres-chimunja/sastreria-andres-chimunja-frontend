@@ -148,9 +148,11 @@ export class MovimientosListComponent implements OnInit {
     );
   }
 
+  // Los créditos se ven en la lista pero no suman: la plata entra cuando se
+  // pagan, y ese pago es otro movimiento (ver pagarCredito() en el backend).
   get totalEntradas(): number {
     return this.movsPedidos
-      .filter((m) => m.idTipoMovimiento === 1)
+      .filter((m) => m.idTipoMovimiento === 1 && !m.esCredito)
       .reduce((s, m) => s + Number(m.valor), 0);
   }
 
