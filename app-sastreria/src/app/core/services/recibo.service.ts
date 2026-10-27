@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { API } from '../../utils/constants';
 import { QzPrintService } from './qz-print.service';
-import { telefonoConIndicativo } from '../../utils/telefono.utils';
+import { telefonoConIndicativo, formatearTelefono } from '../../utils/telefono.utils';
 
 export interface ReciboData {
   idPedido: number;
@@ -173,6 +173,21 @@ export class ReciboService {
     .total-row { display: flex; justify-content: space-between; font-size: 18.5px; margin: 4px 0; }
     .total-saldo { font-size: 21.5px; font-weight: 700; }
     .footer { font-size: 18px; font-weight: 700; text-align: center; margin-top: 6px; line-height: 1.4; }
+    /* Datos clave (cliente, fecha de entrega, total, abono, saldo) más
+       visibles a pedido del cliente: Arial Black (más grueso que Arial 700,
+       que ya es la negrita máxima de Arial) y letra más grande. */
+    .destacado { font-family: 'Arial Black', 'Arial', sans-serif; font-weight: 900; font-size: 22px; }
+    /* Total, abono y saldo, todos del mismo tamaño (a pedido del cliente). */
+    .total-row.destacado, .total-saldo.destacado { font-size: 22px; }
+    /* Cliente encerrado en un recuadro gris (no negro), para que resalte sin
+       verse tan pesado; el driver térmico lo imprime como trama de puntos. */
+    .field-cliente { border: 2px solid #777; border-radius: 4px; padding: 3px 5px; margin: 6px 0; }
+    /* Aviso de garantía/tiempo para recoger, más visible. */
+    .footer.destacado { font-size: 19px; line-height: 1.35; margin-top: 8px; }
+    /* La fecha a esta letra no cabe junto a la etiqueta: baja completa a la
+       línea de abajo en vez de partirse en "3 -" / "SEP -" / "2026". */
+    .field-fecha { flex-wrap: wrap; }
+    .field-fecha > span:last-child { flex: 0 0 auto; white-space: nowrap; }
     /* Red de seguridad si el driver igual parte la factura en páginas:
        ninguna fila, total ni el pie se corta por la mitad. */
     .item-row, .total-row, .field, .footer { break-inside: avoid; page-break-inside: avoid; }
@@ -201,9 +216,9 @@ export class ReciboService {
   <div class="hr-s"></div>
 
   <div class="field"><span class="field-lbl">NO.:</span><span>${noOrden}</span></div>
-  <div class="field"><span class="field-lbl" style="min-width:130px">FECHA ENTREGA:</span><span>${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}</span></div>
-  <div class="field"><span class="field-lbl">CLIENTE:</span><span>${data.nombreCliente.toUpperCase()}</span></div>
-  ${data.telefonoCliente ? `<div class="field"><span class="field-lbl">TEL:</span><span>${data.telefonoCliente}</span></div>` : ''}
+  <div class="field field-fecha destacado"><span class="field-lbl">FECHA ENTREGA:</span><span>${this.formatFecha(data.fechaEntrega ?? data.fechaPago)}</span></div>
+  <div class="field field-cliente destacado"><span class="field-lbl">CLIENTE:</span><span>${data.nombreCliente.toUpperCase()}</span></div>
+  ${data.telefonoCliente ? `<div class="field"><span class="field-lbl">TEL:</span><span>${formatearTelefono(data.telefonoCliente)}</span></div>` : ''}
 
   <div class="hr-d"></div>
   <div class="tbl-hdr"><span>DESCRIPCIÓN</span><span>VALOR</span></div>
@@ -211,13 +226,13 @@ export class ReciboService {
   ${itemsHtml}
   <div class="hr-d"></div>
 
-  <div class="total-row"><span class="b">TOTAL:</span><span>${this.formatCOP(data.valorTotalPedido)}</span></div>
-  <div class="total-row"><span class="b">ABONO:</span><span>(-${this.formatCOP(data.totalPagadoPedido)})</span></div>
+  <div class="total-row destacado"><span class="b">TOTAL:</span><span>${this.formatCOP(data.valorTotalPedido)}</span></div>
+  <div class="total-row destacado"><span class="b">ABONO:</span><span>(-${this.formatCOP(data.totalPagadoPedido)})</span></div>
   <div class="hr-d"></div>
-  <div class="total-row total-saldo"><span>SALDO:</span><span>${this.formatCOP(saldo)}</span></div>
+  <div class="total-row total-saldo destacado"><span>SALDO:</span><span>${this.formatCOP(saldo)}</span></div>
   <div class="hr-s"></div>
 
-  <div class="footer">DESPUÉS DE 30 DÍAS NO SE RESPONDE POR NINGUNA PRENDA, Y PARA EFECTOS DE GARANTÍA, 7 DÍAS DESPUÉS DE LA ENTREGA. TIEMPO PARA RECOGER PRENDAS: 30 DÍAS. NO NOS HACEMOS RESPONSABLES.</div>
+  <div class="footer destacado">DESPUÉS DE 30 DÍAS NO SE RESPONDE POR NINGUNA PRENDA, Y PARA EFECTOS DE GARANTÍA, 7 DÍAS DESPUÉS DE LA ENTREGA. TIEMPO PARA RECOGER PRENDAS: 30 DÍAS. NO NOS HACEMOS RESPONSABLES.</div>
 </body>
 </html>`;
   }
@@ -445,7 +460,7 @@ export class ReciboService {
     <div class="left-col">
       <div>
         <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
-        ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+        ${data.telefonoCliente ? `<div class="fila">CELULAR: ${formatearTelefono(data.telefonoCliente)}</div>` : ''}
         <div class="fila-pedido">PEDIDO ${data.idPedido}</div>
         <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
       </div>
@@ -538,7 +553,7 @@ export class ReciboService {
   <div class="fila-row">
     <div class="left-col">
       <div class="cliente-nombre">${data.nombreCliente.toUpperCase()}</div>
-      ${data.telefonoCliente ? `<div class="fila">CELULAR: ${data.telefonoCliente}</div>` : ''}
+      ${data.telefonoCliente ? `<div class="fila">CELULAR: ${formatearTelefono(data.telefonoCliente)}</div>` : ''}
       <div class="fila-pedido">PEDIDO ${data.idPedido}</div>
       <div class="fila-entrega">ENTREGA: ${this.formatFechaEtiqueta(data.fechaEntrega ?? data.fechaPago)}</div>
     </div>
@@ -925,7 +940,7 @@ export class ReciboService {
 
     const infoCliente = [
       { lbl: 'Cliente',          val: data.nombreCliente },
-      ...(data.telefonoCliente  ? [{ lbl: 'Teléfono',        val: data.telefonoCliente }] : []),
+      ...(data.telefonoCliente  ? [{ lbl: 'Teléfono',        val: formatearTelefono(data.telefonoCliente) }] : []),
       ...(!esAbono              ? [{ lbl: 'Fecha de emisión', val: this.formatFechaLarga(data.fechaPago) }] : []),
       ...(data.fechaEntrega     ? [{ lbl: 'Fecha de entrega', val: this.formatFechaLarga(data.fechaEntrega), destacar: true }] : []),
       ...(data.metodoPago && esAbono ? [{ lbl: 'Método de pago', val: data.metodoPago }] : []),
