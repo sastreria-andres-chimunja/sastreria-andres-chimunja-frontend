@@ -1879,7 +1879,7 @@ export class ReciboService {
       const a = Number(partes[0]), b = Number(partes[1]), c = Number(partes[2]);
       if (!isNaN(a) && !isNaN(b) && !isNaN(c)) {
         const [dia, mes, anio] = a > 31 ? [c, b, a] : [a, b, c];
-        return `${dia} - ${meses[mes - 1] ?? ''} - ${anio}`;
+        return `${dia} ${meses[mes - 1] ?? ''} ${anio}`;
       }
     }
     return dateStr;
