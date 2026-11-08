@@ -173,7 +173,9 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       descripcion:       [item.descripcion ?? '', Validators.required],
       valor:             [item.valor ?? '', [Validators.required, Validators.min(0)]],
-      comisionEmpleado:  [item.comisionEmpleado ?? 0],
+      // 50% por defecto (comisión estándar del empleado). Antes era 0 y los
+      // ítems agregados al editar un pedido quedaban sin comisión.
+      comisionEmpleado:  [item.comisionEmpleado ?? 50],
       idEstado:          [item.idEstado ?? null],
       fechaEntrega:      [item.fechaEntrega ? stringToDate(item.fechaEntrega) : new Date(), Validators.required],
       observacion:       [item.observacion ?? ''],
@@ -320,7 +322,7 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
       idPedido:         this.data.idPedido,
       descripcion:      formVal.descripcion,
       valor:            formVal.valor,
-      comisionEmpleado: formVal.comisionEmpleado ?? 0,
+      comisionEmpleado: formVal.comisionEmpleado ?? 50,
       idEstado:         formVal.idEstado ?? null,
       observacion:      formVal.observacion,
       idEmpleado:       formVal.idEmpleado || null,
