@@ -125,7 +125,7 @@
         </div>
         <div class="grupo-resumen">
           <span class="grupo-entrega">
-            <mat-icon class="meta-icon">event</mat-icon>{{ formatFecha(grupo.fechaEntrega) }}
+            <mat-icon class="meta-icon">event</mat-icon>Entrega: {{ formatFecha(grupo.fechaEntrega) }}
           </span>
           <span class="grupo-count">{{ grupo.items.length }} ítem{{ grupo.items.length === 1 ? '' : 's' }}</span>
           <span class="grupo-valor">{{ formatCOP(totalGrupo(grupo)) }}</span>
