@@ -176,6 +176,9 @@
                     </mat-option>
                   </ng-container>
                 </mat-select>
+                <mat-hint *ngIf="isEdit && estadoActualEsManual">
+                  Al guardar, los ítems asignados que no estén terminados pasan a Terminado y entran a la nómina del empleado.
+                </mat-hint>
               </mat-form-field>
             </div>
           </div>
