@@ -13,7 +13,7 @@ import { EstadoService } from '../../core/services/estado.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
-import { stringToDate } from '../../utils/date.utils';
+import { filtrarPorFechaDeEstado, CampoFechaItem, TITULO_CAMPO_FECHA } from '../../utils/filtro-fecha-items';
 
 export interface GrupoPedido {
   idPedido: number;
@@ -143,15 +143,7 @@ export class MisItemsComponent implements OnInit {
       );
     }
     if (this.fechaInicioCtrl.value || this.fechaFinCtrl.value) {
-      const desde = this.inicioDelDia(this.fechaInicioCtrl.value);
-      const hasta = this.finDelDia(this.fechaFinCtrl.value);
-      res = res.filter((i) => {
-        const f = stringToDate(i.fechaAsignado);
-        if (!f) return false;
-        if (desde && f < desde) return false;
-        if (hasta && f > hasta) return false;
-        return true;
-      });
+      res = filtrarPorFechaDeEstado(res, this.campoFechaFiltro, this.inicioDelDia(this.fechaInicioCtrl.value), this.finDelDia(this.fechaFinCtrl.value));
     }
     this.itemsFiltrados = res;
     this.gruposFiltrados = this.agruparPorPedido(res);
@@ -166,6 +158,14 @@ export class MisItemsComponent implements OnInit {
     if (!fecha) return null;
     return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 23, 59, 59, 999);
   }
+
+  /** Con "Terminados" elegido, el filtro de fecha va por fecha de terminado
+   * (la misma de Mi nómina); en cualquier otro caso, por fecha de asignación. */
+  get campoFechaFiltro(): CampoFechaItem {
+    return this.filtroEstado === 'terminado' ? 'terminado' : 'asignado';
+  }
+
+  get tituloFiltroFecha(): string { return TITULO_CAMPO_FECHA[this.campoFechaFiltro]; }
 
   toggleFiltroFecha(): void {
     this.filtroFechaAbierto = !this.filtroFechaAbierto;

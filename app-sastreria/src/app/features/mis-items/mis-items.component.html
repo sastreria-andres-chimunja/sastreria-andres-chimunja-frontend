@@ -8,13 +8,13 @@
     </div>
 
     <div class="fecha-filter-wrapper">
-      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de asignación">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" [matTooltip]="'Filtrar por ' + tituloFiltroFecha.toLowerCase()">
         <mat-icon>date_range</mat-icon>
       </button>
 
       <div class="fecha-panel" *ngIf="filtroFechaAbierto">
         <div class="fecha-panel-header">
-          <p class="fecha-panel-title">Fecha de asignación</p>
+          <p class="fecha-panel-title">{{ tituloFiltroFecha }}</p>
           <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
             <mat-icon>close</mat-icon>
           </button>

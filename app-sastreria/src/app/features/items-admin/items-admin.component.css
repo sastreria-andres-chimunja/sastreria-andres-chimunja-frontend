@@ -822,3 +822,23 @@
     width: auto;
   }
 }
+
+/* Solo Admin: fecha de terminado editable (ítem sin pagar) */
+.btn-fecha-terminado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed #1565c0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  background: transparent;
+  color: #1565c0;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover { background: rgba(21, 101, 192, .08); }
+}

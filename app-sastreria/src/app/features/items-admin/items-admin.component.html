@@ -23,13 +23,13 @@
     </button>
 
     <div class="fecha-filter-wrapper">
-      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" matTooltip="Filtrar por fecha de entrega">
+      <button class="btn-fecha" [class.activo]="filtroFechaActivo" (click)="toggleFiltroFecha()" [matTooltip]="'Filtrar por ' + tituloFiltroFecha.toLowerCase()">
         <mat-icon>date_range</mat-icon>
       </button>
 
       <div class="fecha-panel" *ngIf="filtroFechaAbierto">
         <div class="fecha-panel-header">
-          <p class="fecha-panel-title">Fecha de entrega</p>
+          <p class="fecha-panel-title">{{ tituloFiltroFecha }}</p>
           <button class="btn-cerrar-panel" (click)="toggleFiltroFecha()">
             <mat-icon>close</mat-icon>
           </button>
@@ -236,6 +236,15 @@
               <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
               <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">undo</mat-icon>
               <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
+            </button>
+
+            <!-- Solo Admin: corregir el día en que se terminó (ítem sin pagar) -->
+            <button class="btn-fecha-terminado"
+              *ngIf="esAdmin && estadoClase(item) === 'terminado' && item.fechaTerminado && !item.pagado"
+              matTooltip="Cambiar la fecha de terminado (nómina)"
+              (click)="cambiarFechaTerminado(item)">
+              <mat-icon>event</mat-icon>
+              <span>Terminado: {{ fechaTerminadoTexto(item) }}</span>
             </button>
 
             <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->

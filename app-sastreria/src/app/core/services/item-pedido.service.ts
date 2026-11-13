@@ -51,6 +51,10 @@ export class ItemPedidoService {
     return this.http.put<any>(`${this.api}/${id}/estado`, { idEstado });
   }
 
+  cambiarFechaTerminado(id: number, fecha: string) {
+    return this.http.put<any>(`${this.api}/${id}/fecha-terminado`, { fecha });
+  }
+
   actualizarComision(id: number, comisionEmpleado: number) {
     return this.http.put<any>(`${this.api}/${id}/comision`, { comisionEmpleado });
   }

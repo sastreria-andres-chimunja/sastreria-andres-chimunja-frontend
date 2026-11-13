@@ -13,7 +13,9 @@ import { EmpleadoService } from '../../core/services/empleado.service';
 import { EstadoService } from '../../core/services/estado.service';
 import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
-import { stringToDate } from '../../utils/date.utils';
+import { filtrarPorFechaDeEstado, CampoFechaItem, TITULO_CAMPO_FECHA } from '../../utils/filtro-fecha-items';
+import { AuthService } from '../../core/services/auth.service';
+import Swal from 'sweetalert2';
 
 export interface GrupoPedido {
   idPedido: number;
@@ -89,7 +91,59 @@ export class ItemsAdminComponent implements OnInit {
     private estadoService: EstadoService,
     private reciboService: ReciboService,
     private imagenService: ImagenService,
+    private authService: AuthService,
   ) {}
+
+  get esAdmin(): boolean { return this.authService.esAdmin(); }
+
+  /** El filtro de fecha sigue al estado elegido: Asignados por fecha de
+   * asignación, Terminados por fecha de terminado (la misma de Nómina);
+   * sin estado o con otro, por fecha de entrega (como siempre). */
+  get campoFechaFiltro(): CampoFechaItem {
+    if (this.filtroEstado === 'asignado') return 'asignado';
+    if (this.filtroEstado === 'terminado') return 'terminado';
+    return 'entrega';
+  }
+
+  get tituloFiltroFecha(): string { return TITULO_CAMPO_FECHA[this.campoFechaFiltro]; }
+
+  /** "dd/mm/aaaa" del día (hora Colombia) en que se terminó el ítem. */
+  fechaTerminadoTexto(item: any): string {
+    if (!item.fechaTerminado) return '';
+    return new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric' })
+      .format(new Date(item.fechaTerminado));
+  }
+
+  /** Solo Admin: corrige el día en que se terminó un ítem sin pagar, para
+   * que cuente en la nómina de ese día. */
+  cambiarFechaTerminado(item: any): void {
+    const actual = new Date(item.fechaTerminado);
+    const iso = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(d); // aaaa-mm-dd
+    Swal.fire({
+      title: 'Cambiar fecha de terminado',
+      html: `Ítem #${item.numeroItem ?? ''} del pedido #${item.idPedido} — ${item.nombreEmpleado ?? ''}<br>
+        <small>Pasará a la nómina del día que elijas.</small>`,
+      input: 'date',
+      inputValue: iso(actual),
+      inputAttributes: { max: iso(new Date()) },
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2563eb',
+      inputValidator: (v) => (!v ? 'Elige una fecha' : null),
+    }).then((r) => {
+      if (!r.isConfirmed || !r.value) return;
+      const [a, m, d] = String(r.value).split('-');
+      this.itemPedidoService.cambiarFechaTerminado(item.idItemPedido, `${d}/${m}/${a}`).subscribe({
+        next: (resp: any) => {
+          item.fechaTerminado = resp.item?.fechaTerminado ?? item.fechaTerminado;
+          this.aplicarFiltro();
+          Swal.fire({ title: 'Fecha actualizada', text: `Terminado el ${d}/${m}/${a}`, icon: 'success', timer: 1800, showConfirmButton: false });
+        },
+        error: (err) => Swal.fire({ title: 'No se pudo cambiar', text: err?.error?.error ?? 'Ocurrió un error inesperado.', icon: 'error' }),
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.cargarItems();
@@ -162,15 +216,7 @@ export class ItemsAdminComponent implements OnInit {
       res = res.filter((i) => String(i.idEmpleado) === this.filtroEmpleado);
     }
     if (this.fechaInicioCtrl.value || this.fechaFinCtrl.value) {
-      const desde = this.inicioDelDia(this.fechaInicioCtrl.value);
-      const hasta = this.finDelDia(this.fechaFinCtrl.value);
-      res = res.filter((i) => {
-        const f = stringToDate(i.fechaEntrega);
-        if (!f) return false;
-        if (desde && f < desde) return false;
-        if (hasta && f > hasta) return false;
-        return true;
-      });
+      res = filtrarPorFechaDeEstado(res, this.campoFechaFiltro, this.inicioDelDia(this.fechaInicioCtrl.value), this.finDelDia(this.fechaFinCtrl.value));
     }
     this.itemsFiltrados = res;
     this.gruposFiltrados = this.agruparPorPedido(res);
