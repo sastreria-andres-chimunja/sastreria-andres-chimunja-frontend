@@ -728,6 +728,7 @@
 /* ── ACCIONES ── */
 .card-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -825,6 +826,9 @@
 
 /* Solo Admin: fecha de terminado editable (ítem sin pagar) */
 .btn-fecha-terminado {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -839,6 +843,8 @@
   color: #1565c0;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  .icono-editar { font-size: 13px; width: 13px; height: 13px; opacity: .7; }
 
   &:hover { background: rgba(21, 101, 192, .08); }
 }

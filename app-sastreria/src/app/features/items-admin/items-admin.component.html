@@ -216,6 +216,16 @@
             </div>
           </ng-template>
 
+          <!-- Solo Admin: corregir el día en que se terminó (ítem sin pagar) -->
+          <button class="btn-fecha-terminado"
+            *ngIf="esAdmin && estadoClase(item) === 'terminado' && item.fechaTerminado && !item.pagado"
+            matTooltip="Cambiar la fecha de terminado (nómina)"
+            (click)="cambiarFechaTerminado(item)">
+            <mat-icon>event</mat-icon>
+            <span>Terminado: {{ fechaTerminadoTexto(item) }}</span>
+            <mat-icon class="icono-editar">edit</mat-icon>
+          </button>
+
           <!-- Acciones -->
           <div class="card-actions">
             <!-- Marcar terminado (cuando está Asignado) -->
@@ -236,15 +246,6 @@
               <mat-spinner *ngIf="cambioEstadoId === item.idItemPedido" diameter="14"></mat-spinner>
               <mat-icon *ngIf="cambioEstadoId !== item.idItemPedido">undo</mat-icon>
               <span>{{ cambioEstadoId === item.idItemPedido ? 'Guardando…' : 'Reabrir' }}</span>
-            </button>
-
-            <!-- Solo Admin: corregir el día en que se terminó (ítem sin pagar) -->
-            <button class="btn-fecha-terminado"
-              *ngIf="esAdmin && estadoClase(item) === 'terminado' && item.fechaTerminado && !item.pagado"
-              matTooltip="Cambiar la fecha de terminado (nómina)"
-              (click)="cambiarFechaTerminado(item)">
-              <mat-icon>event</mat-icon>
-              <span>Terminado: {{ fechaTerminadoTexto(item) }}</span>
             </button>
 
             <!-- Avisar al cliente que esta prenda ya está lista (cuando está Terminado) -->
