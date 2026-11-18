@@ -17,6 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ReciboService, ReciboNominaData } from '../../../core/services/recibo.service';
 import { dateToString } from '../../../utils/date.utils';
 import Swal from 'sweetalert2';
+import { valorEmpleadoItem } from '../../../utils/nomina.utils';
 
 export interface NominaDetalleDialogData {
   idEmpleado: number;
@@ -154,7 +155,7 @@ export class NominaDetalleDialogComponent implements OnInit {
   private get nominaReciboData(): ReciboNominaData {
     const item = this.ultimoItemPagado!;
     const valorEmpleado = Number(item.valorEmpleado ?? 0)
-      || (Number(item.valor ?? 0) * Number(item.comisionEmpleado ?? 0) / 100);
+      || valorEmpleadoItem(item);
     return {
       idItemPedido:    item.idItemPedido,
       idPedido:        item.idPedido,

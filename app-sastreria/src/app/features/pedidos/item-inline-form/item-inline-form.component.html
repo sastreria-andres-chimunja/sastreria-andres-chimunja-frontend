@@ -26,6 +26,15 @@
         <mat-error *ngIf="form.get('valor')?.hasError('required')">Requerido</mat-error>
       </mat-form-field>
 
+      <!-- Solo confecciones: valor exacto que se le paga al empleado (en vez del %) -->
+      <mat-form-field appearance="outline" class="form-field" *ngIf="esConfeccion">
+        <mat-label>Comisión del empleado ($)</mat-label>
+        <mat-icon matPrefix>payments</mat-icon>
+        <input matInput formControlName="valorComision" type="number" min="0" placeholder="Vacío = 50%" />
+        <mat-hint>Valor exacto que se le paga en la nómina. Vacío: 50% del valor.</mat-hint>
+        <mat-error *ngIf="form.get('valorComision')?.hasError('min')">No puede ser negativo</mat-error>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Empleado encargado (opcional)</mat-label>
         <mat-icon matPrefix>person</mat-icon>

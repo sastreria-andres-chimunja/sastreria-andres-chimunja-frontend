@@ -160,7 +160,11 @@
               </div>
               <span class="mov-fecha">{{ item.fechaTerminado || '—' }}</span>
               <span class="mov-valor" style="text-align:right">{{ formatCOP(item.valor) }}</span>
-              <div style="display:flex;justify-content:center">
+              <div style="display:flex;justify-content:center" *ngIf="item.valorComision != null"
+                title="Confección con comisión de valor fijo (se define en el ítem del pedido)">
+                <span class="comision-fija">Fija</span>
+              </div>
+              <div style="display:flex;justify-content:center" *ngIf="item.valorComision == null">
                 <input class="comision-input" type="number" min="0" max="100"
                   [(ngModel)]="item.comisionEmpleado"
                   (focus)="onFocusComision(item)"

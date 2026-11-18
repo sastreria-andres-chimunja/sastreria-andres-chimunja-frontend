@@ -25,6 +25,8 @@ export interface ItemDialogData {
   empleados: Empleado[];
   medidas: Medida[];
   imagenes?: any[];
+  /** Pedido de confección: muestra el campo de comisión de valor fijo. */
+  esConfeccion?: boolean;
 }
 
 export interface ItemDialogResult {
@@ -168,6 +170,8 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
     }
   }
 
+  get esConfeccion(): boolean { return !!this.data.esConfeccion; }
+
   private buildForms(): void {
     const item = this.data.item ?? {};
     this.form = this.fb.group({
@@ -176,6 +180,7 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
       // 50% por defecto (comisión estándar del empleado). Antes era 0 y los
       // ítems agregados al editar un pedido quedaban sin comisión.
       comisionEmpleado:  [item.comisionEmpleado ?? 50],
+      valorComision:     [item.valorComision ?? null, Validators.min(0)],
       idEstado:          [item.idEstado ?? null],
       fechaEntrega:      [item.fechaEntrega ? stringToDate(item.fechaEntrega) : new Date(), Validators.required],
       observacion:       [item.observacion ?? ''],
@@ -323,6 +328,10 @@ export class ItemPedidoDialogComponent implements OnInit, OnDestroy {
       descripcion:      formVal.descripcion,
       valor:            formVal.valor,
       comisionEmpleado: formVal.comisionEmpleado ?? 50,
+      // Solo confecciones mandan valor fijo (vacío = null, se paga por %).
+      valorComision:    this.esConfeccion
+        ? (formVal.valorComision === null || formVal.valorComision === '' ? null : Number(formVal.valorComision))
+        : undefined,
       idEstado:         formVal.idEstado ?? null,
       observacion:      formVal.observacion,
       idEmpleado:       formVal.idEmpleado || null,

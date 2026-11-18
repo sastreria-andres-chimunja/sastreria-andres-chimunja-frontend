@@ -40,6 +40,8 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
   @Input() idPedido = 0;
   @Input() item: any = null;
   @Input() modoEdicion = false;
+  /** Pedido de confección: muestra el campo de comisión de valor fijo. */
+  @Input() esConfeccion = false;
 
   @Output() itemGuardado = new EventEmitter<ItemDialogResult>();
   @Output() cancelarEdicion = new EventEmitter<void>();
@@ -141,6 +143,7 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form = this.fb.group({
       descripcion:      [it.descripcion ?? '', Validators.required],
       valor:            [it.valor ?? '', [Validators.required, Validators.min(0)]],
+      valorComision:    [it.valorComision ?? null, Validators.min(0)],
       idEmpleado:       [it.idEmpleado ?? null],
       idMedidaGuardada: [it.idMedida ?? null],
     });
@@ -165,6 +168,7 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form.patchValue({
       descripcion:      it.descripcion ?? '',
       valor:            it.valor ?? '',
+      valorComision:    it.valorComision ?? null,
       idEmpleado:       it.idEmpleado ?? null,
       idMedidaGuardada: it.idMedida ?? null,
     });
@@ -305,6 +309,7 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
         idPedido:    this.idPedido,
         descripcion: formVal.descripcion,
         valor:       formVal.valor,
+        valorComision: this.valorComisionDelForm(formVal),
         idEmpleado:  formVal.idEmpleado || null,
         idMedida:    this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
       },
@@ -318,6 +323,13 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
 
     this.itemGuardado.emit(result);
     if (!this.modoEdicion) this.resetForm();
+  }
+
+  /** Solo en confecciones se manda el valor fijo (vacío = null, se paga por %). */
+  private valorComisionDelForm(formVal: any): number | null | undefined {
+    if (!this.esConfeccion) return undefined;
+    const v = formVal.valorComision;
+    return v === null || v === '' || v === undefined ? null : Number(v);
   }
 
   cancelar(): void { this.cancelarEdicion.emit(); }
@@ -334,6 +346,7 @@ export class ItemInlineFormComponent implements OnInit, OnChanges, OnDestroy {
         idPedido:    this.idPedido,
         descripcion: formVal.descripcion,
         valor:       formVal.valor,
+        valorComision: this.valorComisionDelForm(formVal),
         idEmpleado:  formVal.idEmpleado || null,
         idMedida:    this.modoMedida === 'guardada' ? formVal.idMedidaGuardada : null,
       },

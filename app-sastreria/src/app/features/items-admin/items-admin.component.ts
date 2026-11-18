@@ -13,6 +13,7 @@ import { EmpleadoService } from '../../core/services/empleado.service';
 import { EstadoService } from '../../core/services/estado.service';
 import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
+import { valorEmpleadoItem } from '../../utils/nomina.utils';
 import { filtrarPorFechaDeEstado, CampoFechaItem, TITULO_CAMPO_FECHA } from '../../utils/filtro-fecha-items';
 import { AuthService } from '../../core/services/auth.service';
 import Swal from 'sweetalert2';
@@ -276,7 +277,7 @@ export class ItemsAdminComponent implements OnInit {
   get ganadoEmpleadoFiltrado(): number {
     return this.itemsFiltrados
       .filter((i) => this.estadoClase(i) === 'terminado' || this.estadoClase(i) === 'entregado')
-      .reduce((s, i) => s + Number(i.valor ?? 0) * Number(i.comisionEmpleado ?? 0) / 100, 0);
+      .reduce((s, i) => s + valorEmpleadoItem(i), 0);
   }
 
   onBusqueda(event: Event): void {

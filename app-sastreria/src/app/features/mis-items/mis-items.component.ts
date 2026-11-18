@@ -13,6 +13,7 @@ import { EstadoService } from '../../core/services/estado.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ReciboService } from '../../core/services/recibo.service';
 import { ImagenService } from '../../core/services/imagen.service';
+import { valorEmpleadoItem } from '../../utils/nomina.utils';
 import { filtrarPorFechaDeEstado, CampoFechaItem, TITULO_CAMPO_FECHA } from '../../utils/filtro-fecha-items';
 
 export interface GrupoPedido {
@@ -339,7 +340,7 @@ export class MisItemsComponent implements OnInit {
         if (hasta && f > hasta) return false;
         return true;
       })
-      .reduce((s, i) => s + Number(i.valor ?? 0) * Number(i.comisionEmpleado ?? 0) / 100, 0);
+      .reduce((s, i) => s + valorEmpleadoItem(i), 0);
   }
 
   get etiquetaGanado(): string {

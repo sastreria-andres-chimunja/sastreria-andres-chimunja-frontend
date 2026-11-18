@@ -254,6 +254,7 @@
                       [idPedido]="0"
                       [item]="it"
                       [modoEdicion]="true"
+                      [esConfeccion]="esConfeccion"
                       (itemGuardado)="onItemActualizado($event, i)"
                       (cancelarEdicion)="panelExpandidoIdx = null">
                     </app-item-inline-form>
@@ -298,6 +299,7 @@
                 [idCliente]="clienteSeleccionado?.idCliente ?? 0"
                 [idPedido]="0"
                 [modoEdicion]="false"
+                [esConfeccion]="esConfeccion"
                 (itemGuardado)="onItemAgregado($event)"
                 (valorCambiado)="valorFormActual = $event">
               </app-item-inline-form>

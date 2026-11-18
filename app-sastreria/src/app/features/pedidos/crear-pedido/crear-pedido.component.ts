@@ -412,6 +412,13 @@ export class CrearPedidoComponent implements OnInit {
     return this.empleados.filter((e) => e.activo || (idActual && e.idEmpleado === idActual));
   }
 
+  /** El pedido es de confección (según el tipo elegido en el formulario). */
+  get esConfeccion(): boolean {
+    const id = this.form?.get('idTipoPedido')?.value;
+    const tipo = this.tiposPedido.find((t) => t.idTipoPedido === id);
+    return /confecci/i.test(tipo?.nombre ?? '');
+  }
+
   // ── Modo EDITAR: dialog (comportamiento actual) ───────────────
   abrirDialogoItem(item?: any): void {
     const dialogData: ItemDialogData = {
@@ -421,6 +428,7 @@ export class CrearPedidoComponent implements OnInit {
       empleados: this.empleadosParaAsignar(item),
       medidas:   this.clienteMedidas,
       imagenes:  item?._fotos ?? [],
+      esConfeccion: this.esConfeccion,
     };
 
     const ref = this.dialog.open(ItemPedidoDialogComponent, {
